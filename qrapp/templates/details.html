@@ -1,6 +1,22 @@
-<h2>Person Detail</h2>
+{% extends 'base.html' %}
 
-<p>Name: {{ person.name }}</p>
-<p>Email: {{ person.email }}</p>
+{% block content %}
+<div class="card shadow p-4 mx-auto text-center" style="max-width: 500px;">
 
-<img src="/media/qr_{{ person.id }}.png" width="200">
+    <h3 class="mb-3">User Information</h3>
+
+    <p><strong>Name:</strong> {{ person.name }}</p>
+    <p><strong>Email:</strong> {{ person.email }}</p>
+
+    <hr>
+
+    <h5 class="mb-3">Scan QR Code</h5>
+
+    <img src="{{ person.qr_code.url }}" class="img-fluid mb-3" width="200">
+
+    <a href="/" class="btn btn-success w-100">
+        Add Another
+    </a>
+
+</div>
+{% endblock %}

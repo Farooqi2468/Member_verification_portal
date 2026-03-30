@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+<p>Welcome {{ request.user.username }}</p>
+<p>Your Role: {{ role }}</p>
+
+<hr>
+
+{% if role == "Admin" %}
+    <a href="#">Manage Users</a><br>
+    <a href="#">Manage Events</a>
+
+{% elif role == "Town President" %}
+    <a href="#">View Town Reports</a>
+
+{% elif role == "Citizen" %}
+    <a href="#">Submit Complaint</a>
+
+{% elif role == "Event Organizer" %}
+    <a href="#">Create Event</a>
+{% endif %}
+
+{% endblock %}

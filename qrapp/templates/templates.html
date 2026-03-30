@@ -1,6 +1,24 @@
-<h2>Enter Data</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card shadow p-4 mx-auto" style="max-width: 500px;">
+    <h3 class="text-center mb-4">Enter Your Details</h3>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Name</label>
+            {{ form.name }}
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            {{ form.email }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Generate QR Code
+        </button>
+    </form>
+</div>
+{% endblock %}
