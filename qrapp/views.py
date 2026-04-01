@@ -52,26 +52,26 @@ def create_person(request):
     if request.method == 'POST':
         form = PersonForm(request.POST)
         if form.is_valid():
-            person = form.save()
-
-            # URL for QR (localhost)
-            url = request.build_absolute_uri(f"/person/{person.id}/")
-
-            # Generate QR
+            # Don't save to the database just yet
+            person = form.save(commit=False)
+            
+            # Attach the logged-in user as the creator
+            person.made_by = request.user 
+            
+            # Now save to the database
+            person.save()
+            # Update the URL and image saving to use person_id instead of id
+            url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
-
-            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.id}.png")
+            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
             img.save(qr_path)
-
-            return redirect('person_detail', pk=person.id)
+            return redirect('person_detail', pk=person.person_id)
     else:
         form = PersonForm()
-
     return render(request, 'templates.html', {'form': form})
 
-
 def person_detail(request, pk):
-    person = Person.objects.get(id=pk)
+    person = Person.objects.get(person_id=pk)
     return render(request, 'details.html', {'person': person})
 
 
