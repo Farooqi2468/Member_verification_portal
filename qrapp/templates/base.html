@@ -57,9 +57,8 @@
 </head>
 <body class="bg-light">
 
-<div class="container mt-4">
-    <nav class="navbar navbar-expand-lg navbar-custom rounded-4 shadow-sm px-4 py-2">
-        <div class="container-fluid">
+<nav class="navbar navbar-expand-lg navbar-custom shadow-sm px-4 py-2">
+    <div class="container-fluid">
             
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
@@ -127,11 +126,12 @@
             
         </div>
     </nav>
-</div>
 
+{% block layout %}
 <div class="container mt-5">
     {% block content %}{% endblock %}
 </div>
+{% endblock %}
 
 </body>
 </html>
