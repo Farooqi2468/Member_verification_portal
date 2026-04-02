@@ -1,124 +1,182 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block layout %}
 <style>
-    .dashboard-container {
-        background: linear-gradient(135deg, #ffffff 0%, #eef1f5 100%);
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        padding: 3rem;
-        min-height: 60vh;
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
     }
-    .action-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        border: 1px solid rgba(0,0,0,0.05);
+
+    .dash-wrap {
+        display: flex;
+        min-height: calc(100vh - 72px);
+        background: #f4f6f8;
+    }
+
+    .dash-sidebar {
+        width: 280px;
+        background: #1A1A1A;
+        padding: 30px 20px;
+        color: #fff;
+    }
+
+    .dash-sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .dash-sidebar .nav-link:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dash-sidebar .nav-link.active {
+        background: var(--ppp-red);
+        color: #fff;
+    }
+
+    .dash-main {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+    }
+
+    .dash-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
         border-radius: 12px;
-        background: white;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-    .action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 20px rgba(0,0,0,0.08);
-    }
-    .dashboard-header {
-        color: #343a40;
-        font-weight: 700;
-        letter-spacing: -0.5px;
+
+    .dash-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
     }
 </style>
 
-<div class="dashboard-container mx-auto" style="max-width: 900px;">
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h2 class="dashboard-header mb-3">Dashboard</h2>
-            <p class="fs-5 text-secondary mb-2">Welcome back, <strong class="text-dark">{{ request.user.username }}</strong></p>
-            <span class="badge bg-secondary px-3 py-2 fs-6 rounded-pill shadow-sm">Role: {{ role }}</span>
-        </div>
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    <div class="dash-sidebar d-none d-md-block">
+        <div
+            style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">
+            Menu</div>
+        <nav class="nav flex-column">
+            <a class="nav-link active" href="#">Overview</a>
+            <a class="nav-link" href="#">Reports</a>
+            <a class="nav-link" href="#">Settings</a>
+        </nav>
     </div>
 
-    <div class="row justify-content-center g-4">
-        {% if role == "Admin" %}
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div class="mb-5 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Dashboard</h2>
+                <div class="text-secondary">Welcome back, <strong style="color: var(--ppp-red);">{{ name }}</strong>
+                </div>
+            </div>
+            <div>
+                <span
+                    style="background: var(--ppp-green-light); color: var(--ppp-green-dark); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">Role:
+                    {{ role }}</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% if role == "Admin" %}
             <div class="col-md-6 col-lg-5">
-                <div class="card action-card text-center h-100">
-                    <div class="card-body py-5 px-4">
-                        <div class="mb-3 text-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
-                                <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4 q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4"/>
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">Manage Users</h5>
-                        <p class="card-text text-muted mb-4">View, edit, and manage all registered users.</p>
-                        <a href="#" class="btn btn-dark px-4 py-2 rounded-pill">Go to Users</a>
-                    </div>
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: var(--ppp-red);"><svg xmlns="http://www.w3.org/2000/svg" width="48"
+                            height="48" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                            <path
+                                d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4 q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4" />
+                        </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Manage Users</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">View, edit, and manage all registered users.</p>
+                    <a href="#" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Go
+                        to Users</a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-5">
-                <div class="card action-card text-center h-100">
-                    <div class="card-body py-5 px-4">
-                        <div class="mb-3 text-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
-                                <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                                <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">Create Person</h5>
-                        <p class="card-text text-muted mb-4">Register a new person and generate a QR Code.</p>
-                        <a href="{% url 'create_person' %}" class="btn btn-dark px-4 py-2 rounded-pill">Create Person</a>
-                    </div>
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: var(--ppp-green);"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="48" height="48" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
+                            <path
+                                d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H1s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C9.516 10.68 8.289 10 6 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+                            <path fill-rule="evenodd"
+                                d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
+                        </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Person</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Register a new person and generate a QR Code.
+                    </p>
+                    <a href="{% url 'create_person' %}" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Create
+                        Person</a>
                 </div>
             </div>
-
-        {% elif role == "Town President" %}
+            {% elif role == "Town President" %}
             <div class="col-md-8 col-lg-6">
-                <div class="card action-card text-center h-100">
-                    <div class="card-body py-5 px-4">
-                        <div class="mb-3 text-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-file-earmark-bar-graph" viewBox="0 0 16 16">
-                                <path d="M10 13.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm-2.5.5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5zm-3 0a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5z"/>
-                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">View Town Reports</h5>
-                        <p class="card-text text-muted mb-4">Access generated town activity and status reports.</p>
-                        <a href="#" class="btn btn-dark px-4 py-2 rounded-pill">View Reports</a>
-                    </div>
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: #8B7024;"><svg xmlns="http://www.w3.org/2000/svg" width="48"
+                            height="48" fill="currentColor" class="bi bi-file-earmark-bar-graph" viewBox="0 0 16 16">
+                            <path
+                                d="M10 13.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm-2.5.5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5zm-3 0a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5z" />
+                            <path
+                                d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2-2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z" />
+                        </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">View Town Reports</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Access generated town activity and status
+                        reports.</p>
+                    <a href="#" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">View
+                        Reports</a>
                 </div>
             </div>
-
-        {% elif role == "Citizen" %}
+            {% elif role == "Citizen" %}
             <div class="col-md-8 col-lg-6">
-                <div class="card action-card text-center h-100">
-                    <div class="card-body py-5 px-4">
-                        <div class="mb-3 text-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-exclamation-square" viewBox="0 0 16 16">
-                                <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-                                <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">Submit Complaint</h5>
-                        <p class="card-text text-muted mb-4">File a new complaint or issue to the town administration.</p>
-                        <a href="#" class="btn btn-dark px-4 py-2 rounded-pill">New Complaint</a>
-                    </div>
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: var(--ppp-red);"><svg xmlns="http://www.w3.org/2000/svg" width="48"
+                            height="48" fill="currentColor" class="bi bi-exclamation-square" viewBox="0 0 16 16">
+                            <path
+                                d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z" />
+                            <path
+                                d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
+                        </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Submit Complaint</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">File a new complaint or issue to the town
+                        administration.</p>
+                    <a href="#" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">New
+                        Complaint</a>
                 </div>
             </div>
-
-        {% elif role == "Event Organizer" %}
+            {% elif role == "Event Organizer" %}
             <div class="col-md-8 col-lg-6">
-                <div class="card action-card text-center h-100">
-                    <div class="card-body py-5 px-4">
-                        <div class="mb-3 text-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
-                                <path d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7"/>
-                                <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
-                            </svg>
-                        </div>
-                        <h5 class="card-title fw-bold">Create Event</h5>
-                        <p class="card-text text-muted mb-4">Plan and publish new events for the town.</p>
-                        <a href="#" class="btn btn-dark px-4 py-2 rounded-pill">New Event</a>
-                    </div>
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: var(--ppp-green);"><svg xmlns="http://www.w3.org/2000/svg"
+                            width="48" height="48" fill="currentColor" class="bi bi-calendar-plus" viewBox="0 0 16 16">
+                            <path
+                                d="M8 7a.5.5 0 0 1 .5.5V9H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V10H6a.5.5 0 0 1 0-1h1.5V7.5A.5.5 0 0 1 8 7" />
+                            <path
+                                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z" />
+                        </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Event</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Plan and publish new events for the town.</p>
+                    <a href="#" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">New
+                        Event</a>
                 </div>
             </div>
-        {% endif %}
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

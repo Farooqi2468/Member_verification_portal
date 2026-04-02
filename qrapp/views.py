@@ -27,9 +27,11 @@ def get_user_role(user):
 @login_required
 def dashboard(request):
     role = get_user_role(request.user)
+    name = request.user.first_name if request.user.first_name else request.user.username
 
     return render(request, 'dashboard.html', {
-        'role': role
+        'role': role,
+        'name': name
     })
 
 def admin_only(view_func):
