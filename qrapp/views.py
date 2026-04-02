@@ -52,7 +52,7 @@ def create_person(request):
             img = qrcode.make(url)
             qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
             img.save(qr_path)
-            return redirect('person_detail', pk=person.person_id)
+            return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm()
     return render(request, 'templates.html', {'form': form})
@@ -112,7 +112,7 @@ def update_person(request, pk):
             img = qrcode.make(url)
             qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
             img.save(qr_path)
-            return redirect('person_detail', pk=person.person_id)
+            return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm(instance=person)
     return render(request, 'templates.html', {'form': form, 'is_update': True, 'person': person})
