@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>QR App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -7,17 +8,21 @@
         body {
             background-color: #f4f6f8;
         }
+
         .navbar-custom {
             background-color: #1a1a1a;
             font-family: 'Georgia', serif;
         }
+
         .navbar-custom .navbar-brand {
             color: #ffffff;
             font-size: 1.25rem;
         }
+
         .navbar-custom .navbar-brand:hover {
             color: #ffffff;
         }
+
         .navbar-custom .nav-link {
             color: #a0a0a0;
             transition: color 0.3s ease, background-color 0.3s ease;
@@ -25,52 +30,63 @@
             margin: 0 4px;
             border-radius: 6px;
         }
+
         .navbar-custom .nav-link:hover {
             color: #ffffff;
         }
+
         .navbar-custom .nav-link.active {
             color: #ffffff;
             background-color: #333333;
         }
+
         .navbar-custom .search-icon {
             color: #a0a0a0;
             transition: color 0.3s ease;
         }
+
         .navbar-custom .search-icon:hover {
             color: #ffffff;
         }
+
         .navbar-custom .btn-admin {
             color: #ffffff;
             border-color: #555555;
             font-family: 'Georgia', serif;
             font-size: 0.95rem;
         }
+
         .navbar-custom .btn-admin:hover {
             background-color: #ffffff;
             color: #000000;
             border-color: #ffffff;
         }
+
         .navbar-toggler-icon-custom {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
     </style>
 </head>
+
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-custom shadow-sm px-4 py-2">
-    <div class="container-fluid">
-            
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm px-4 py-2">
+        <div class="container-fluid">
+
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="me-3" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z" fill="#E21033"/>
-                    <path d="M12 2L9.6 9.4H1.8L8.1 14.1L5.7 21.5L12 16.8V2Z" fill="#14A144"/>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="me-3"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z"
+                        fill="#E21033" />
+                    <path d="M12 2L9.6 9.4H1.8L8.1 14.1L5.7 21.5L12 16.8V2Z" fill="#14A144" />
                 </svg>
                 <span>PPP Rukan</span>
             </a>
 
             <!-- Toggle button -->
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon navbar-toggler-icon-custom"></span>
             </button>
 
@@ -79,28 +95,28 @@
                 <ul class="navbar-nav">
 
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'create_person' %}">Create QR</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'create_person' %}">Create QR</a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link active" href="{% url 'home' %}">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Achievements</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Party structure</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">News</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Gallery</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Achievements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Party structure</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Gallery</a>
+                    </li>
                     {% endif %}
 
                 </ul>
@@ -109,29 +125,32 @@
             <!-- Right side actions -->
             <div class="d-none d-lg-flex align-items-center">
                 <a href="#" class="search-icon me-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                        class="bi bi-search" viewBox="0 0 16 16">
+                        <path
+                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
                     </svg>
                 </a>
-                
+
                 {% if user.is_authenticated %}
-                    <form action="{% url 'logout' %}" method="post" class="m-0 d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-admin rounded-3 px-4 py-1">Logout</button>
-                    </form>
+                <form action="{% url 'logout' %}" method="post" class="m-0 d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-admin rounded-3 px-4 py-1">Logout</button>
+                </form>
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-admin rounded-3 px-4 py-1">Admin login</a>
+                <a href="/admin/" class="btn btn-outline-light btn-admin rounded-3 px-4 py-1">Admin login</a>
                 {% endif %}
             </div>
-            
+
         </div>
     </nav>
 
-{% block layout %}
-<div class="container mt-5">
-    {% block content %}{% endblock %}
-</div>
-{% endblock %}
+    {% block layout %}
+    <div class="container mt-5">
+        {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
 
 </body>
+
 </html>
