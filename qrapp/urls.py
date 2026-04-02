@@ -9,5 +9,7 @@ urlpatterns = [
     # This is the private url
     path('dashboard/create/', views.create_person, name='create_person'),
     path('dashboard/', views.dashboard, name='dashboard'),
-
+    path('dashboard/members/', views.all_members, name='all_members'),
+    path('dashboard/update/<str:pk>/', views.update_person, name='update_person'),
+    path('dashboard/delete/<str:pk>/', views.delete_person, name='delete_person'),
 ]

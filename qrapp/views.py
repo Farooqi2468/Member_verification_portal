@@ -72,8 +72,36 @@ def create_person(request):
         form = PersonForm()
     return render(request, 'templates.html', {'form': form})
 
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+
 def person_detail(request, pk):
     person = Person.objects.get(person_id=pk)
     return render(request, 'details.html', {'person': person})
 
+@login_required
+@admin_only
+def all_members(request):
+    members = Person.objects.all().order_by('-created_at')
+    return render(request, 'all_members.html', {'members': members})
 
+@login_required
+@admin_only
+def update_person(request, pk):
+    person = get_object_or_404(Person, person_id=pk)
+    if request.method == 'POST':
+        form = PersonForm(request.POST, instance=person)
+        if form.is_valid():
+            person = form.save()
+            return redirect('person_detail', pk=person.person_id)
+    else:
+        form = PersonForm(instance=person)
+    return render(request, 'templates.html', {'form': form, 'is_update': True, 'person': person})
+
+@require_POST
+@login_required
+@admin_only
+def delete_person(request, pk):
+    person = get_object_or_404(Person, person_id=pk)
+    person.delete()
+    return redirect('all_members')
