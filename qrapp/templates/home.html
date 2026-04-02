@@ -1,22 +1,45 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="text-center mt-5">
+<style>
+:root {
+  --ppp-red: #C41E3A;
+  --ppp-red-dark: #8B1528;
+}
+.home-d-hero {
+    background: linear-gradient(135deg, #1A1A1A 0%, var(--ppp-red-dark) 100%);
+    padding: 60px 50px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+.home-d-hero::after {
+    content: '';
+    position: absolute;
+    right: 40px;
+    top: -30px;
+    width: 250px;
+    height: 250px;
+    border: 2px solid rgba(255,255,255,0.05);
+    border-radius: 50%;
+}
+@media (max-width: 768px) {
+    .home-d-hero { padding: 40px 24px; }
+}
+</style>
 
-    <h1 class="mb-3">Welcome to QR Management System</h1>
-    <p class="lead">Generate and manage QR codes بسهولة</p>
-
-    <div class="mt-4">
-
-        <a href="/accounts/login/" class="btn btn-primary me-2">
-            Login
-        </a>
-
-        <a href="/admin/" class="btn btn-outline-dark">
-            Admin Panel
-        </a>
-
+<div class="container-fluid px-0">
+    <div class="home-d-hero">
+      <div style="max-width: 580px; z-index: 1; position: relative;">
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">Pakistan peoples party</div>
+        <div style="font-size: 34px; color: #fff; font-weight: 500; line-height: 1.25; margin-bottom: 12px; font-family: 'Georgia', serif;">Lahore division<br/>digital membership portal</div>
+        <div style="font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 28px;">Verified QR-coded membership cards for over 125,000 members across all towns, zones, and union councils in Lahore.</div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="{% url 'login' %}" style="text-decoration: none; padding: 12px 24px; background: var(--ppp-red); border-radius: 8px; font-size: 14px; color: #fff; font-weight: 500; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Login</a>
+        </div>
+      </div>
     </div>
-
 </div>
 {% endblock %}

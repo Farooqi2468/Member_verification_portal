@@ -1,14 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card p-4 mx-auto" style="max-width:400px;">
-    <h3 class="text-center">Login</h3>
+<style>
+:root {
+  --ppp-red: #C41E3A;
+  --ppp-red-dark: #8B1528;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #666;
+  --color-text-tertiary: #999;
+  --color-border-tertiary: #E5E5E5;
+  --color-background-primary: #fff;
+}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+.login-d-wrap { display: flex; min-height: 540px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06); border: 1px solid #eaeaea; }
+.login-d-left { flex: 1; background: linear-gradient(160deg, #1A1A1A 0%, #1A1A1A 50%, var(--ppp-red-dark) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; overflow: hidden; }
+.login-d-left::before { content: ''; position: absolute; top: -80px; right: -80px; width: 280px; height: 280px; border: 2px solid rgba(255,255,255,0.04); border-radius: 50%; }
+.login-d-left::after { content: ''; position: absolute; bottom: -60px; left: -60px; width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.03); border-radius: 50%; }
+.login-d-right { width: 440px; padding: 48px 40px; display: flex; flex-direction: column; justify-content: center; background: var(--color-background-primary); }
+.login-d-field { margin-bottom: 20px; }
+.login-d-field label { display: block; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.login-d-field input[type="text"],
+.login-d-field input[type="password"],
+.login-d-field input[type="email"] { 
+    width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--color-border-tertiary); border-radius: 8px; font-size: 14px; background: var(--color-background-primary); color: var(--color-text-primary); font-family: inherit; transition: border-color 0.2s; 
+}
+.login-d-field input:focus { outline: none; border-color: var(--ppp-red); }
+.login-d-btn { width: 100%; padding: 14px; background: var(--ppp-red); border: none; border-radius: 8px; color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; margin-top: 10px; transition: opacity 0.2s; }
+.login-d-btn:hover { opacity: 0.9; }
 
-        <button class="btn btn-primary w-100">Login</button>
-    </form>
+/* Responsive */
+@media (max-width: 768px) {
+    .login-d-wrap { flex-direction: column; }
+    .login-d-left { min-height: 250px; padding: 30px; }
+    .login-d-right { width: 100%; padding: 30px; }
+}
+</style>
+
+<div class="login-d-wrap mx-auto my-4" style="max-width: 900px;">
+    <div class="login-d-left">
+        <div style="z-index: 1; text-align: center;">
+            <svg width="68" height="68" viewBox="0 0 24 24" fill="none" style="margin-bottom: 20px;" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z" fill="#E21033"/>
+                <path d="M12 2L9.6 9.4H1.8L8.1 14.1L5.7 21.5L12 16.8V2Z" fill="#14A144"/>
+            </svg>
+            <div style="color: #fff; font-size: 32px; font-weight: 500; letter-spacing: 1px; margin-bottom: 8px; font-family: 'Georgia', serif;">PPP Rukan</div>
+            <div style="color: rgba(255,255,255,0.4); font-size: 14px; margin-bottom: 30px;">Digital membership management system</div>
+            <div style="color: rgba(255,255,255,0.25); font-size: 13px; max-width: 300px; line-height: 1.6; margin: 0 auto;">Pakistan peoples party · Lahore division<br/>Serving the people since 1967</div>
+        </div>
+    </div>
+    <div class="login-d-right">
+        <div style="margin-bottom: 32px;">
+            <div style="font-size: 24px; font-weight: 500; margin-bottom: 6px;">Sign in</div>
+            <div style="font-size: 14px; color: var(--color-text-secondary);">Access the admin portal</div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="font-size: 13px; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% elif form.errors %}
+            <div class="alert alert-danger" style="font-size: 13px; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
+                Please correct the errors below.
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="login-d-field">
+                <label for="{{ form.username.id_for_label }}">Email address / Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div style="color: var(--ppp-red); font-size: 12px; margin-top: 4px;">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="login-d-field">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div style="color: var(--ppp-red); font-size: 12px; margin-top: 4px;">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <label style="font-size: 13px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer;" /> Remember me
+                </label>
+                <a href="#" style="font-size: 13px; color: var(--ppp-red); text-decoration: none;">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="login-d-btn">Sign in</button>
+            <input type="hidden" name="next" value="{{ next }}" />
+        </form>
+    </div>
 </div>
 {% endblock %}
