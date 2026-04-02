@@ -145,7 +145,8 @@
         <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">Menu</div>
         <nav class="nav flex-column">
             <a class="nav-link" href="{% url 'dashboard' %}">Overview</a>
-            <a class="nav-link active" href="{% url 'create_person' %}">Register Member</a>
+            <a class="nav-link {% if is_update %}active{% endif %}" href="{% url 'all_members' %}">All Members</a>
+            <a class="nav-link {% if not is_update %}active{% endif %}" href="{% url 'create_person' %}">Register Member</a>
             <a class="nav-link" href="#">Reports</a>
             <a class="nav-link" href="#">Settings</a>
         </nav>
@@ -156,6 +157,13 @@
         <div class="qr-d-layout">
             <!-- Form Column -->
             <div class="qr-form-area">
+                {% if is_update %}
+                    <div style="margin-bottom: 16px;">
+                        <a href="{% url 'all_members' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500;">
+                            &larr; Cancel & Back to Directory
+                        </a>
+                    </div>
+                {% endif %}
                 <div class="qr-form-card">
                     <h2 class="qr-form-title">
                         {% if is_update %}Update Member Profile{% else %}Register Member{% endif %}

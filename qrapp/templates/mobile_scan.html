@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Member Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #fff;
+            color: #1A1A1A;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Header Navigation */
+        .top-bar {
+            background-color: #1a1a1a;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(180deg, #1A1A1A 0%, #004D2C 100%);
+            color: #fff;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0 auto 16px auto;
+        }
+
+        .hero-name {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .hero-id {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0, 107, 63, 0.3);
+            color: #66D9A0;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        /* Information Sections */
+        .info-container {
+            padding: 24px 20px;
+            background: #fff;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 500;
+            color: #888;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            margin-top: 32px;
+        }
+
+        .section-title:first-child {
+            margin-top: 8px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .data-label {
+            color: #4a4a4a;
+        }
+
+        .data-value {
+            color: #1A1A1A;
+            font-weight: 500;
+        }
+
+        .data-value.success {
+            color: #006B3F;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px 20px;
+            font-size: 12px;
+            color: #999;
+            background: #fafafa;
+            border-top: 1px solid #eee;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            Member details
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+        </svg>
+    </div>
+
+    <!-- Hero Area -->
+    <div class="hero">
+        <div class="avatar">{{ person.name|slice:":1"|upper }}{{ person.father_name|slice:":1"|upper }}</div>
+        <div class="hero-name">{{ person.name }}</div>
+        <div class="hero-id">ID: #{{ person.person_id }}</div>
+        <div class="hero-badge">Approved member</div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-container">
+        
+        <!-- Personal Info -->
+        <div class="section-title">Personal Information</div>
+        <div class="data-row">
+            <span class="data-label">Father's name</span>
+            <span class="data-value">{{ person.father_name }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Mobile</span>
+            <span class="data-value">{{ masked_phone }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">CNIC (last 5)</span>
+            <span class="data-value">{{ masked_cnic }}</span>
+        </div>
+
+        <!-- Area Assignment -->
+        <div class="section-title">Area Assignment</div>
+        <div class="data-row">
+            <span class="data-label">Town</span>
+            <span class="data-value">{{ person.town|default:"--" }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Zone</span>
+            <span class="data-value">{{ person.zone|default:"--" }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Union council</span>
+            <span class="data-value">UC {{ person.union_council|default:"--" }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Ward</span>
+            <span class="data-value">Ward {{ person.ward|default:"--" }}</span>
+        </div>
+
+        <!-- Registration -->
+        <div class="section-title">Registration</div>
+        {% if is_admin %}
+        <div class="data-row">
+            <span class="data-label">Registered by</span>
+            <span class="data-value">{{ person.made_by.username|default:"Admin" }}</span>
+        </div>
+        {% endif %}
+        <div class="data-row">
+            <span class="data-label">Date</span>
+            <span class="data-value">{{ person.created_at|date:"d M Y" }}</span>
+        </div>
+        <div class="data-row">
+            <span class="data-label">Card printed</span>
+            <span class="data-value success">Yes</span>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        &copy; PPP Lahore {% now "Y" %}
+    </div>
+
+</body>
+</html>

@@ -64,11 +64,11 @@
 <div class="dash-wrap">
     <!-- Sidebar -->
     <div class="dash-sidebar d-none d-md-block">
-        <div
-            style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">
-            Menu</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">Menu</div>
         <nav class="nav flex-column">
-            <a class="nav-link active" href="#">Overview</a>
+            <a class="nav-link active" href="{% url 'dashboard' %}">Overview</a>
+            <a class="nav-link" href="{% url 'all_members' %}">All Members</a>
+            <a class="nav-link" href="{% url 'create_person' %}">Register Member</a>
             <a class="nav-link" href="#">Reports</a>
             <a class="nav-link" href="#">Settings</a>
         </nav>

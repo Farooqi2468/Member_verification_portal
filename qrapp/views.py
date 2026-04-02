@@ -1,23 +1,19 @@
-# Create your views here.
-import qrcode
-from django.shortcuts import render, redirect
-from .forms import PersonForm
-from .models import Person
-from django.conf import settings
 import os
-
-
+import qrcode
+from django.conf import settings
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
 
+from .forms import PersonForm
+from .models import Person
 
 
 def home(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')  # logged-in users go to dashboard
-
-    return render(request, 'home.html')  # public landing page
-
+        return redirect('dashboard')
+    return render(request, 'home.html')
 
 def get_user_role(user):
     if user.groups.exists():
@@ -28,11 +24,7 @@ def get_user_role(user):
 def dashboard(request):
     role = get_user_role(request.user)
     name = request.user.first_name if request.user.first_name else request.user.username
-
-    return render(request, 'dashboard.html', {
-        'role': role,
-        'name': name
-    })
+    return render(request, 'dashboard.html', {'role': role, 'name': name})
 
 def admin_only(view_func):
     def wrapper(request, *args, **kwargs):
@@ -41,12 +33,10 @@ def admin_only(view_func):
         return HttpResponseForbidden("Not allowed")
     return wrapper
 
-
 @login_required
 @admin_only
 def manage_users(request):
     return render(request, 'admin/users.html')
-
 
 @login_required
 @admin_only
@@ -54,15 +44,10 @@ def create_person(request):
     if request.method == 'POST':
         form = PersonForm(request.POST)
         if form.is_valid():
-            # Don't save to the database just yet
             person = form.save(commit=False)
-            
-            # Attach the logged-in user as the creator
             person.made_by = request.user 
-            
-            # Now save to the database
             person.save()
-            # Update the URL and image saving to use person_id instead of id
+            
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
             qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
@@ -72,18 +57,47 @@ def create_person(request):
         form = PersonForm()
     return render(request, 'templates.html', {'form': form})
 
-from django.views.decorators.http import require_POST
-from django.shortcuts import get_object_or_404
 
 def person_detail(request, pk):
-    person = Person.objects.get(person_id=pk)
-    return render(request, 'details.html', {'person': person})
+    person = get_object_or_404(Person, person_id=pk)
+    
+    # Secure string masking
+    masked_phone = person.phone if person.phone else "--"
+    if person.phone and len(person.phone) >= 7:
+        masked_phone = f"{person.phone[:4]}-{person.phone[4:5]}XXXXXX"
+        
+    masked_cnic = person.cnic if person.cnic else "--"
+    if person.cnic and len(person.cnic) >= 5:
+        masked_cnic = f"...{person.cnic[-5:]}"
+    
+    is_admin = False
+    if request.user.is_authenticated:
+        if request.user.groups.filter(name='Admin').exists() or request.user.is_superuser:
+            is_admin = True
+        
+    return render(request, 'mobile_scan.html', {
+        'person': person,
+        'masked_phone': masked_phone,
+        'masked_cnic': masked_cnic,
+        'is_admin': is_admin
+    })
+
+@login_required
+@admin_only
+def admin_person_detail(request, pk):
+    person = get_object_or_404(Person, person_id=pk)
+    is_admin = request.user.groups.filter(name='Admin').exists() or request.user.is_superuser
+    return render(request, 'details.html', {
+        'person': person,
+        'is_admin': is_admin
+    })
 
 @login_required
 @admin_only
 def all_members(request):
     members = Person.objects.all().order_by('-created_at')
     return render(request, 'all_members.html', {'members': members})
+
 
 @login_required
 @admin_only
@@ -93,6 +107,11 @@ def update_person(request, pk):
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
             person = form.save()
+            # Regenerate the QR code with the current request host (useful if server IP/port changes)
+            url = request.build_absolute_uri(f"/person/{person.person_id}/")
+            img = qrcode.make(url)
+            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
+            img.save(qr_path)
             return redirect('person_detail', pk=person.person_id)
     else:
         form = PersonForm(instance=person)
