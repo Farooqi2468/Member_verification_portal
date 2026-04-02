@@ -12,6 +12,9 @@ class Person(models.Model):
     phone = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     union_council = models.CharField(max_length=100, null=True, blank=True)
+    town = models.CharField(max_length=100, null=True, blank=True)
+    zone = models.CharField(max_length=100, null=True, blank=True)
+    ward = models.CharField(max_length=100, null=True, blank=True)
     
     # Foreign key to the User table
     made_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='persons_created')

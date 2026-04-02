@@ -6,7 +6,8 @@ class PersonForm(forms.ModelForm):
         model = Person
         fields = [
             'person_id', 'name', 'father_name', 
-            'cnic', 'phone', 'address', 'union_council'
+            'cnic', 'phone', 'address', 'union_council', 
+            'town', 'zone', 'ward'
         ]
         widgets = {
             'person_id': forms.TextInput(attrs={'class': 'form-control'}),
@@ -16,4 +17,7 @@ class PersonForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'union_council': forms.TextInput(attrs={'class': 'form-control'}),
+            'town': forms.TextInput(attrs={'class': 'form-control'}),
+            'zone': forms.TextInput(attrs={'class': 'form-control'}),
+            'ward': forms.TextInput(attrs={'class': 'form-control'}),
         }

@@ -1,21 +1,290 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="card shadow p-4 mx-auto text-center" style="max-width: 500px;">
+{% block layout %}
+<style>
+:root {
+  --ppp-red: #C41E3A;
+  --ppp-red-dark: #8B1528;
+  --ppp-green: #006B3F;
+  --ppp-green-dark: #004D2C;
+}
 
-    <h3 class="mb-3">User Information</h3>
+.dash-wrap {
+    display: flex;
+    min-height: calc(100vh - 72px);
+    background: #f4f6f8;
+}
 
-    <p><strong>Name:</strong> {{ person.name }}</p>
-    <p><strong>Email:</strong> {{ person.email }}</p>
+.dash-sidebar {
+    width: 280px;
+    background: #1A1A1A;
+    padding: 30px 20px;
+    color: #fff;
+    flex-shrink: 0;
+}
 
-    <hr>
+.dash-sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
 
-    <h5 class="mb-3">Scan QR Code</h5>
+.dash-sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
 
-    <img src="/media/qr_{{ person.person_id }}.png" class="img-fluid mb-3" width="200">
-    <a href="/" class="btn btn-success w-100">
-        Add Another
-    </a>
+.dash-sidebar .nav-link.active {
+    background: var(--ppp-red);
+    color: #fff;
+}
 
+.dash-main {
+    flex: 1;
+    padding: 48px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.detail-av {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.detail-badge {
+    padding: 4px 16px;
+    border-radius: 20px;
+    background: rgba(0, 107, 63, 0.2);
+    color: #66D9A0;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.qr-display-box {
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-section {
+    margin-bottom: 32px;
+}
+
+.detail-section-title {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.detail-row {
+    margin-bottom: 4px;
+}
+
+.detail-row .label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.detail-row .value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Modal Styles */
+.qr-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.qr-modal-card {
+    background: linear-gradient(180deg, #1A1A1A, var(--ppp-green-dark));
+    width: 90%;
+    max-width: 360px;
+    max-height: 90vh; /* Extremely important for responsive height */
+    overflow-y: auto; /* Enable scrolling on tiny screens */
+    border-radius: 20px;
+    padding: 32px 20px 24px;
+    text-align: center;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.qr-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    line-height: 1;
+}
+
+.qr-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    <div class="dash-sidebar d-none d-md-block">
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">Menu</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{% url 'dashboard' %}">Overview</a>
+            <a class="nav-link active" href="{% url 'create_person' %}">Register Member</a>
+            <a class="nav-link" href="#">Reports</a>
+            <a class="nav-link" href="#">Settings</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">Member Profile</h2>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="document.getElementById('qrModal').style.display='flex'" class="btn" style="background: var(--ppp-green); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-qr-code-scan me-1" viewBox="0 0 16 16" style="vertical-align: text-bottom;">
+                        <path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z"/>
+                        <path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z"/>
+                        <path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z"/>
+                        <path d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z"/>
+                        <path d="M12 9h2V8h-2z"/>
+                    </svg>
+                    View QR Card
+                </button>
+                <a href="{% url 'create_person' %}" class="btn" style="background: #f0f0f0; border-radius: 8px; font-size: 12px; font-weight: 600;">+ New Registration</a>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Personal Information</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="label">Father's Name</div>
+                    <div class="value">{{ person.father_name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Mobile Number</div>
+                    <div class="value">{{ person.phone }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">CNIC Number</div>
+                    <div class="value">{{ person.cnic }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Date of Registration</div>
+                    <div class="value">{{ person.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Area Assignment</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="label">Town</div>
+                    <div class="value">{{ person.town|default:"Not assigned" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Union Council</div>
+                    <div class="value">UC {{ person.union_council }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Zone / Ward</div>
+                    <div class="value">Zone {{ person.zone|default:"--" }} / Ward {{ person.ward|default:"--" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Full Residential Address</div>
+            <div class="value" style="font-weight: 400; line-height: 1.6;">{{ person.address }}</div>
+        </div>
+
+        <div style="padding: 20px; background: #fffcf0; border: 1px solid #f9f2d0; border-radius: 8px; display: flex; align-items: flex-start; gap: 12px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#8B7024" style="flex-shrink: 0;">
+                <path d="M12 2L1 21h22L12 2zm0 3.45l8.15 14.1H3.85L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+            </svg>
+            <div style="font-size: 12px; color: #6B5820;">This membership record was verified by <strong>{{ person.made_by.username }}</strong> on {{ person.created_at|date:"M d, Y" }}. All data is secured via QR encryption.</div>
+        </div>
+    </div>
 </div>
+
+<!-- QR Card Modal Overlay -->
+<div id="qrModal" class="qr-modal" style="display: flex;">
+    <div class="qr-modal-card">
+        <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn">&times;</button>
+        
+        <div class="detail-av" style="width: 60px; height: 60px; font-size: 20px; margin-bottom: 12px;">{{ person.name|slice:":1" }}{{ person.father_name|slice:":1" }}</div>
+        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">{{ person.name }}</h3>
+        <code style="color: rgba(255,255,255,0.5); font-size: 11px; margin-bottom: 8px;">ID: #{{ person.person_id }}</code>
+        <div class="detail-badge" style="margin-bottom: 16px; padding: 4px 12px; font-size: 10px;">Approved Member</div>
+
+        <div class="qr-display-box shadow" style="padding: 8px; margin-bottom: 8px;">
+            <img src="/media/qr_{{ person.person_id }}.png" width="140" alt="QR Code">
+        </div>
+        <p style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 20px;">Scan to verify digital membership</p>
+
+        <div style="width: 100%;">
+            <button class="btn w-100 mb-2" style="background: var(--ppp-red); color: #fff; font-size: 12px; font-weight: 600; padding: 8px;">Download Card Image</button>
+            <button class="btn btn-outline-light w-100" style="font-size: 12px; padding: 8px;">Print Membership Card</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Close modal if user clicks outside the card
+    window.onclick = function(event) {
+        var modal = document.getElementById("qrModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 {% endblock %}
