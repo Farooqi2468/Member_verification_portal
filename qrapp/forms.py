@@ -21,9 +21,9 @@ class PersonForm(forms.ModelForm):
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control', 
-                'placeholder': '03XX-XXXXXXX',
-                'pattern': '03[0-9]{2}-[0-9]{7}',
-                'title': 'Phone number must be in the format 03XX-XXXXXXX'
+                'placeholder': '03XXXXXXXXX',
+                'pattern': '03[0-9]{9}',
+                'title': 'Phone number must be in the format 03XXXXXXXXX'
             }),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter current address'}),
             'union_council': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., UC-14'}),
