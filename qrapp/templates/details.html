@@ -280,23 +280,41 @@
 </div>
 
 <!-- QR Card Modal Overlay -->
-<div id="qrModal" class="qr-modal" style="display: flex;">
-    <div class="qr-modal-card">
-        <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn">&times;</button>
+<div id="qrModal" class="qr-modal" style="display: none;">
+    <div class="qr-modal-card" style="background: transparent; box-shadow: none; padding: 0;">
+        <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn" style="top: -40px; right: 0;">&times;</button>
         
-        <div class="detail-av" style="width: 60px; height: 60px; font-size: 20px; margin-bottom: 12px;">{{ person.name|slice:":1" }}{{ person.father_name|slice:":1" }}</div>
-        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">{{ person.name }}</h3>
-        <code style="color: rgba(255,255,255,0.5); font-size: 11px; margin-bottom: 8px;">ID: #{{ person.person_id }}</code>
-        <div class="detail-badge" style="margin-bottom: 16px; padding: 4px 12px; font-size: 10px;">Approved Member</div>
-
-        <div class="qr-display-box shadow" style="padding: 8px; margin-bottom: 8px;">
-            <img src="/media/qr_{{ person.person_id }}.png" width="140" alt="QR Code">
+        <!-- Front Card -->
+        <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; text-align: left; position: relative;">
+            <div style="z-index: 1;">
+                <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 12px;">{{ person.name }}</h3>
+                <div style="font-size: 13px; margin-bottom: 6px; opacity: 0.9;"><strong>Joined:</strong> {{ person.created_at|date:"d M Y" }}</div>
+                <div style="font-size: 13px; margin-bottom: 16px; opacity: 0.9;"><strong>Made by:</strong> {{ person.made_by.username }}</div>
+                <div style="font-size: 10px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; display: inline-block;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" class="bi bi-shield-lock-fill me-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.777 11.777 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7.159 7.159 0 0 0 1.048-.625 11.775 11.775 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.541 1.541 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0m0 5a1.5 1.5 0 0 1 .5 2.915l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99A1.5 1.5 0 0 1 8 5"/>
+                    </svg>
+                    Other information secured
+                </div>
+            </div>
+            <div style="z-index: 1; text-align: center;">
+                <div class="qr-display-box" style="padding: 6px; margin: 0; background: #fff; border-radius: 8px;">
+                    <img src="/media/qr_{{ person.person_id }}.png" width="80" alt="QR Code" style="display: block;">
+                </div>
+                <div style="font-size: 10px; opacity: 0.7; margin-top: 8px;">#{{ person.person_id }}</div>
+            </div>
         </div>
-        <p style="font-size: 10px; color: rgba(255,255,255,0.4); margin-bottom: 20px;">Scan to verify digital membership</p>
+
+        <!-- Back Card -->
+        <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; font-weight: 700; font-family: 'Georgia', serif; letter-spacing: 1px; min-height: 180px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 24px;">
+            <div style="text-align: center;">
+                PPP Lahore<br>Urban Member
+            </div>
+        </div>
 
         <div style="width: 100%;">
-            <button class="btn w-100 mb-2" style="background: var(--ppp-red); color: #fff; font-size: 12px; font-weight: 600; padding: 8px;">Download Card Image</button>
-            <button class="btn btn-outline-light w-100" style="font-size: 12px; padding: 8px;">Print Membership Card</button>
+            <button class="btn w-100 mb-2" style="background: var(--ppp-red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px;">Download Cards</button>
+            <button class="btn btn-outline-light w-100" style="font-size: 13px; padding: 10px; border-radius: 8px;">Print Cards</button>
         </div>
     </div>
 </div>
