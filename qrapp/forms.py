@@ -10,14 +10,24 @@ class PersonForm(forms.ModelForm):
             'town', 'zone', 'ward'
         ]
         widgets = {
-            'person_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'father_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'cnic': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'union_council': forms.TextInput(attrs={'class': 'form-control'}),
-            'town': forms.TextInput(attrs={'class': 'form-control'}),
-            'zone': forms.TextInput(attrs={'class': 'form-control'}),
-            'ward': forms.TextInput(attrs={'class': 'form-control'}),
+            'person_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
+            'father_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Father's Name"}),
+            'cnic': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'XXXXX-XXXXXXX-X',
+                'pattern': '[0-9]{5}-[0-9]{7}-[0-9]{1}',
+                'title': 'CNIC must be in the format XXXXX-XXXXXXX-X'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': '03XX-XXXXXXX',
+                'pattern': '03[0-9]{2}-[0-9]{7}',
+                'title': 'Phone number must be in the format 03XX-XXXXXXX'
+            }),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter current address'}),
+            'union_council': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., UC-14'}),
+            'town': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Model Town'}),
+            'zone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Zone 1'}),
+            'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Ward 5'}),
         }
