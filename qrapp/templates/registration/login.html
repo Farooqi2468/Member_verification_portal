@@ -119,16 +119,27 @@
     @media (max-width: 768px) {
         .login-d-wrap {
             flex-direction: column;
+            border-radius: 8px;
         }
 
         .login-d-left {
-            min-height: 250px;
-            padding: 30px;
+            min-height: 200px;
+            padding: 30px 20px;
         }
 
         .login-d-right {
             width: 100%;
-            padding: 30px;
+            padding: 28px 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .login-d-left {
+            min-height: 160px;
+            padding: 24px 16px;
+        }
+        .login-d-right {
+            padding: 24px 16px;
         }
     }
 </style>
