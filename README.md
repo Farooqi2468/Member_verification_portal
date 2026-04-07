@@ -1,12 +1,15 @@
-# QR Code Generator Application
+# PPP Membership Portal & QR Generator
 
-This is a Django-based web application designed to generate and store QR codes associated with Person records. 
+This is a Django-based web application designed to manage membership records for the PPP, generating distinct digital membership profiles and QR codes for each registered member.
 
 ## Features
-- Create and manage Person records.
-- Automatically generate unique QR codes for each Person record.
-- Store details such as Name, CNIC, Phone, Address, and more.
-- Built utilizing Django and Python.
+
+- **Member Registration & Management:** Create, update, and manage member profiles from a robust administrative dashboard.
+- **Data Validation:** Ensures accurate record-keeping with enforced input formats:
+  - **CNIC:** Must follow the `XXXXX-XXXXXXX-X` format.
+  - **Phone:** Must follow the 11-digit Pakistani format `03XXXXXXXXX` without hyphens.
+- **Dynamic Membership Cards:** Automatically generates a digital, glossy three-band (Red, Black, Green) membership card showing user details alongside a unique QR code.
+- **QR Code Scanning:** Specifically tailored layout providing a standalone view to display scanned profile data securely, masking sensitive info like CNIC or Phone to maintain privacy.
 
 ## Getting Started
 
@@ -61,17 +64,18 @@ Follow the on-screen prompts to set your desired username, email, and password.
 Start the local development server by executing:
 
 ```powershell
-python manage.py runserver
+python manage.py runserver 192.168.18.202:8000
 ```
+*(Optionally, use just `python manage.py runserver` for localhost access)*
 
-Once the server begins running, open your web browser and navigate to:
-- Main App Interface: `http://127.0.0.1:8000/`
-- Django Admin Panel: `http://127.0.0.1:8000/admin/`
+Once the server begins running, you can access the platform at:
+- **Main Dashboard/Registration:** `http://192.168.18.202:8000/` (or `http://127.0.0.1:8000/`)
+- **Django Admin Panel:** `http://192.168.18.202:8000/admin/`
 
 ## Project Structure
 
 - `manage.py`: Django's command-line utility for local administrative tasks.
-- `qrproject/`: Project configuration (settings, master routing etc).
-- `qrapp/`: Contains logic for dealing with models (e.g., `Person`), endpoints, and generating the QR codes.
-- `media/`: Directory designated for holding generated QR codes and file uploads.
+- `qrproject/`: Project core configurations (settings, master routing, etc).
+- `qrapp/`: Contains forms, models, endpoints, views, and logic generating the digital membership profiles and QR codes.
+- `media/`: Directory designated for saving the generated QR images.
 - `requirements.txt`: The definitive list of Python package dependencies needed for startup.
