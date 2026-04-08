@@ -104,25 +104,22 @@
 
             <!-- Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                <svg width="36" height="24" viewBox="0 0 45 30" class="me-3" xmlns="http://www.w3.org/2000/svg">
-                    <clipPath id="flag-clip">
-                        <rect x="0" y="0" width="45" height="30" rx="2" />
-                    </clipPath>
-                    <g clip-path="url(#flag-clip)">
-                        <rect x="0" y="0" width="15" height="30" fill="#E21033" />
-                        <rect x="15" y="0" width="15" height="30" fill="#000000" />
-                        <rect x="30" y="0" width="15" height="30" fill="#14A144" />
-                        <defs>
-                            <mask id="crescentMask">
-                                <rect x="15" y="0" width="15" height="30" fill="white" />
-                                <circle cx="23.5" cy="12.5" r="4.5" fill="black" />
-                            </mask>
-                        </defs>
-                        <circle cx="21" cy="15" r="5.5" fill="#ffffff" mask="url(#crescentMask)" />
-                        <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z"
-                            fill="#ffffff" transform="translate(23.5, 8.5) scale(0.18) rotate(35 12 12)" />
-                    </g>
+                <div style="width: 36px; height: 36px; border-radius: 50%; overflow: hidden; flex-shrink: 0; margin-right: 10px; border: 2px solid rgba(255,255,255,0.2);">
+                <svg width="36" height="36" viewBox="0 0 45 30" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+                    <rect x="0" y="0" width="15" height="30" fill="#E21033" />
+                    <rect x="15" y="0" width="15" height="30" fill="#000000" />
+                    <rect x="30" y="0" width="15" height="30" fill="#14A144" />
+                    <defs>
+                        <mask id="crescentMask">
+                            <rect x="15" y="0" width="15" height="30" fill="white" />
+                            <circle cx="25" cy="10" r="4.5" fill="black" />
+                        </mask>
+                    </defs>
+                    <circle cx="22.5" cy="12.5" r="5.5" fill="#ffffff" mask="url(#crescentMask)" />
+                    <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z"
+                        fill="#ffffff" transform="translate(25, 6) scale(0.18) rotate(35 12 12)" />
                 </svg>
+                </div>
                 <span>PPP Urban Membership</span>
             </a>
 
