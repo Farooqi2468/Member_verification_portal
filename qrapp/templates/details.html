@@ -254,11 +254,11 @@
                 </div>
                 <div class="detail-row">
                     <div class="label">Union Council</div>
-                    <div class="value">UC {{ person.union_council }}</div>
+                    <div class="value">{{ person.union_council }}</div>
                 </div>
                 <div class="detail-row">
                     <div class="label">Zone / Ward</div>
-                    <div class="value">Zone {{ person.zone|default:"--" }} / Ward {{ person.ward|default:"--" }}</div>
+                    <div class="value">{{ person.zone|default:"--" }} / {{ person.ward|default:"--" }}</div>
                 </div>
             </div>
         </div>
@@ -285,9 +285,9 @@
         <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn" style="top: -40px; right: 0;">&times;</button>
         
         <!-- Front Card -->
-        <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; text-align: left; position: relative;">
-            <div style="z-index: 1;">
-                <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 12px;">{{ person.name }}</h3>
+        <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; text-align: left; position: relative;">
+            <div style="z-index: 1; min-width: 0; flex: 1;">
+                <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 12px; word-break: break-word; white-space: normal;">{{ person.name }}</h3>
                 <div style="font-size: 13px; margin-bottom: 6px; opacity: 0.9;"><strong>Joined:</strong> {{ person.created_at|date:"d M Y" }}</div>
                 <div style="font-size: 13px; margin-bottom: 16px; opacity: 0.9;"><strong>Made by:</strong> {{ person.made_by.username }}</div>
                 <div style="font-size: 10px; padding: 4px 8px; background: rgba(0,0,0,0.3); border-radius: 4px; display: inline-block;">
