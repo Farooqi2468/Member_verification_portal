@@ -79,6 +79,7 @@
             <a class="nav-link active" href="{% url 'dashboard' %}">Overview</a>
             <a class="nav-link" href="{% url 'all_members' %}">All Members</a>
             <a class="nav-link" href="{% url 'create_person' %}">Register Member</a>
+            <a class="nav-link" href="{% url 'manage_locations' %}">Manage Locations</a>
             <a class="nav-link" href="#">Reports</a>
             <a class="nav-link" href="#">Settings</a>
         </nav>
@@ -130,6 +131,17 @@
                     <a href="{% url 'create_person' %}" class="btn"
                         style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Create
                         Person</a>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-5">
+                <div class="dash-card text-center h-100 p-5">
+                    <div class="mb-3" style="color: #4A6FA5;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                        <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
+                        <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4"/>
+                    </svg></div>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Manage Locations</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Add and manage Towns, Zones, Union Councils, and Wards.</p>
+                    <a href="{% url 'manage_locations' %}" class="btn" style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Manage</a>
                 </div>
             </div>
             {% elif role == "Town President" %}

@@ -50,9 +50,19 @@
 }
 
 .qr-d-layout {
-    display: grid;
-    grid-template-columns: 1fr 340px;
+    display: flex;
     gap: 32px;
+    align-items: flex-start;
+}
+
+.qr-form-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.qr-preview-area {
+    width: 340px;
+    flex-shrink: 0;
 }
 
 .qr-form-card {
@@ -131,7 +141,10 @@
 
 @media (max-width: 992px) {
     .qr-d-layout {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+    .qr-preview-area {
+        width: 100%;
     }
     .qr-preview-panel {
         position: static;
@@ -162,6 +175,7 @@
             <a class="nav-link" href="{% url 'dashboard' %}">Overview</a>
             <a class="nav-link {% if is_update %}active{% endif %}" href="{% url 'all_members' %}">All Members</a>
             <a class="nav-link {% if not is_update %}active{% endif %}" href="{% url 'create_person' %}">Register Member</a>
+            <a class="nav-link" href="{% url 'manage_locations' %}">Manage Locations</a>
             <a class="nav-link" href="#">Reports</a>
             <a class="nav-link" href="#">Settings</a>
         </nav>
@@ -233,25 +247,28 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.town.label }}</label>
+                            <div class="col-md-6 qr-input-group">
+                                <label>Town</label>
                                 {{ form.town }}
                             </div>
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.zone.label }}</label>
+                            <div class="col-md-6 qr-input-group">
+                                <label>Zone</label>
                                 {{ form.zone }}
-                            </div>
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.ward.label }}</label>
-                                {{ form.ward }}
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 qr-input-group">
-                                <label>{{ form.union_council.label }}</label>
+                                <label>Union Council</label>
                                 {{ form.union_council }}
                             </div>
+                            <div class="col-md-6 qr-input-group">
+                                <label>Ward</label>
+                                {{ form.ward }}
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6 qr-input-group">
                                 <label>{{ form.person_id.label }} (ID Number)</label>
                                 {{ form.person_id }}
@@ -311,32 +328,75 @@
 </div>
 
 <script>
-    // Live update preview
-    document.addEventListener('DOMContentLoaded', function() {
-        const nameInput = document.querySelector('input[name="name"]');
-        const idInput = document.querySelector('input[name="person_id"]');
-        const townInput = document.querySelector('input[name="town"]');
-        const ucInput = document.querySelector('input[name="union_council"]');
+document.addEventListener('DOMContentLoaded', function () {
 
-        const prevName = document.getElementById('prevName');
-        const prevId = document.getElementById('prevId');
-        const prevTown = document.getElementById('prevTown');
+    const townSel = document.getElementById('id_town');
+    const zoneSel = document.getElementById('id_zone');
+    const ucSel   = document.getElementById('id_union_council');
+    const wardSel = document.getElementById('id_ward');
+    const nameInput = document.querySelector('input[name="name"]');
+    const idInput   = document.querySelector('input[name="person_id"]');
+    const prevName  = document.getElementById('prevName');
+    const prevId    = document.getElementById('prevId');
+    const prevTown  = document.getElementById('prevTown');
 
-        function updatePreview() {
-            prevName.innerText = nameInput.value || 'Member Name';
-            prevId.innerText = idInput.value ? '#' + idInput.value : '# ——';
-            
-            let areaText = townInput.value || '';
-            if (ucInput.value) {
-                areaText += (areaText ? ' · ' : '') + 'UC ' + ucInput.value;
-            }
-            prevTown.innerText = areaText || 'Area / Union Council';
-        }
+    function populateSelect(sel, items, emptyLabel) {
+        const current = sel.value;
+        sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+        items.forEach(function(item) {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (String(item.id) === String(current)) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
 
-        nameInput.addEventListener('input', updatePreview);
-        idInput.addEventListener('input', updatePreview);
-        townInput.addEventListener('input', updatePreview);
-        ucInput.addEventListener('input', updatePreview);
+    function resetSelect(sel, emptyLabel) {
+        sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+    }
+
+    function updatePreview() {
+        prevName.innerText = nameInput.value || 'Member Name';
+        prevId.innerText   = idInput.value ? '#' + idInput.value : '# ——';
+        const townText = townSel.selectedIndex > 0 ? townSel.options[townSel.selectedIndex].text : '';
+        const ucText   = ucSel.selectedIndex   > 0 ? ucSel.options[ucSel.selectedIndex].text   : '';
+        let area = townText || '';
+        if (ucText) area += (area ? ' · ' : '') + ucText;
+        prevTown.innerText = area || 'Area / Union Council';
+    }
+
+    townSel.addEventListener('change', function () {
+        resetSelect(zoneSel, '— Select Zone —');
+        resetSelect(ucSel,   '— Select Union Council —');
+        resetSelect(wardSel, '— Select Ward —');
+        updatePreview();
+        if (!this.value) return;
+        fetch('/ajax/zones/?town_id=' + this.value)
+            .then(function(r){ return r.json(); })
+            .then(function(data){ populateSelect(zoneSel, data, '— Select Zone —'); });
     });
+
+    zoneSel.addEventListener('change', function () {
+        resetSelect(ucSel,   '— Select Union Council —');
+        resetSelect(wardSel, '— Select Ward —');
+        if (!this.value) return;
+        fetch('/ajax/ucs/?zone_id=' + this.value)
+            .then(function(r){ return r.json(); })
+            .then(function(data){ populateSelect(ucSel, data, '— Select Union Council —'); });
+    });
+
+    ucSel.addEventListener('change', function () {
+        resetSelect(wardSel, '— Select Ward —');
+        updatePreview();
+        if (!this.value) return;
+        fetch('/ajax/wards/?uc_id=' + this.value)
+            .then(function(r){ return r.json(); })
+            .then(function(data){ populateSelect(wardSel, data, '— Select Ward —'); });
+    });
+
+    nameInput.addEventListener('input', updatePreview);
+    idInput.addEventListener('input', updatePreview);
+});
 </script>
 {% endblock %}

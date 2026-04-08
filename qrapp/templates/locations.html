@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
+    }
+
+    .dash-wrap {
+        display: flex;
+        min-height: calc(100vh - 72px);
+        background: #f4f6f8;
+    }
+
+    .dash-sidebar {
+        width: 280px;
+        background: #1A1A1A;
+        padding: 30px 20px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .dash-sidebar .nav-link {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .dash-sidebar .nav-link:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dash-sidebar .nav-link.active {
+        background: var(--ppp-red);
+        color: #fff;
+    }
+
+    .dash-main {
+        flex: 1;
+        padding: 48px;
+        overflow-y: auto;
+        background: #fff;
+    }
+
+    /* Tabs */
+    .loc-tabs {
+        display: flex;
+        gap: 4px;
+        border-bottom: 2px solid #f0f0f0;
+        margin-bottom: 32px;
+    }
+
+    .loc-tab {
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #888;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .loc-tab:hover {
+        color: #333;
+    }
+
+    .loc-tab.active {
+        color: var(--ppp-red);
+        border-bottom-color: var(--ppp-red);
+    }
+
+    /* Panel */
+    .loc-panel {
+        display: none;
+    }
+
+    .loc-panel.active {
+        display: block;
+    }
+
+    .loc-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* Add Form Card */
+    .loc-form-card {
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .loc-form-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1A1A1A;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .loc-input {
+        border: 1.5px solid #eee;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .loc-input:focus {
+        outline: none;
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.08);
+    }
+
+    .loc-btn-add {
+        width: 100%;
+        padding: 10px;
+        background: var(--ppp-green);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .loc-btn-add:hover {
+        opacity: 0.9;
+    }
+
+    /* Table */
+    .loc-table-wrap {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .loc-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .loc-table thead tr {
+        background: #f4f6f8;
+    }
+
+    .loc-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .loc-table td {
+        padding: 12px 16px;
+        border-top: 1px solid #f0f0f0;
+        color: #333;
+        vertical-align: middle;
+    }
+
+    .loc-table tbody tr:hover {
+        background: #fafafa;
+    }
+
+    .loc-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #f0f0f0;
+        color: #555;
+    }
+
+    .loc-btn-del {
+        background: none;
+        border: 1px solid #fcc;
+        color: var(--ppp-red);
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .loc-btn-del:hover {
+        background: var(--ppp-red);
+        color: #fff;
+        border-color: var(--ppp-red);
+    }
+
+    .loc-empty {
+        text-align: center;
+        padding: 40px;
+        color: #bbb;
+        font-size: 13px;
+    }
+
+    @media (max-width: 991px) {
+        .loc-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dash-main {
+            padding: 24px 16px;
+        }
+    }
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    <div class="dash-sidebar d-none d-md-block">
+        <div
+            style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">
+            Menu</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{% url 'dashboard' %}">Overview</a>
+            <a class="nav-link" href="{% url 'all_members' %}">All Members</a>
+            <a class="nav-link" href="{% url 'create_person' %}">Register Member</a>
+            <a class="nav-link active" href="{% url 'manage_locations' %}">Manage Locations</a>
+            <a class="nav-link" href="#">Reports</a>
+            <a class="nav-link" href="#">Settings</a>
+        </nav>
+    </div>
+
+    <!-- Main -->
+    <div class="dash-main">
+        <div style="margin-bottom: 28px;">
+            <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0 0 4px;">Manage Locations</h2>
+            <div style="font-size: 13px; color: #888;">Add and manage Towns, Zones, Union Councils, and Wards.</div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="loc-tabs">
+            <a href="?tab=town" class="loc-tab {% if active_tab == 'town' %}active{% endif %}"> Towns <span
+                    class="loc-badge">{{ towns|length }}</span></a>
+            <a href="?tab=zone" class="loc-tab {% if active_tab == 'zone' %}active{% endif %}"> Zones <span
+                    class="loc-badge">{{ zones|length }}</span></a>
+            <a href="?tab=uc" class="loc-tab {% if active_tab == 'uc'   %}active{% endif %}"> Union Councils <span
+                    class="loc-badge">{{ ucs|length }}</span></a>
+            <a href="?tab=ward" class="loc-tab {% if active_tab == 'ward' %}active{% endif %}"> Wards <span
+                    class="loc-badge">{{ wards|length }}</span></a>
+        </div>
+
+        <!-- ── TOWN PANEL ──────────────────────────────── -->
+        <div class="loc-panel {% if active_tab == 'town' %}active{% endif %}">
+            <div class="loc-grid">
+                <div class="loc-form-card">
+                    <div class="loc-form-title">Add New Town</div>
+                    <form method="post" action="{% url 'add_town' %}">
+                        {% csrf_token %}
+                        {{ town_form.name }}
+                        <button type="submit" class="loc-btn-add">+ Add Town</button>
+                    </form>
+                </div>
+                <div class="loc-table-wrap">
+                    <table class="loc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Town Name</th>
+                                <th>Zones</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for town in towns %}
+                            <tr>
+                                <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
+                                <td><strong>{{ town.name }}</strong></td>
+                                <td><span class="loc-badge">{{ town.zones.count }}</span></td>
+                                <td>
+                                    <form method="post" action="{% url 'delete_town' town.pk %}"
+                                        onsubmit="return confirm('Delete {{ town.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="loc-btn-del">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="loc-empty">No towns added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ZONE PANEL ──────────────────────────────── -->
+        <div class="loc-panel {% if active_tab == 'zone' %}active{% endif %}">
+            <div class="loc-grid">
+                <div class="loc-form-card">
+                    <div class="loc-form-title">Add New Zone</div>
+                    <form method="post" action="{% url 'add_zone' %}">
+                        {% csrf_token %}
+                        {{ zone_form.town }}
+                        <div style="margin-bottom:12px;"></div>
+                        {{ zone_form.name }}
+                        <button type="submit" class="loc-btn-add">+ Add Zone</button>
+                    </form>
+                </div>
+                <div class="loc-table-wrap">
+                    <table class="loc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Zone Name</th>
+                                <th>Town</th>
+                                <th>UCs</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for zone in zones %}
+                            <tr>
+                                <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
+                                <td><strong>{{ zone.name }}</strong></td>
+                                <td><span class="loc-badge">{{ zone.town.name }}</span></td>
+                                <td><span class="loc-badge">{{ zone.union_councils.count }}</span></td>
+                                <td>
+                                    <form method="post" action="{% url 'delete_zone' zone.pk %}"
+                                        onsubmit="return confirm('Delete {{ zone.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="loc-btn-del">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="loc-empty">No zones added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── UNION COUNCIL PANEL ────────────────────── -->
+        <div class="loc-panel {% if active_tab == 'uc' %}active{% endif %}">
+            <div class="loc-grid">
+                <div class="loc-form-card">
+                    <div class="loc-form-title">Add New Union Council</div>
+                    <form method="post" action="{% url 'add_uc' %}">
+                        {% csrf_token %}
+                        {{ uc_form.zone }}
+                        <div style="margin-bottom:12px;"></div>
+                        {{ uc_form.name }}
+                        <button type="submit" class="loc-btn-add">+ Add Union Council</button>
+                    </form>
+                </div>
+                <div class="loc-table-wrap">
+                    <table class="loc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>UC Name</th>
+                                <th>Zone</th>
+                                <th>Town</th>
+                                <th>Wards</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for uc in ucs %}
+                            <tr>
+                                <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
+                                <td><strong>{{ uc.name }}</strong></td>
+                                <td><span class="loc-badge">{{ uc.zone.name }}</span></td>
+                                <td><span class="loc-badge">{{ uc.zone.town.name }}</span></td>
+                                <td><span class="loc-badge">{{ uc.wards.count }}</span></td>
+                                <td>
+                                    <form method="post" action="{% url 'delete_uc' uc.pk %}"
+                                        onsubmit="return confirm('Delete {{ uc.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="loc-btn-del">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="loc-empty">No union councils added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── WARD PANEL ──────────────────────────────── -->
+        <div class="loc-panel {% if active_tab == 'ward' %}active{% endif %}">
+            <div class="loc-grid">
+                <div class="loc-form-card">
+                    <div class="loc-form-title">Add New Ward</div>
+                    <form method="post" action="{% url 'add_ward' %}">
+                        {% csrf_token %}
+                        {{ ward_form.union_council }}
+                        <div style="margin-bottom:12px;"></div>
+                        {{ ward_form.name }}
+                        <button type="submit" class="loc-btn-add">+ Add Ward</button>
+                    </form>
+                </div>
+                <div class="loc-table-wrap">
+                    <table class="loc-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ward Name</th>
+                                <th>Union Council</th>
+                                <th>Zone</th>
+                                <th>Town</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ward in wards %}
+                            <tr>
+                                <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
+                                <td><strong>{{ ward.name }}</strong></td>
+                                <td><span class="loc-badge">{{ ward.union_council.name }}</span></td>
+                                <td><span class="loc-badge">{{ ward.union_council.zone.name }}</span></td>
+                                <td><span class="loc-badge">{{ ward.union_council.zone.town.name }}</span></td>
+                                <td>
+                                    <form method="post" action="{% url 'delete_ward' ward.pk %}"
+                                        onsubmit="return confirm('Delete {{ ward.name }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="loc-btn-del">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="loc-empty">No wards added yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

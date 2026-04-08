@@ -1,33 +1,110 @@
 from django import forms
-from .models import Person
+from .models import Person, Town, Zone, UnionCouncil, Ward
+
 
 class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [
-            'person_id', 'name', 'father_name', 
-            'cnic', 'phone', 'address', 'union_council', 
-            'town', 'zone', 'ward'
+            'person_id', 'name', 'father_name',
+            'cnic', 'phone', 'address',
+            'town', 'zone', 'union_council', 'ward'
         ]
         widgets = {
             'person_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Father's Name"}),
             'cnic': forms.TextInput(attrs={
-                'class': 'form-control', 
+                'class': 'form-control',
                 'placeholder': 'XXXXX-XXXXXXX-X',
                 'pattern': '[0-9]{5}-[0-9]{7}-[0-9]{1}',
                 'title': 'CNIC must be in the format XXXXX-XXXXXXX-X'
             }),
             'phone': forms.TextInput(attrs={
-                'class': 'form-control', 
+                'class': 'form-control',
                 'placeholder': '03XXXXXXXXX',
                 'pattern': '03[0-9]{9}',
                 'title': 'Phone number must be in the format 03XXXXXXXXX'
             }),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter current address'}),
-            'union_council': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., UC-14'}),
-            'town': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Model Town'}),
-            'zone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Zone 1'}),
-            'ward': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Ward 5'}),
+            'town': forms.Select(attrs={'class': 'form-control', 'id': 'id_town'}),
+            'zone': forms.Select(attrs={'class': 'form-control', 'id': 'id_zone'}),
+            'union_council': forms.Select(attrs={'class': 'form-control', 'id': 'id_union_council'}),
+            'ward': forms.Select(attrs={'class': 'form-control', 'id': 'id_ward'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+
+        self.fields['town'].queryset = Town.objects.all()
+        self.fields['town'].empty_label = "— Select Town —"
+        self.fields['town'].required = False
+
+        # Resolve IDs from submitted POST data first, then existing instance
+        town_id = self.data.get('town') or (instance.town_id if instance else None)
+        zone_id = self.data.get('zone') or (instance.zone_id if instance else None)
+        uc_id   = self.data.get('union_council') or (instance.union_council_id if instance else None)
+
+        # Zone queryset
+        if town_id:
+            self.fields['zone'].queryset = Zone.objects.filter(town_id=town_id)
+        else:
+            self.fields['zone'].queryset = Zone.objects.all()
+        self.fields['zone'].empty_label = "— Select Zone —"
+        self.fields['zone'].required = False
+
+        # Union Council queryset
+        if zone_id:
+            self.fields['union_council'].queryset = UnionCouncil.objects.filter(zone_id=zone_id)
+        else:
+            self.fields['union_council'].queryset = UnionCouncil.objects.all()
+        self.fields['union_council'].empty_label = "— Select Union Council —"
+        self.fields['union_council'].required = False
+
+        # Ward queryset
+        if uc_id:
+            self.fields['ward'].queryset = Ward.objects.filter(union_council_id=uc_id)
+        else:
+            self.fields['ward'].queryset = Ward.objects.all()
+        self.fields['ward'].empty_label = "— Select Ward —"
+        self.fields['ward'].required = False
+
+
+class TownForm(forms.ModelForm):
+    class Meta:
+        model = Town
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Model Town'}),
+        }
+
+
+class ZoneForm(forms.ModelForm):
+    class Meta:
+        model = Zone
+        fields = ['name', 'town']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Zone A'}),
+            'town': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class UnionCouncilForm(forms.ModelForm):
+    class Meta:
+        model = UnionCouncil
+        fields = ['name', 'zone']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., UC-14'}),
+            'zone': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class WardForm(forms.ModelForm):
+    class Meta:
+        model = Ward
+        fields = ['name', 'union_council']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Ward 5'}),
+            'union_council': forms.Select(attrs={'class': 'form-control'}),
         }
