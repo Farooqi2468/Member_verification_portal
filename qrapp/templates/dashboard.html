@@ -17,6 +17,7 @@
 
     .dash-sidebar {
         width: 280px;
+        min-height: 100%;
         background: #1A1A1A;
         padding: 30px 20px;
         color: #fff;
@@ -64,10 +65,51 @@
     @media (max-width: 767.98px) {
         .dash-main {
             padding: 20px 16px;
+            padding-bottom: 80px;
         }
         .dash-card {
             padding: 24px !important;
         }
+    }
+
+    /* ── Mobile Bottom Nav ── */
+    .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: #1A1A1A;
+        display: flex;
+        align-items: stretch;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        z-index: 1000;
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+    }
+    .mobile-bottom-nav a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 500;
+        gap: 4px;
+        transition: color 0.2s, background 0.2s;
+        padding: 6px 2px;
+    }
+    .mobile-bottom-nav a i {
+        font-size: 20px;
+    }
+    .mobile-bottom-nav a:hover,
+    .mobile-bottom-nav a.active {
+        color: #fff;
+        background: rgba(255,255,255,0.06);
+    }
+    .mobile-bottom-nav a.active i {
+        color: #C41E3A;
     }
 </style>
 
@@ -201,4 +243,25 @@
         </div>
     </div>
 </div>
+
+<!-- Mobile Bottom Navigation (visible on small screens only) -->
+<div class="mobile-bottom-nav d-flex d-md-none">
+    <a href="{% url 'dashboard' %}" class="active">
+        <i class="bi bi-house-fill"></i>
+        <span>Overview</span>
+    </a>
+    <a href="{% url 'all_members' %}">
+        <i class="bi bi-people-fill"></i>
+        <span>Members</span>
+    </a>
+    <a href="{% url 'create_person' %}">
+        <i class="bi bi-person-plus-fill"></i>
+        <span>Register</span>
+    </a>
+    <a href="{% url 'manage_locations' %}">
+        <i class="bi bi-geo-alt-fill"></i>
+        <span>Locations</span>
+    </a>
+</div>
+
 {% endblock %}
