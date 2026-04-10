@@ -181,13 +181,17 @@
         <div class="qr-d-layout">
             <!-- Form Column -->
             <div class="qr-form-area">
+                <div style="margin-bottom: 16px;">
                 {% if is_update %}
-                    <div style="margin-bottom: 16px;">
-                        <a href="{% url 'all_members' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500;">
-                            &larr; Cancel & Back to Directory
-                        </a>
-                    </div>
+                    <a href="{% url 'all_members' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseout="this.style.color='#666'" onmouseover="this.style.color='#1A1A1A'">
+                        &larr; Cancel & Back to Directory
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseout="this.style.color='#666'" onmouseover="this.style.color='#1A1A1A'">
+                        &larr; Back to Dashboard
+                    </a>
                 {% endif %}
+                </div>
                 <div class="qr-form-card">
                     <h2 class="qr-form-title">
                         {% if is_update %}Update Member Profile{% else %}Register Member{% endif %}

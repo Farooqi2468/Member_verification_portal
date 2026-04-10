@@ -121,6 +121,12 @@
         /* PPP Red */
     }
 
+    .action-buttons-wrap {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
     .filter-section {
         background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%);
         border-radius: 8px;
@@ -187,6 +193,15 @@
         }
         .jump-to-page {
             justify-content: center;
+            width: 100%;
+        }
+
+        .action-buttons-wrap {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .action-buttons-wrap form,
+        .action-buttons-wrap .btn-action {
             width: 100%;
         }
     }
@@ -318,6 +333,11 @@
 
     <!-- Main Content -->
     <div class="dash-main">
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'dashboard' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseout="this.style.color='#666'" onmouseover="this.style.color='#1A1A1A'">
+                &larr; Back to Dashboard
+            </a>
+        </div>
         <div class="table-card shadow-sm">
             <div class="table-title-area">
                 <h2 class="table-title">All Members Directory</h2>
@@ -412,7 +432,7 @@
                             </td>
                             <td>{{ person.made_by.username|default:"System" }}</td>
                             <td style="text-align: right;">
-                                <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                                <div class="action-buttons-wrap">
                                     <!-- Details Button -->
                                     <a href="{% url 'admin_person_detail' person.person_id %}"
                                         class="btn-action btn-details" title="View Details & QR">
