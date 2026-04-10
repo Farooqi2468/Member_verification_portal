@@ -250,7 +250,10 @@
             </a>
         </div>
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 12px;">
-            <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">Member Profile</h2>
+            <div>
+                <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">Member Profile</h2>
+                <div style="font-size: 13px; color: #888; margin-top: 4px;">{{ person.name }}</div>
+            </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                 <button onclick="document.getElementById('qrModal').style.display='flex'" class="btn" style="background: var(--ppp-green); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-qr-code-scan me-1" viewBox="0 0 16 16" style="vertical-align: text-bottom;">
@@ -281,10 +284,6 @@
                     <div class="label">CNIC Number</div>
                     <div class="value">{{ person.cnic }}</div>
                 </div>
-                <div class="detail-row">
-                    <div class="label">Date of Registration</div>
-                    <div class="value">{{ person.created_at|date:"d M Y" }}</div>
-                </div>
             </div>
         </div>
 
@@ -313,6 +312,29 @@
         <div class="detail-section">
             <div class="detail-section-title">Full Residential Address</div>
             <div class="value" style="font-weight: 400; line-height: 1.6;">{{ person.address }}</div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Registration Info</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="label">Registered By</div>
+                    <div class="value" style="display: flex; align-items: center; gap: 8px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #1A1A1A; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+                            {{ person.made_by.username|first|upper }}
+                        </span>
+                        {{ person.made_by.username }}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Date of Registration</div>
+                    <div class="value">{{ person.created_at|date:"d M Y" }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="label">Member ID</div>
+                    <div class="value" style="font-family: monospace; font-size: 13px;">#{{ person.person_id }}</div>
+                </div>
+            </div>
         </div>
 
         {% if is_admin %}
