@@ -1,15 +1,17 @@
 import os
 import qrcode
+import csv
+from datetime import timedelta, datetime
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import HttpResponseForbidden, JsonResponse
-from django.db.models import Count
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
-from datetime import timedelta
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
 
 from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm
 from .models import Person, Town, Zone, UnionCouncil, Ward
@@ -126,12 +128,88 @@ def admin_person_detail(request, pk):
 @admin_only
 def all_members(request):
     members_list = Person.objects.all().order_by('-created_at')
+
+    # Filtering logic
+    q = request.GET.get('q', '')
+    town_id = request.GET.get('town')
+    registrar_id = request.GET.get('registrar')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if q:
+        members_list = members_list.filter(
+            Q(name__icontains=q) | 
+            Q(person_id__icontains=q) | 
+            Q(cnic__icontains=q) |
+            Q(phone__icontains=q)
+        )
+    if town_id:
+        members_list = members_list.filter(town_id=town_id)
+    if registrar_id:
+        members_list = members_list.filter(made_by_id=registrar_id)
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            members_list = members_list.filter(created_at__date__gte=start_date_obj)
+        except ValueError:
+            pass
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            members_list = members_list.filter(created_at__date__lte=end_date_obj)
+        except ValueError:
+            pass
+
+    # CSV Export
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="members_export.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Date'])
+        
+        for p in members_list:
+            writer.writerow([
+                p.person_id, p.name, p.father_name, p.cnic, p.phone, p.address,
+                p.town.name if p.town else '',
+                p.zone.name if p.zone else '',
+                p.union_council.name if p.union_council else '',
+                p.ward.name if p.ward else '',
+                p.made_by.username if p.made_by else '',
+                p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        return response
+
+    # Pagination
     paginator = Paginator(members_list, 10)  # Show 10 members per page
-    
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
-    return render(request, 'all_members.html', {'page_obj': page_obj})
+
+    # Initial context for dropdowns
+    towns = Town.objects.all()
+    registrars = User.objects.filter(is_active=True).order_by('username')
+    # Query string for pagination
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'towns': towns,
+        'registrars': registrars,
+        'current_filters': {
+            'q': q,
+            'town': int(town_id) if town_id else '',
+            'registrar': int(registrar_id) if registrar_id else '',
+            'start_date': start_date or '',
+            'end_date': end_date or ''
+        },
+        'query_params': query_params
+    }
+    return render(request, 'all_members.html', context)
 
 
 @login_required

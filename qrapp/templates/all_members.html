@@ -155,6 +155,50 @@
         /* PPP Red */
     }
 
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid #E5E5E5;
+    }
+    .filter-section .form-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #555;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+    .filter-section .form-control, .filter-section .form-select {
+        font-size: 13px;
+        border-radius: 6px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+    }
+    .filter-section .form-control:focus, .filter-section .form-select:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.1);
+    }
+    .filter-section .btn-filter {
+        background: var(--ppp-red);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: none;
+    }
+    .filter-section .btn-clear {
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+    }
+
     /* Responsive */
     @media (max-width: 767.98px) {
         .dash-main {
@@ -174,6 +218,10 @@
         }
         .d-table th, .d-table td {
             padding: 10px 8px;
+        }
+        .jump-to-page {
+            justify-content: center;
+            width: 100%;
         }
     }
 
@@ -319,9 +367,64 @@
         <div class="table-card shadow-sm">
             <div class="table-title-area">
                 <h2 class="table-title">All Members Directory</h2>
-                <a href="{% url 'create_person' %}" class="btn"
-                    style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">+
-                    New Member</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-funnel-fill"></i> Filters
+                    </button>
+                    <a href="?export=csv{{ query_params }}" class="btn"
+                        style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-download"></i> Export CSV
+                    </a>
+                    <a href="{% url 'create_person' %}" class="btn"
+                        style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">+
+                        New Member</a>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="collapse d-md-block" id="mobileFilterCollapse">
+                <div class="filter-section">
+                <form method="GET" action="{% url 'all_members' %}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="q" class="form-control" placeholder="Name, ID, CNIC, Phone" value="{{ current_filters.q }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Town</label>
+                            <select name="town" class="form-select">
+                                <option value="">— All Towns —</option>
+                                {% for t in towns %}
+                                <option value="{{ t.id }}" {% if current_filters.town == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Registered By</label>
+                            <select name="registrar" class="form-select">
+                                <option value="">— All Users —</option>
+                                {% for u in registrars %}
+                                <option value="{{ u.id }}" {% if current_filters.registrar == u.id %}selected{% endif %}>{{ u.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ current_filters.start_date }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ current_filters.end_date }}">
+                        </div>
+                        <div class="col-md-4 d-flex justify-content-end align-items-end gap-2">
+                            <a href="{% url 'all_members' %}" class="btn-clear text-decoration-none">Clear Filters</a>
+                            <button type="submit" class="btn-filter">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -394,14 +497,15 @@
             <!-- ── Pagination ── -->
             {% if page_obj.paginator.num_pages > 1 %}
             <div class="pagination-container">
-                <div class="pagination-info text-muted small">
+                <div class="pagination-info text-muted small d-none d-md-block">
                     Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} members
                 </div>
 
-                <div class="pagination-nav">
+                <!-- Desktop Pagination -->
+                <div class="pagination-nav d-none d-md-flex">
                     {% if page_obj.has_previous %}
-                        <a href="?page=1" class="page-btn" title="First Page"><i class="bi bi-chevron-double-left"></i></a>
-                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn"><i class="bi bi-chevron-left"></i> Prev</a>
+                        <a href="?page=1{{ query_params }}" class="page-btn" title="First Page"><i class="bi bi-chevron-double-left"></i></a>
+                        <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="page-btn"><i class="bi bi-chevron-left"></i> Prev</a>
                     {% else %}
                         <span class="page-btn disabled"><i class="bi bi-chevron-double-left"></i></span>
                         <span class="page-btn disabled"><i class="bi bi-chevron-left"></i> Prev</span>
@@ -411,23 +515,48 @@
                         {% if page_obj.number == num %}
                             <span class="page-btn active">{{ num }}</span>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                            <a href="?page={{ num }}{{ query_params }}" class="page-btn">{{ num }}</a>
                         {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next <i class="bi bi-chevron-right"></i></a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn" title="Last Page"><i class="bi bi-chevron-double-right"></i></a>
+                        <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="page-btn">Next <i class="bi bi-chevron-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{{ query_params }}" class="page-btn" title="Last Page"><i class="bi bi-chevron-double-right"></i></a>
                     {% else %}
                         <span class="page-btn disabled">Next <i class="bi bi-chevron-right"></i></span>
                         <span class="page-btn disabled"><i class="bi bi-chevron-double-right"></i></span>
                     {% endif %}
                 </div>
 
+                <!-- Mobile Pagination Stepper -->
+                <div class="mobile-pagination-nav d-flex d-md-none justify-content-between align-items-center w-100 mb-2 px-3">
+                    <div style="flex: 1; text-align: left;">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                <i class="bi bi-arrow-left"></i> {{ page_obj.previous_page_number }}
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"><i class="bi bi-arrow-left"></i> - </span>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <span style="font-size: 20px; font-weight: 800; color: #1A1A1A;">{{ page_obj.number }}</span>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                {{ page_obj.next_page_number }} <i class="bi bi-arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"> - <i class="bi bi-arrow-right"></i></span>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="jump-to-page">
                     <span>Jump to</span>
                     <input type="number" id="jumpPageInput" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}">
-                    <button type="button" class="jump-btn" id="jumpBtn">Go</button>
+                    <button type="button" class="jump-btn" id="jumpBtn" data-query="{{ query_params }}">Go</button>
                 </div>
             </div>
             {% endif %}
@@ -467,9 +596,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const performJump = () => {
             const page = jumpInput.value;
             const max = jumpInput.getAttribute('max');
+            const queryParams = jumpBtn.getAttribute('data-query');
             if (page && page >= 1 && page <= parseInt(max)) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('page', page);
+                // The URL object already preserves GET parameters. 
+                // Setting 'page' updates it correctly avoiding need manual injection.
                 window.location.href = url.toString();
             } else {
                 alert('Please enter a valid page number between 1 and ' + max);
@@ -483,6 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
 });
 </script>
 {% endblock %}
