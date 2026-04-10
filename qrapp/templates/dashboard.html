@@ -368,6 +368,7 @@
         </div>
         <!-- ── Divider ─────────────────────────────────────────── -->
         <div style="border-top: 1px solid #E5E5E5; margin-bottom: 24px;"></div>
+
         {% endif %}
 
         <div class="row g-4">
@@ -473,6 +474,43 @@
             </div>
             {% endif %}
         </div>
+
+        {% if role == "Admin" %}
+        <!-- ── Divider ─────────────────────────────────────────── -->
+        <div style="border-top: 1px solid #E5E5E5; margin-top: 24px; margin-bottom: 24px;"></div>
+
+        <!-- ── Charts Section ──────────────────────────────────── -->
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <h4 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A; margin: 0;">Analytics Overview</h4>
+            <select id="chart-time-filter" class="form-select w-auto" style="border-radius: 8px; font-size: 14px;">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="365">This Year</option>
+                <option value="all">All Time</option>
+            </select>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Line Chart -->
+            <div class="col-lg-8">
+                <div class="dash-card h-100 p-4">
+                    <h6 class="fw-bold mb-3" style="color: #1A1A1A;">Registrations Over Time</h6>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Doughnut Chart -->
+            <div class="col-lg-4">
+                <div class="dash-card h-100 p-4">
+                    <h6 class="fw-bold mb-3" style="color: #1A1A1A;">Members by Town</h6>
+                    <div style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="townsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -513,5 +551,113 @@
         document.getElementById('time-greeting').textContent = greeting;
     })();
 </script>
+
+{% if role == "Admin" %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let timelineChart, townsChart;
+
+    const fetchChartData = (days) => {
+        fetch(`/dashboard/ajax/dashboard-charts/?days=${days}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                updateTimelineChart(data.timeline);
+                updateTownsChart(data.towns);
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    };
+
+    const updateTimelineChart = (data) => {
+        const canvas = document.getElementById('timelineChart');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (timelineChart) timelineChart.destroy();
+        
+        timelineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'New Registrations',
+                    data: data.data,
+                    borderColor: '#C41E3A',
+                    backgroundColor: 'rgba(196, 30, 58, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#C41E3A',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    };
+
+    const updateTownsChart = (data) => {
+        const canvas = document.getElementById('townsChart');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (townsChart) townsChart.destroy();
+        
+        townsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.data,
+                    backgroundColor: [
+                        '#006B3F', '#C41E3A', '#3B82F6', '#8B5CF6', '#F59E0B', '#14B8A6'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                },
+                cutout: '65%'
+            }
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterSelect = document.getElementById('chart-time-filter');
+        if(filterSelect) {
+            // Initial fetch based on default route. Wait, the route is actually `/ajax/dashboard-charts/`
+            // Let's patch the fetch url to exactly match urls.py.
+            
+            const fetchDataFixed = (days) => {
+                fetch(`/ajax/dashboard-charts/?days=${days}`)
+                    .then(r => r.json())
+                    .then(d => { updateTimelineChart(d.timeline); updateTownsChart(d.towns); })
+                    .catch(e => console.error(e));
+            };
+
+            fetchDataFixed(filterSelect.value);
+            
+            filterSelect.addEventListener('change', (e) => {
+                fetchDataFixed(e.target.value);
+            });
+        }
+    });
+</script>
+{% endif %}
 
 {% endblock %}

@@ -216,6 +216,86 @@
     .mobile-bottom-nav a.active i {
         color: #C41E3A;
     }
+
+    /* ── Pagination Styles ── */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 15px 0;
+        border-top: 1px solid #eee;
+    }
+    .pagination-nav {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    .page-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .page-btn:hover:not(.disabled) {
+        border-color: var(--ppp-red);
+        color: var(--ppp-red);
+        background: #fff;
+    }
+    .page-btn.active {
+        background: var(--ppp-red);
+        border-color: var(--ppp-red);
+        color: #fff;
+    }
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f5f5f5;
+    }
+    .jump-to-page {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    .jump-to-page input {
+        width: 60px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        outline: none;
+    }
+    .jump-to-page input:focus {
+        border-color: var(--ppp-red);
+    }
+    .jump-btn {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 8px;
+        background: #1A1A1A;
+        color: #fff;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .jump-btn:hover {
+        background: #333;
+    }
 </style>
 
 <div class="dash-wrap">
@@ -253,11 +333,12 @@
                             <th>CNIC</th>
                             <th>Phone Number</th>
                             <th>Location Assignment</th>
+                            <th>Made By</th>
                             <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for person in members %}
+                        {% for person in page_obj %}
                         <tr>
                             <td style="font-family: var(--font-mono); font-weight: 500; font-size: 12px;">
                                 {{person.person_id }}</td>
@@ -272,6 +353,7 @@
                                     </div>
                                 </div>
                             </td>
+                            <td>{{ person.made_by.username|default:"System" }}</td>
                             <td style="text-align: right;">
                                 <div style="display: flex; gap: 6px; justify-content: flex-end;">
                                     <!-- Details Button -->
@@ -300,7 +382,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 No members have been registered yet.
                             </td>
                         </tr>
@@ -308,6 +390,47 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- ── Pagination ── -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <div class="pagination-info text-muted small">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} members
+                </div>
+
+                <div class="pagination-nav">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-btn" title="First Page"><i class="bi bi-chevron-double-left"></i></a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn"><i class="bi bi-chevron-left"></i> Prev</a>
+                    {% else %}
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-left"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-left"></i> Prev</span>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">Next <i class="bi bi-chevron-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn" title="Last Page"><i class="bi bi-chevron-double-right"></i></a>
+                    {% else %}
+                        <span class="page-btn disabled">Next <i class="bi bi-chevron-right"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-right"></i></span>
+                    {% endif %}
+                </div>
+
+                <div class="jump-to-page">
+                    <span>Jump to</span>
+                    <input type="number" id="jumpPageInput" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}">
+                    <button type="button" class="jump-btn" id="jumpBtn">Go</button>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -332,4 +455,34 @@
     </a>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jumpInput = document.getElementById('jumpPageInput');
+    const jumpBtn = document.getElementById('jumpBtn');
+
+    if (jumpBtn) {
+        const performJump = () => {
+            const page = jumpInput.value;
+            const max = jumpInput.getAttribute('max');
+            if (page && page >= 1 && page <= parseInt(max)) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', page);
+                window.location.href = url.toString();
+            } else {
+                alert('Please enter a valid page number between 1 and ' + max);
+            }
+        };
+
+        jumpBtn.addEventListener('click', performJump);
+        jumpInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performJump();
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

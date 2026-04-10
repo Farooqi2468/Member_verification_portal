@@ -6,6 +6,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from datetime import timedelta
+from django.core.paginator import Paginator
 
 from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm
 from .models import Person, Town, Zone, UnionCouncil, Ward
@@ -121,8 +125,13 @@ def admin_person_detail(request, pk):
 @login_required
 @admin_only
 def all_members(request):
-    members = Person.objects.all().order_by('-created_at')
-    return render(request, 'all_members.html', {'members': members})
+    members_list = Person.objects.all().order_by('-created_at')
+    paginator = Paginator(members_list, 10)  # Show 10 members per page
+    
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'all_members.html', {'page_obj': page_obj})
 
 
 @login_required
@@ -265,3 +274,56 @@ def ajax_get_wards(request):
     uc_id = request.GET.get('uc_id')
     wards = Ward.objects.filter(union_council_id=uc_id).values('id', 'name') if uc_id else []
     return JsonResponse(list(wards), safe=False)
+
+
+@login_required
+@admin_only
+def ajax_dashboard_charts(request):
+    days = request.GET.get('days', '30')
+    
+    # Base queryset for persons
+    persons_qs = Person.objects.all()
+    
+    if days != 'all':
+        try:
+            days = int(days)
+            start_date = timezone.now().date() - timedelta(days=days)
+            persons_qs = persons_qs.filter(created_at__date__gte=start_date)
+        except ValueError:
+            pass # fallback to all if invalid
+
+    # 1. Registrations Over Time (Line Chart)
+    # Group by the date part of created_at
+    daily_counts = (
+        persons_qs
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(count=Count('person_id'))
+        .order_by('date')
+    )
+    
+    labels_line = [obj['date'].strftime('%b %d') for obj in daily_counts if obj['date']]
+    data_line = [obj['count'] for obj in daily_counts if obj['date']]
+
+    # 2. Members by Town (Doughnut/Bar Chart)
+    town_counts = (
+        persons_qs
+        .filter(town__isnull=False)
+        .values('town__name')
+        .annotate(count=Count('person_id'))
+        .order_by('-count')
+    )
+    
+    labels_town = [obj['town__name'] for obj in town_counts]
+    data_town = [obj['count'] for obj in town_counts]
+
+    return JsonResponse({
+        'timeline': {
+            'labels': labels_line,
+            'data': data_line,
+        },
+        'towns': {
+            'labels': labels_town,
+            'data': data_town,
+        }
+    })
