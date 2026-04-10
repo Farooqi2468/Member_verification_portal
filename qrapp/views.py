@@ -1,6 +1,7 @@
 import os
 import qrcode
 from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -26,7 +27,25 @@ def get_user_role(user):
 def dashboard(request):
     role = get_user_role(request.user)
     name = request.user.first_name if request.user.first_name else request.user.username
-    return render(request, 'dashboard.html', {'role': role, 'name': name})
+
+    today = timezone.now().date()
+    context = {
+        'role': role,
+        'name': name,
+        # ── 8 Metric Cards ──────────────────────────────────────
+        'total_members':   Person.objects.count(),
+        'members_today':   Person.objects.filter(created_at__date=today).count(),
+        'members_month':   Person.objects.filter(
+                               created_at__year=today.year,
+                               created_at__month=today.month
+                           ).count(),
+        'total_towns':     Town.objects.count(),
+        'total_zones':     Zone.objects.count(),
+        'total_ucs':       UnionCouncil.objects.count(),
+        'total_wards':     Ward.objects.count(),
+        'registered_by_me': Person.objects.filter(made_by=request.user).count(),
+    }
+    return render(request, 'dashboard.html', context)
 
 
 def admin_only(view_func):
