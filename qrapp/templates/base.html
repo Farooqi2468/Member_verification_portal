@@ -94,6 +94,81 @@
                 gap: 8px;
             }
         }
+        /* ── Global Sidebar CSS ── */
+        .dash-wrap {
+            display: flex;
+            min-height: calc(100vh - 72px);
+            background: #f4f6f8;
+        }
+        .dash-sidebar {
+            width: 280px;
+            min-height: 100%;
+            background: #1A1A1A;
+            padding: 30px 20px;
+            color: #fff;
+            flex-shrink: 0;
+            transition: width 0.3s ease, padding 0.3s ease;
+            overflow-x: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .dash-sidebar.collapsed {
+            width: 80px;
+            padding: 30px 12px;
+        }
+        .dash-sidebar.collapsed .sidebar-text,
+        .dash-sidebar.collapsed .sidebar-header-text {
+            display: none;
+        }
+        .dash-sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .dash-sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 12px 0;
+        }
+        .dash-sidebar .nav-link i {
+            font-size: 18px;
+            margin-right: 12px;
+            transition: margin 0.3s;
+        }
+        .dash-sidebar.collapsed .nav-link i {
+            margin-right: 0;
+            font-size: 22px;
+        }
+        .dash-sidebar .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .dash-sidebar .nav-link.active {
+            background: var(--ppp-red);
+            color: #fff;
+        }
+        .sidebar-toggle-btn {
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .sidebar-toggle-btn:hover {
+            color: #fff;
+        }
+        .dash-main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
     </style>
 </head>
 
@@ -204,6 +279,26 @@
 
     <!-- Bootstrap JS for navbar toggle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarBtn = document.getElementById('sidebarToggleBtn');
+            const sidebar = document.getElementById('baseSidebar');
+
+            if (sidebarBtn && sidebar) {
+                // Initialize collapse state from local storage
+                if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                    sidebar.classList.add('collapsed');
+                }
+
+                sidebarBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('sidebar_collapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

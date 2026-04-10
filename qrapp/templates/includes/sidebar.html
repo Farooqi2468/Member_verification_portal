@@ -1,0 +1,37 @@
+<!-- Sidebar Component -->
+<div class="dash-sidebar d-none d-md-block" id="baseSidebar">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+        <div class="sidebar-header-text" style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px;">Menu</div>
+        <button type="button" id="sidebarToggleBtn" class="sidebar-toggle-btn text-white title" title="Toggle Sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+
+    <nav class="nav flex-column mt-2">
+        <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}" title="Overview">
+            <i class="bi bi-speedometer2 text-white"></i> 
+            <span class="sidebar-text">Overview</span>
+        </a>
+        <a class="nav-link {% if active_page == 'members' %}active{% endif %}" href="{% url 'all_members' %}" title="All Members">
+            <i class="bi bi-people-fill text-white"></i> 
+            <span class="sidebar-text">All Members</span>
+        </a>
+        <a class="nav-link {% if active_page == 'register' %}active{% endif %}" href="{% url 'create_person' %}" title="Register Member">
+            <i class="bi bi-person-plus-fill text-white"></i> 
+            <span class="sidebar-text">Register Member</span>
+        </a>
+        <a class="nav-link {% if active_page == 'locations' %}active{% endif %}" href="{% url 'manage_locations' %}" title="Manage Locations">
+            <i class="bi bi-geo-alt-fill text-white"></i> 
+            <span class="sidebar-text">Manage Locations</span>
+        </a>
+        <a class="nav-link" href="#" title="Reports">
+            <i class="bi bi-bar-chart-fill text-white"></i> 
+            <span class="sidebar-text">Reports</span>
+        </a>
+        <a class="nav-link" href="#" title="Settings">
+            <i class="bi bi-gear-fill text-white"></i> 
+            <span class="sidebar-text">Settings</span>
+        </a>
+    </nav>
+</div>
