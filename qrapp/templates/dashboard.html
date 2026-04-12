@@ -328,8 +328,9 @@
                             <path
                                 d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4 q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4" />
                         </svg></div>
-                    <h5 class="fw-bold" style="color: #1A1A1A;">Manage Users</h5>
-                    <p class="text-muted mb-4" style="font-size: 13px;">View, edit, and manage all registered users.</p>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Members</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">View, edit, and manage all registered members.
+                    </p>
                     <a href="{% url 'all_members' %}" class="btn"
                         style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Go
                         to Users</a>
@@ -344,12 +345,12 @@
                             <path fill-rule="evenodd"
                                 d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
                         </svg></div>
-                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Person</h5>
-                    <p class="text-muted mb-4" style="font-size: 13px;">Register a new person and generate a QR Code.
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Member</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Register a new member and generate a QR Code.
                     </p>
                     <a href="{% url 'create_person' %}" class="btn"
                         style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Create
-                        Person</a>
+                        Member</a>
                 </div>
             </div>
             <div class="col-md-4">
@@ -429,7 +430,8 @@
 
         <!-- ── Charts Section ──────────────────────────────────── -->
         <div class="mb-4 d-flex justify-content-between align-items-center">
-            <h4 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A; margin: 0;">Analytics Overview</h4>
+            <h4 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A; margin: 0;">Analytics Overview
+            </h4>
             <select id="chart-time-filter" class="form-select w-auto" style="border-radius: 8px; font-size: 14px;">
                 <option value="7">Last 7 Days</option>
                 <option value="30" selected>Last 30 Days</option>
@@ -452,7 +454,8 @@
             <div class="col-lg-4">
                 <div class="dash-card h-100 p-4">
                     <h6 class="fw-bold mb-3" style="color: #1A1A1A;">Members by Town</h6>
-                    <div style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                    <div
+                        style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
                         <canvas id="townsChart"></canvas>
                     </div>
                 </div>
@@ -520,10 +523,10 @@
 
     const updateTimelineChart = (data) => {
         const canvas = document.getElementById('timelineChart');
-        if(!canvas) return;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (timelineChart) timelineChart.destroy();
-        
+
         timelineChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -556,10 +559,10 @@
 
     const updateTownsChart = (data) => {
         const canvas = document.getElementById('townsChart');
-        if(!canvas) return;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (townsChart) townsChart.destroy();
-        
+
         townsChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -587,10 +590,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const filterSelect = document.getElementById('chart-time-filter');
-        if(filterSelect) {
+        if (filterSelect) {
             // Initial fetch based on default route. Wait, the route is actually `/ajax/dashboard-charts/`
             // Let's patch the fetch url to exactly match urls.py.
-            
+
             const fetchDataFixed = (days) => {
                 fetch(`/ajax/dashboard-charts/?days=${days}`)
                     .then(r => r.json())
@@ -599,7 +602,7 @@
             };
 
             fetchDataFixed(filterSelect.value);
-            
+
             filterSelect.addEventListener('change', (e) => {
                 fetchDataFixed(e.target.value);
             });
