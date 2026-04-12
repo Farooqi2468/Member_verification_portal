@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .table-title-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .table-title {
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        font-size: 20px;
+        margin: 0;
+        color: #1A1A1A;
+    }
+
+    .d-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .d-table th {
+        text-align: left;
+        font-weight: 600;
+        font-size: 11px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #E5E5E5;
+        background: #fafafa;
+    }
+
+    .d-table th:first-child {
+        border-top-left-radius: 8px;
+    }
+
+    .d-table th:last-child {
+        border-top-right-radius: 8px;
+    }
+
+    .d-table td {
+        padding: 16px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .d-table tr:hover {
+        background: #fdfdfd;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 12px;
+        gap: 6px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        text-decoration: none;
+        transition: transform 0.1s;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-update {
+        background: #ffc107;
+        color: #1a1a1a;
+    }
+    
+    .btn-update:hover {
+        color: #000;
+    }
+
+    .btn-delete {
+        background: var(--ppp-red);
+    }
+
+    .action-buttons-wrap {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .filter-section {
+        background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .filter-section .form-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #fff;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+    .filter-section .form-control, .filter-section .form-select {
+        font-size: 13px;
+        border-radius: 6px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+    }
+    .filter-section .form-control:focus, .filter-section .form-select:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.1);
+    }
+    .filter-section .btn-filter {
+        background: var(--ppp-red);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: none;
+    }
+    .filter-section .btn-clear {
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+    }
+
+    /* Responsive */
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 12px;
+            padding-bottom: 80px;
+        }
+        .table-card {
+            padding: 16px 12px;
+        }
+        .table-title-area {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .d-table {
+            font-size: 12px;
+        }
+        .d-table th, .d-table td {
+            padding: 10px 8px;
+        }
+        .jump-to-page {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .action-buttons-wrap {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .action-buttons-wrap form,
+        .action-buttons-wrap .btn-action {
+            width: 100%;
+        }
+    }
+
+
+
+    /* ── Pagination Styles ── */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 15px 0;
+        border-top: 1px solid #eee;
+    }
+    .pagination-nav {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    .page-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .page-btn:hover:not(.disabled) {
+        border-color: var(--ppp-red);
+        color: var(--ppp-red);
+        background: #fff;
+    }
+    .page-btn.active {
+        background: var(--ppp-red);
+        border-color: var(--ppp-red);
+        color: #fff;
+    }
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f5f5f5;
+    }
+    .jump-to-page {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    .jump-to-page input {
+        width: 60px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        outline: none;
+    }
+    .jump-to-page input:focus {
+        border-color: var(--ppp-red);
+    }
+    .jump-btn {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 8px;
+        background: #1A1A1A;
+        color: #fff;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .jump-btn:hover {
+        background: #333;
+    }
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='all_users' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'dashboard' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseout="this.style.color='#666'" onmouseover="this.style.color='#1A1A1A'">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+        
+        <!-- Alerts for Django messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="border-radius: 8px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="table-card shadow-sm">
+            <div class="table-title-area">
+                <h2 class="table-title">System Users Directory</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-funnel-fill"></i> Filters
+                    </button>
+                    <a href="{% url 'create_system_user' %}" class="btn"
+                        style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">+
+                        New User</a>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="collapse d-md-block" id="mobileFilterCollapse">
+                <div class="filter-section">
+                <form method="GET" action="{% url 'all_system_users' %}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Search Users</label>
+                            <input type="text" name="q" class="form-control" placeholder="Username, Name, Email" value="{{ current_filters.q }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Filter by Role</label>
+                            <select name="role" class="form-select">
+                                <option value="">— All Roles —</option>
+                                {% for r in roles %}
+                                <option value="{{ r.id }}" {% if current_filters.role == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-12 d-flex justify-content-end align-items-end gap-2">
+                            <a href="{% url 'all_system_users' %}" class="btn-clear text-decoration-none">Clear Filters</a>
+                            <button type="submit" class="btn-filter">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="d-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email Address</th>
+                            <th>Role / Group</th>
+                            <th>Date Joined</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in page_obj %}
+                        <tr>
+                            <td style="font-weight: 600; color: #1A1A1A;">{{ user.username }}</td>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>{{ user.email|default:"--" }}</td>
+                            <td>
+                                {% for group in user.groups.all %}
+                                    <span style="background: rgba(196, 30, 58, 0.1); color: var(--ppp-red-dark); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">{{ group.name }}</span>
+                                {% empty %}
+                                    <span class="text-muted">No Role</span>
+                                {% endfor %}
+                                {% if user.is_superuser %}
+                                    <span style="background: rgba(0, 107, 63, 0.1); color: var(--ppp-green-dark); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Superuser</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td style="text-align: right;">
+                                <div class="action-buttons-wrap">
+                                    <!-- Update Button -->
+                                    <a href="{% url 'update_system_user' user.id %}" class="btn-action btn-update" title="Update User">
+                                        <i class="bi bi-pencil-square"></i> Update
+                                    </a>
+
+                                    <!-- Delete Button -->
+                                    {% if user != request.user %}
+                                    <form method="POST" action="{% url 'delete_system_user' user.id %}"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('WARNING: Are you sure you want to permanently delete user {{ user.username }}?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-action btn-delete" title="Delete User">
+                                            <i class="bi bi-trash3-fill"></i> Delete
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                No system users found based on the provided filters.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ── Pagination ── -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <div class="pagination-info text-muted small d-none d-md-block">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} users
+                </div>
+
+                <!-- Desktop Pagination -->
+                <div class="pagination-nav d-none d-md-flex">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{{ query_params }}" class="page-btn" title="First Page"><i class="bi bi-chevron-double-left"></i></a>
+                        <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="page-btn"><i class="bi bi-chevron-left"></i> Prev</a>
+                    {% else %}
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-left"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-left"></i> Prev</span>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{{ query_params }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="page-btn">Next <i class="bi bi-chevron-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{{ query_params }}" class="page-btn" title="Last Page"><i class="bi bi-chevron-double-right"></i></a>
+                    {% else %}
+                        <span class="page-btn disabled">Next <i class="bi bi-chevron-right"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-right"></i></span>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Pagination Stepper -->
+                <div class="mobile-pagination-nav d-flex d-md-none justify-content-between align-items-center w-100 mb-2 px-3">
+                    <div style="flex: 1; text-align: left;">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                <i class="bi bi-arrow-left"></i> {{ page_obj.previous_page_number }}
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"><i class="bi bi-arrow-left"></i> - </span>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <span style="font-size: 20px; font-weight: 800; color: #1A1A1A;">{{ page_obj.number }}</span>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                {{ page_obj.next_page_number }} <i class="bi bi-arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"> - <i class="bi bi-arrow-right"></i></span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="jump-to-page">
+                    <span>Jump to</span>
+                    <input type="number" id="jumpPageInput" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}">
+                    <button type="button" class="jump-btn" id="jumpBtn" data-query="{{ query_params }}">Go</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='all_users' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jumpInput = document.getElementById('jumpPageInput');
+    const jumpBtn = document.getElementById('jumpBtn');
+
+    if (jumpBtn) {
+        const performJump = () => {
+            const page = jumpInput.value;
+            const max = jumpInput.getAttribute('max');
+            const queryParams = jumpBtn.getAttribute('data-query');
+            if (page && page >= 1 && page <= parseInt(max)) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', page);
+                window.location.href = url.toString();
+            } else {
+                alert('Please enter a valid page number between 1 and ' + max);
+            }
+        };
+
+        jumpBtn.addEventListener('click', performJump);
+        jumpInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performJump();
+            }
+        });
+    }
+
+});
+</script>
+{% endblock %}

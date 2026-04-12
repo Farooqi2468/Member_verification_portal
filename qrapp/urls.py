@@ -8,6 +8,10 @@ urlpatterns = [
 
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/users/', views.all_system_users, name='all_system_users'),
+    path('dashboard/users/create/', views.create_system_user, name='create_system_user'),
+    path('dashboard/users/update/<int:pk>/', views.update_system_user, name='update_system_user'),
+    path('dashboard/users/delete/<int:pk>/', views.delete_system_user, name='delete_system_user'),
     path('dashboard/create/', views.create_person, name='create_person'),
     path('dashboard/members/', views.all_members, name='all_members'),
     path('dashboard/update/<str:pk>/', views.update_person, name='update_person'),

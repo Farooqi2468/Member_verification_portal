@@ -13,9 +13,10 @@ from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.core.paginator import Paginator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
+from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm
 from .models import Person, Town, Zone, UnionCouncil, Ward
 
 
@@ -66,8 +67,108 @@ def admin_only(view_func):
 
 @login_required
 @admin_only
-def manage_users(request):
-    return render(request, 'admin/users.html')
+def all_system_users(request):
+    users_list = User.objects.all().order_by('-date_joined')
+    
+    # ROLE-BASED VISIBILITY: Non-superusers cannot see superusers
+    if not request.user.is_superuser:
+        users_list = users_list.filter(is_superuser=False)
+
+    q = request.GET.get('q', '')
+    role_id = request.GET.get('role')
+
+    if q:
+        users_list = users_list.filter(
+            Q(username__icontains=q) | 
+            Q(first_name__icontains=q) | 
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q)
+        )
+    if role_id:
+        users_list = users_list.filter(groups__id=role_id)
+
+    paginator = Paginator(users_list, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # ROLE-BASED VISIBILITY: Non-superusers cannot filter for Superuser group
+    roles = Group.objects.all()
+    if not request.user.is_superuser:
+        roles = roles.exclude(name='Superuser')
+
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'roles': roles,
+        'current_filters': {
+            'q': q,
+            'role': int(role_id) if role_id else ''
+        },
+        'query_params': query_params,
+        'active_page': 'all_users'
+    }
+    return render(request, 'all_users.html', context)
+
+
+@login_required
+@admin_only
+def update_system_user(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    
+    # ROLE-BASED ACCESS: Non-superusers cannot update superusers
+    if user_obj.is_superuser and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to update a Superuser account.")
+        return redirect('all_system_users')
+
+    if request.method == 'POST':
+        form = RoleUserChangeForm(request.POST, instance=user_obj, request_user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {user_obj.username} updated successfully!")
+            return redirect('all_system_users')
+    else:
+        form = RoleUserChangeForm(instance=user_obj, request_user=request.user)
+    return render(request, 'update_user.html', {'form': form, 'user_obj': user_obj, 'active_page': 'all_users'})
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_system_user(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    
+    # ROLE-BASED ACCESS: Non-superusers cannot delete superusers
+    if user_obj.is_superuser and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to delete a Superuser account.")
+        return redirect('all_system_users')
+
+    if user_obj.is_superuser and user_obj == request.user:
+        messages.error(request, "You cannot delete your own admin account.")
+    else:
+        user_obj.delete()
+        messages.success(request, "User deleted successfully.")
+    return redirect('all_system_users')
+
+
+
+@login_required
+@admin_only
+def create_system_user(request):
+    if request.method == 'POST':
+        form = RoleUserCreationForm(request.POST, request_user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {form.cleaned_data.get('username')} created successfully!")
+            return redirect('dashboard')
+    else:
+        form = RoleUserCreationForm(request_user=request.user)
+    return render(request, 'create_user.html', {'form': form, 'active_page': 'create_user'})
 
 
 @login_required
@@ -195,7 +296,11 @@ def all_members(request):
 
     # Initial context for dropdowns
     towns = Town.objects.all()
+    
+    # ROLE-BASED VISIBILITY: Non-superusers cannot see superusers in registrar list
     registrars = User.objects.filter(is_active=True).order_by('username')
+    if not request.user.is_superuser:
+        registrars = registrars.filter(is_superuser=False)
     # Query string for pagination
     query_dict = request.GET.copy()
     if 'page' in query_dict:
