@@ -59,7 +59,8 @@ def dashboard(request):
 
 def admin_only(view_func):
     def wrapper(request, *args, **kwargs):
-        if request.user.groups.filter(name='Admin').exists():
+        is_admin = request.user.groups.filter(name='Admin').exists() or request.user.is_superuser
+        if is_admin:
             return view_func(request, *args, **kwargs)
         return HttpResponseForbidden("Not allowed")
     return wrapper
@@ -524,3 +525,50 @@ def ajax_dashboard_charts(request):
             'data': data_town,
         }
     })
+
+@login_required
+@admin_only
+def reports_view(request):
+    # 1. Geographic Data
+    town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    
+    # 2. Registrar Performance (Top 10)
+    registrar_stats = User.objects.filter(is_active=True).annotate(
+        member_count=Count('persons_created')
+    ).order_by('-member_count')[:10]
+    
+    # 3. Data Integrity
+    total_count = Person.objects.count()
+    integrity_data = {
+        'missing_phone': Person.objects.filter(Q(phone__isnull=True) | Q(phone='')).count(),
+        'missing_cnic': Person.objects.filter(Q(cnic__isnull=True) | Q(cnic='')).count(),
+        'missing_address': Person.objects.filter(Q(address__isnull=True) | Q(address='')).count(),
+        'total': total_count
+    }
+    
+    # 4. Growth Stats (Last 6 Months)
+    growth_stats = []
+    today = timezone.now().date().replace(day=1)
+    for i in range(5, -1, -1):
+        # Calculate start of month
+        month_date = today - timedelta(days=i*30) # rough estimate
+        month_date = month_date.replace(day=1)
+        
+        count = Person.objects.filter(
+            created_at__year=month_date.year, 
+            created_at__month=month_date.month
+        ).count()
+        
+        growth_stats.append({
+            'label': month_date.strftime('%b %Y'),
+            'count': count
+        })
+
+    context = {
+        'active_page': 'reports',
+        'town_stats': town_stats,
+        'registrar_stats': registrar_stats,
+        'integrity_data': integrity_data,
+        'growth_stats': growth_stats,
+    }
+    return render(request, 'reports.html', context)

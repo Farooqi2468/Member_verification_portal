@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-green: #006B3F;
+        --ppp-black: #1A1A1A;
+    }
+
+    .report-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 16px;
+        padding: 24px;
+        height: 100%;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .report-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .report-title {
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: var(--ppp-black);
+        margin-bottom: 20px;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .stat-pill {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .table-custom {
+        font-size: 14px;
+    }
+
+    .table-custom thead th {
+        background: #f8f9fa;
+        color: #666;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-top: none;
+    }
+
+    .integrity-box {
+        background: #fdfdfd;
+        border: 1px dashed #ddd;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 16px;
+            padding-bottom: 80px;
+        }
+    }
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='reports' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Reports & Analytics</h2>
+                <div class="text-secondary">Comprehensive analysis of membership data across all dimensions.</div>
+            </div>
+            <button onclick="window.print()" class="btn btn-outline-dark d-none d-md-flex align-items-center gap-2" style="border-radius: 8px;">
+                <i class="bi bi-printer"></i> Print Report
+            </button>
+        </div>
+
+        <!-- ── Growth Trends Section ─────────────────────────────── -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-graph-up-arrow text-primary"></i> 6-Month Registration Growth
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- ── Geographic Breakdown ────────────────────────────── -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-geo-alt-fill" style="color: #EA580C;"></i> Geographic Distribution
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <div style="height: 200px;">
+                                <canvas id="geoChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-custom m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Town Name</th>
+                                            <th class="text-end">Members</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for town in town_stats|slice:":5" %}
+                                        <tr>
+                                            <td>{{ town.name }}</td>
+                                            <td class="text-end fw-bold">{{ town.member_count }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="2" class="text-center text-muted">No data available</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Data Integrity Report ───────────────────────────── -->
+            <div class="col-lg-6">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-shield-check text-success"></i> Data Integrity Audit
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="integrity-box">
+                                <div class="text-muted small mb-1">Missing Phone</div>
+                                <h4 class="fw-bold {% if integrity_data.missing_phone > 0 %}text-danger{% endif %}">{{ integrity_data.missing_phone }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="integrity-box">
+                                <div class="text-muted small mb-1">Missing CNIC</div>
+                                <h4 class="fw-bold {% if integrity_data.missing_cnic > 0 %}text-danger{% endif %}">{{ integrity_data.missing_cnic }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="integrity-box">
+                                <div class="text-muted small mb-1">Missing Address</div>
+                                <h4 class="fw-bold">{{ integrity_data.missing_address }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="integrity-box" style="background: #f0fdf4; border-color: #bbf7d0;">
+                                <div class="text-muted small mb-1">Total Members</div>
+                                <h4 class="fw-bold text-success">{{ integrity_data.total }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-4 text-center">
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-info-circle"></i> Integrity Score: 
+                                <span class="fw-bold text-dark">
+                                    {% if integrity_data.total > 0 %}
+                                        {{ 100|add:"-10" }}% (Mock)
+                                    {% else %}
+                                        100%
+                                    {% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Registrar Performance ────────────────────────────── -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-person-badge text-dark"></i> Top 10 Registrars Performance
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div style="height: 350px;">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Username</th>
+                                            <th class="text-end">Registrations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for user in registrar_stats %}
+                                        <tr>
+                                            <td>#{{ forloop.counter }}</td>
+                                            <td>
+                                                <div class="fw-bold">{{ user.username }}</div>
+                                                <div class="text-muted" style="font-size: 11px;">{{ user.groups.first.name }}</div>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="badge bg-dark rounded-pill">{{ user.member_count }}</span>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="3" class="text-center text-muted">No data available</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='reports' %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Colors
+        const colors = ['#C41E3A', '#006B3F', '#3B82F6', '#8B5CF6', '#F59E0B', '#14B8A6'];
+
+        // 1. Growth Chart (Line)
+        new Chart(document.getElementById('growthChart'), {
+            type: 'line',
+            data: {
+                labels: [{% for stat in growth_stats %}'{{ stat.label|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'New Members',
+                    data: [{% for stat in growth_stats %}{{ stat.count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    borderColor: '#C41E3A',
+                    backgroundColor: 'rgba(196, 30, 58, 0.05)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#C41E3A',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // 2. Geographic Chart (Donut)
+        new Chart(document.getElementById('geoChart'), {
+            type: 'doughnut',
+            data: {
+                labels: [{% for town in town_stats|slice:":5" %}'{{ town.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for town in town_stats|slice:":5" %}{{ town.member_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: colors,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                cutout: '70%'
+            }
+        });
+
+        // 3. Performance Chart (Bar)
+        new Chart(document.getElementById('performanceChart'), {
+            type: 'bar',
+            data: {
+                labels: [{% for user in registrar_stats %}'{{ user.username|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Registrations',
+                    data: [{% for user in registrar_stats %}{{ user.member_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: 'rgba(0, 107, 63, 0.8)',
+                    borderRadius: 8,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
