@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+:root {
+  --ppp-red: #C41E3A;
+  --ppp-green: #006B3F;
+}
+
+.qr-form-card {
+    background: #fff;
+    border: 1px solid #E5E5E5;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.qr-form-title {
+    font-family: 'Georgia', serif;
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.qr-form-sub {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.qr-input-group {
+    margin-bottom: 16px;
+}
+
+.qr-input-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qr-input-group .form-control {
+    border: 1.5px solid #eee;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.qr-input-group .form-control:focus {
+    border-color: var(--ppp-red);
+    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+}
+
+.qr-input-group .helptext {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+    display: block;
+}
+
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='all_users' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div style="margin-bottom: 16px;">
+            <a href="{% url 'all_system_users' %}" style="color: #666; text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s;" onmouseout="this.style.color='#666'" onmouseover="this.style.color='#1A1A1A'">
+                &larr; Back to Users Directory
+            </a>
+        </div>
+        
+        <div class="qr-form-card shadow-sm">
+            <h2 class="qr-form-title">Update System User</h2>
+            <p class="qr-form-sub">Update details and role for user <strong>{{ user_obj.username }}</strong>.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger mb-4" style="border-radius: 8px;">
+                        <strong style="font-size: 13px;">Please correct the following errors:</strong>
+                        <ul class="mb-0 mt-1" style="font-size: 12px; padding-left: 20px;">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="qr-input-group">
+                        <label>{{ field.label }} {% if field.field.required %}<span class="text-danger">*</span>{% endif %}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <small class="helptext">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-lg w-100 mt-4" style="background: #ffc107; color: #1a1a1a; border-radius: 10px; font-weight: 600; padding: 14px;">
+                    Update User Details
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='all_users' %}
+{% endblock %}

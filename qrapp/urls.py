@@ -8,6 +8,10 @@ urlpatterns = [
 
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/users/', views.all_system_users, name='all_system_users'),
+    path('dashboard/users/create/', views.create_system_user, name='create_system_user'),
+    path('dashboard/users/update/<int:pk>/', views.update_system_user, name='update_system_user'),
+    path('dashboard/users/delete/<int:pk>/', views.delete_system_user, name='delete_system_user'),
     path('dashboard/create/', views.create_person, name='create_person'),
     path('dashboard/members/', views.all_members, name='all_members'),
     path('dashboard/update/<str:pk>/', views.update_person, name='update_person'),
@@ -29,4 +33,5 @@ urlpatterns = [
     path('ajax/zones/', views.ajax_get_zones, name='ajax_get_zones'),
     path('ajax/ucs/', views.ajax_get_ucs, name='ajax_get_ucs'),
     path('ajax/wards/', views.ajax_get_wards, name='ajax_get_wards'),
+    path('ajax/dashboard-charts/', views.ajax_dashboard_charts, name='ajax_dashboard_charts'),
 ]

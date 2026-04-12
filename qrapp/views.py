@@ -1,12 +1,22 @@
+import io
 import os
 import qrcode
+import csv
+from datetime import timedelta, datetime
+from django.core.files.base import ContentFile
 from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
+from django.core.paginator import Paginator
+from django.contrib.auth.models import User, Group
+from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm
 from .models import Person, Town, Zone, UnionCouncil, Ward
 
 
@@ -26,7 +36,25 @@ def get_user_role(user):
 def dashboard(request):
     role = get_user_role(request.user)
     name = request.user.first_name if request.user.first_name else request.user.username
-    return render(request, 'dashboard.html', {'role': role, 'name': name})
+
+    today = timezone.now().date()
+    context = {
+        'role': role,
+        'name': name,
+        # ── 8 Metric Cards ──────────────────────────────────────
+        'total_members':   Person.objects.count(),
+        'members_today':   Person.objects.filter(created_at__date=today).count(),
+        'members_month':   Person.objects.filter(
+                               created_at__year=today.year,
+                               created_at__month=today.month
+                           ).count(),
+        'total_towns':     Town.objects.count(),
+        'total_zones':     Zone.objects.count(),
+        'total_ucs':       UnionCouncil.objects.count(),
+        'total_wards':     Ward.objects.count(),
+        'registered_by_me': Person.objects.filter(made_by=request.user).count(),
+    }
+    return render(request, 'dashboard.html', context)
 
 
 def admin_only(view_func):
@@ -39,8 +67,108 @@ def admin_only(view_func):
 
 @login_required
 @admin_only
-def manage_users(request):
-    return render(request, 'admin/users.html')
+def all_system_users(request):
+    users_list = User.objects.all().order_by('-date_joined')
+    
+    # ROLE-BASED VISIBILITY: Non-superusers cannot see superusers
+    if not request.user.is_superuser:
+        users_list = users_list.filter(is_superuser=False)
+
+    q = request.GET.get('q', '')
+    role_id = request.GET.get('role')
+
+    if q:
+        users_list = users_list.filter(
+            Q(username__icontains=q) | 
+            Q(first_name__icontains=q) | 
+            Q(last_name__icontains=q) |
+            Q(email__icontains=q)
+        )
+    if role_id:
+        users_list = users_list.filter(groups__id=role_id)
+
+    paginator = Paginator(users_list, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # ROLE-BASED VISIBILITY: Non-superusers cannot filter for Superuser group
+    roles = Group.objects.all()
+    if not request.user.is_superuser:
+        roles = roles.exclude(name='Superuser')
+
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'roles': roles,
+        'current_filters': {
+            'q': q,
+            'role': int(role_id) if role_id else ''
+        },
+        'query_params': query_params,
+        'active_page': 'all_users'
+    }
+    return render(request, 'all_users.html', context)
+
+
+@login_required
+@admin_only
+def update_system_user(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    
+    # ROLE-BASED ACCESS: Non-superusers cannot update superusers
+    if user_obj.is_superuser and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to update a Superuser account.")
+        return redirect('all_system_users')
+
+    if request.method == 'POST':
+        form = RoleUserChangeForm(request.POST, instance=user_obj, request_user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {user_obj.username} updated successfully!")
+            return redirect('all_system_users')
+    else:
+        form = RoleUserChangeForm(instance=user_obj, request_user=request.user)
+    return render(request, 'update_user.html', {'form': form, 'user_obj': user_obj, 'active_page': 'all_users'})
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_system_user(request, pk):
+    user_obj = get_object_or_404(User, pk=pk)
+    
+    # ROLE-BASED ACCESS: Non-superusers cannot delete superusers
+    if user_obj.is_superuser and not request.user.is_superuser:
+        messages.error(request, "You do not have permission to delete a Superuser account.")
+        return redirect('all_system_users')
+
+    if user_obj.is_superuser and user_obj == request.user:
+        messages.error(request, "You cannot delete your own admin account.")
+    else:
+        user_obj.delete()
+        messages.success(request, "User deleted successfully.")
+    return redirect('all_system_users')
+
+
+
+@login_required
+@admin_only
+def create_system_user(request):
+    if request.method == 'POST':
+        form = RoleUserCreationForm(request.POST, request_user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {form.cleaned_data.get('username')} created successfully!")
+            return redirect('dashboard')
+    else:
+        form = RoleUserCreationForm(request_user=request.user)
+    return render(request, 'create_user.html', {'form': form, 'active_page': 'create_user'})
 
 
 @login_required
@@ -55,8 +183,14 @@ def create_person(request):
 
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
-            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
-            img.save(qr_path)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.person_id}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+            person.save()
+
             return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm()
@@ -102,8 +236,93 @@ def admin_person_detail(request, pk):
 @login_required
 @admin_only
 def all_members(request):
-    members = Person.objects.all().order_by('-created_at')
-    return render(request, 'all_members.html', {'members': members})
+    members_list = Person.objects.all().order_by('-created_at')
+
+    # Filtering logic
+    q = request.GET.get('q', '')
+    town_id = request.GET.get('town')
+    registrar_id = request.GET.get('registrar')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if q:
+        members_list = members_list.filter(
+            Q(name__icontains=q) | 
+            Q(person_id__icontains=q) | 
+            Q(cnic__icontains=q) |
+            Q(phone__icontains=q)
+        )
+    if town_id:
+        members_list = members_list.filter(town_id=town_id)
+    if registrar_id:
+        members_list = members_list.filter(made_by_id=registrar_id)
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            members_list = members_list.filter(created_at__date__gte=start_date_obj)
+        except ValueError:
+            pass
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            members_list = members_list.filter(created_at__date__lte=end_date_obj)
+        except ValueError:
+            pass
+
+    # CSV Export
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="members_export.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Date'])
+        
+        for p in members_list:
+            writer.writerow([
+                p.person_id, p.name, p.father_name, p.cnic, p.phone, p.address,
+                p.town.name if p.town else '',
+                p.zone.name if p.zone else '',
+                p.union_council.name if p.union_council else '',
+                p.ward.name if p.ward else '',
+                p.made_by.username if p.made_by else '',
+                p.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        return response
+
+    # Pagination
+    paginator = Paginator(members_list, 10)  # Show 10 members per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Initial context for dropdowns
+    towns = Town.objects.all()
+    
+    # ROLE-BASED VISIBILITY: Non-superusers cannot see superusers in registrar list
+    registrars = User.objects.filter(is_active=True).order_by('username')
+    if not request.user.is_superuser:
+        registrars = registrars.filter(is_superuser=False)
+    # Query string for pagination
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'towns': towns,
+        'registrars': registrars,
+        'current_filters': {
+            'q': q,
+            'town': int(town_id) if town_id else '',
+            'registrar': int(registrar_id) if registrar_id else '',
+            'start_date': start_date or '',
+            'end_date': end_date or ''
+        },
+        'query_params': query_params
+    }
+    return render(request, 'all_members.html', context)
 
 
 @login_required
@@ -113,11 +332,17 @@ def update_person(request, pk):
     if request.method == 'POST':
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
-            person = form.save()
+            person = form.save(commit=False)
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
-            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
-            img.save(qr_path)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.person_id}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+            person.save()
+
             return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm(instance=person)
@@ -246,3 +471,56 @@ def ajax_get_wards(request):
     uc_id = request.GET.get('uc_id')
     wards = Ward.objects.filter(union_council_id=uc_id).values('id', 'name') if uc_id else []
     return JsonResponse(list(wards), safe=False)
+
+
+@login_required
+@admin_only
+def ajax_dashboard_charts(request):
+    days = request.GET.get('days', '30')
+    
+    # Base queryset for persons
+    persons_qs = Person.objects.all()
+    
+    if days != 'all':
+        try:
+            days = int(days)
+            start_date = timezone.now().date() - timedelta(days=days)
+            persons_qs = persons_qs.filter(created_at__date__gte=start_date)
+        except ValueError:
+            pass # fallback to all if invalid
+
+    # 1. Registrations Over Time (Line Chart)
+    # Group by the date part of created_at
+    daily_counts = (
+        persons_qs
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(count=Count('person_id'))
+        .order_by('date')
+    )
+    
+    labels_line = [obj['date'].strftime('%b %d') for obj in daily_counts if obj['date']]
+    data_line = [obj['count'] for obj in daily_counts if obj['date']]
+
+    # 2. Members by Town (Doughnut/Bar Chart)
+    town_counts = (
+        persons_qs
+        .filter(town__isnull=False)
+        .values('town__name')
+        .annotate(count=Count('person_id'))
+        .order_by('-count')
+    )
+    
+    labels_town = [obj['town__name'] for obj in town_counts]
+    data_town = [obj['count'] for obj in town_counts]
+
+    return JsonResponse({
+        'timeline': {
+            'labels': labels_line,
+            'data': data_line,
+        },
+        'towns': {
+            'labels': labels_town,
+            'data': data_town,
+        }
+    })

@@ -1,5 +1,7 @@
 from django import forms
 from .models import Person, Town, Zone, UnionCouncil, Ward
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm
 
 
 class PersonForm(forms.ModelForm):
@@ -108,3 +110,89 @@ class WardForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Ward 5'}),
             'union_council': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+class RoleUserCreationForm(UserCreationForm):
+    group = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="— Select Role —"
+    )
+
+    class Meta:
+        model = User
+        fields = UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request_user = kwargs.pop('request_user', None)
+        super().__init__(*args, **kwargs)
+        if self.request_user and not self.request_user.is_superuser:
+            self.fields['group'].queryset = Group.objects.exclude(name='Superuser')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            group = self.cleaned_data.get('group')
+            if group:
+                user.groups.add(group)
+                # If the group name is Superuser, also set is_superuser flag
+                if group.name == 'Superuser':
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.save()
+        return user
+
+
+class RoleUserChangeForm(forms.ModelForm):
+    group = forms.ModelChoiceField(
+        queryset=Group.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        empty_label="— Select Role —"
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request_user = kwargs.pop('request_user', None)
+        super().__init__(*args, **kwargs)
+        if self.request_user and not self.request_user.is_superuser:
+            self.fields['group'].queryset = Group.objects.exclude(name='Superuser')
+            
+        if self.instance and self.instance.pk:
+            group = self.instance.groups.first()
+            if group:
+                self.fields['group'].initial = group
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            group = self.cleaned_data.get('group')
+            if group:
+                user.groups.clear()
+                user.groups.add(group)
+                # Sync is_superuser flag
+                if group.name == 'Superuser':
+                    user.is_superuser = True
+                    user.is_staff = True
+                else:
+                    user.is_superuser = False
+                user.save()
+        return user

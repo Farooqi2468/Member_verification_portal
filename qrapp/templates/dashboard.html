@@ -9,46 +9,6 @@
         --ppp-green-dark: #004D2C;
     }
 
-    .dash-wrap {
-        display: flex;
-        min-height: calc(100vh - 72px);
-        background: #f4f6f8;
-    }
-
-    .dash-sidebar {
-        width: 280px;
-        min-height: 100%;
-        background: #1A1A1A;
-        padding: 30px 20px;
-        color: #fff;
-    }
-
-    .dash-sidebar .nav-link {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 14px;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-
-    .dash-sidebar .nav-link:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .dash-sidebar .nav-link.active {
-        background: var(--ppp-red);
-        color: #fff;
-    }
-
-    .dash-main {
-        flex: 1;
-        padding: 40px;
-        overflow-y: auto;
-    }
-
     .dash-card {
         background: #fff;
         border: 1px solid #E5E5E5;
@@ -67,72 +27,142 @@
             padding: 20px 16px;
             padding-bottom: 80px;
         }
+
         .dash-card {
             padding: 24px !important;
         }
     }
 
-    /* ── Mobile Bottom Nav ── */
-    .mobile-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 64px;
-        background: #1A1A1A;
+
+
+
+    /* ── Metric Stat Cards ── */
+    .metric-card {
+        background: #fff;
+        border: 1px solid #E8E8E8;
+        border-radius: 14px;
+        padding: 22px 20px;
         display: flex;
-        align-items: stretch;
-        border-top: 1px solid rgba(255,255,255,0.08);
-        z-index: 1000;
-        box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
+        animation: fadeSlideUp 0.4s ease both;
     }
-    .mobile-bottom-nav a {
-        flex: 1;
+
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .metric-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: rgba(255,255,255,0.55);
-        text-decoration: none;
-        font-size: 10px;
+        flex-shrink: 0;
+        font-size: 22px;
+    }
+
+    .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        color: #1A1A1A;
+        letter-spacing: -0.5px;
+    }
+
+    .metric-label {
+        font-size: 12px;
+        color: #888;
         font-weight: 500;
-        gap: 4px;
-        transition: color 0.2s, background 0.2s;
-        padding: 6px 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-top: 4px;
     }
-    .mobile-bottom-nav a i {
-        font-size: 20px;
+
+    @keyframes fadeSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-    .mobile-bottom-nav a:hover,
-    .mobile-bottom-nav a.active {
-        color: #fff;
-        background: rgba(255,255,255,0.06);
+
+    .metric-card:nth-child(1) {
+        animation-delay: 0.05s;
     }
-    .mobile-bottom-nav a.active i {
-        color: #C41E3A;
+
+    .metric-card:nth-child(2) {
+        animation-delay: 0.10s;
+    }
+
+    .metric-card:nth-child(3) {
+        animation-delay: 0.15s;
+    }
+
+    .metric-card:nth-child(4) {
+        animation-delay: 0.20s;
+    }
+
+    .metric-card:nth-child(5) {
+        animation-delay: 0.25s;
+    }
+
+    .metric-card:nth-child(6) {
+        animation-delay: 0.30s;
+    }
+
+    .metric-card:nth-child(7) {
+        animation-delay: 0.35s;
+    }
+
+    .metric-card:nth-child(8) {
+        animation-delay: 0.40s;
+    }
+
+    @media (max-width: 767.98px) {
+        .metric-card {
+            padding: 16px 14px;
+            gap: 12px;
+        }
+
+        .metric-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            border-radius: 10px;
+        }
+
+        .metric-value {
+            font-size: 22px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+        }
     }
 </style>
 
 <div class="dash-wrap">
     <!-- Sidebar -->
-    <div class="dash-sidebar d-none d-md-block">
-        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; padding-left: 16px;">Menu</div>
-        <nav class="nav flex-column">
-            <a class="nav-link active" href="{% url 'dashboard' %}">Overview</a>
-            <a class="nav-link" href="{% url 'all_members' %}">All Members</a>
-            <a class="nav-link" href="{% url 'create_person' %}">Register Member</a>
-            <a class="nav-link" href="{% url 'manage_locations' %}">Manage Locations</a>
-            <a class="nav-link" href="#">Reports</a>
-            <a class="nav-link" href="#">Settings</a>
-        </nav>
-    </div>
+    {% include 'includes/sidebar.html' with active_page='dashboard' %}
 
     <!-- Main Content -->
     <div class="dash-main">
-        <div class="mb-4 mb-md-5 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+        <div
+            class="mb-4 mb-md-5 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
             <div>
                 <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Dashboard</h2>
-                <div class="text-secondary">Welcome back, <strong style="color: var(--ppp-red);">{{ name }}</strong>
+                <div class="text-secondary">
+                    Welcome back,
+                    <strong style="color: var(--ppp-red);">{{ name }}</strong> !!!
+                    <span id="time-greeting"></span>
                 </div>
             </div>
             <div>
@@ -142,23 +172,129 @@
             </div>
         </div>
 
-        <div class="row g-4 justify-content-center">
+        {% if role == "Admin" %}
+        <!-- ── 8 Metric Stat Cards ─────────────────────────────── -->
+        <div class="row g-3 mb-4">
+            <!-- 1. Total Members -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(196,30,58,0.10);">
+                        <i class="bi bi-people-fill" style="color: #C41E3A;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ total_members }}</div>
+                        <div class="metric-label">Total Members</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 2. Registered Today -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(0,107,63,0.10);">
+                        <i class="bi bi-person-check-fill" style="color: #006B3F;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">+{{ members_today }}</div>
+                        <div class="metric-label">Today</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 3. This Month -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(59,130,246,0.10);">
+                        <i class="bi bi-calendar-check-fill" style="color: #3B82F6;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ members_month }}</div>
+                        <div class="metric-label">This Month</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 4. Total Towns -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(180,130,0,0.10);">
+                        <i class="bi bi-geo-alt-fill" style="color: #B48200;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ total_towns }}</div>
+                        <div class="metric-label">Towns</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 5. Total Zones -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(139,92,246,0.10);">
+                        <i class="bi bi-hexagon-fill" style="color: #8B5CF6;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ total_zones }}</div>
+                        <div class="metric-label">Zones</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 6. Total Union Councils -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(234,88,12,0.10);">
+                        <i class="bi bi-building-fill" style="color: #EA580C;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ total_ucs }}</div>
+                        <div class="metric-label">Union Councils</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 7. Total Wards -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(20,184,166,0.10);">
+                        <i class="bi bi-diagram-3-fill" style="color: #14B8A6;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ total_wards }}</div>
+                        <div class="metric-label">Wards</div>
+                    </div>
+                </div>
+            </div>
+            <!-- 8. Registered By Me -->
+            <div class="col-6 col-md-3">
+                <div class="metric-card">
+                    <div class="metric-icon" style="background: rgba(26,26,26,0.08);">
+                        <i class="bi bi-person-badge-fill" style="color: #1A1A1A;"></i>
+                    </div>
+                    <div>
+                        <div class="metric-value">{{ registered_by_me }}</div>
+                        <div class="metric-label">By You</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ── Divider ─────────────────────────────────────────── -->
+        <div style="border-top: 1px solid #E5E5E5; margin-bottom: 24px;"></div>
+
+        {% endif %}
+
+        <div class="row g-4">
             {% if role == "Admin" %}
-            <div class="col-md-6 col-lg-5">
+            <div class="col-md-4">
                 <div class="dash-card text-center h-100 p-5">
                     <div class="mb-3" style="color: var(--ppp-red);"><svg xmlns="http://www.w3.org/2000/svg" width="48"
                             height="48" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
                             <path
                                 d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1zm-7.978-1L7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002-.014.002zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4m3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0M6.936 9.28a6 6 0 0 0-1.23-.247A7 7 0 0 0 5 9c-4 0-5 3-5 4 q0 1 1 1h4.216A2.24 2.24 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816M4.92 10A5.5 5.5 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275ZM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0m3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4" />
                         </svg></div>
-                    <h5 class="fw-bold" style="color: #1A1A1A;">Manage Users</h5>
-                    <p class="text-muted mb-4" style="font-size: 13px;">View, edit, and manage all registered users.</p>
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Members</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">View, edit, and manage all registered members.
+                    </p>
                     <a href="{% url 'all_members' %}" class="btn"
                         style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Go
                         to Users</a>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-5">
+            <div class="col-md-4">
                 <div class="dash-card text-center h-100 p-5">
                     <div class="mb-3" style="color: var(--ppp-green);"><svg xmlns="http://www.w3.org/2000/svg"
                             width="48" height="48" fill="currentColor" class="bi bi-person-plus" viewBox="0 0 16 16">
@@ -167,23 +303,27 @@
                             <path fill-rule="evenodd"
                                 d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z" />
                         </svg></div>
-                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Person</h5>
-                    <p class="text-muted mb-4" style="font-size: 13px;">Register a new person and generate a QR Code.
+                    <h5 class="fw-bold" style="color: #1A1A1A;">Create Member</h5>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Register a new member and generate a QR Code.
                     </p>
                     <a href="{% url 'create_person' %}" class="btn"
                         style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Create
-                        Person</a>
+                        Member</a>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-5">
+            <div class="col-md-4">
                 <div class="dash-card text-center h-100 p-5">
-                    <div class="mb-3" style="color: #4A6FA5;"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
-                        <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
-                        <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4"/>
-                    </svg></div>
+                    <div class="mb-3" style="color: #4A6FA5;"><svg xmlns="http://www.w3.org/2000/svg" width="48"
+                            height="48" fill="currentColor" class="bi bi-geo-alt" viewBox="0 0 16 16">
+                            <path
+                                d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10" />
+                            <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4" />
+                        </svg></div>
                     <h5 class="fw-bold" style="color: #1A1A1A;">Manage Locations</h5>
-                    <p class="text-muted mb-4" style="font-size: 13px;">Add and manage Towns, Zones, Union Councils, and Wards.</p>
-                    <a href="{% url 'manage_locations' %}" class="btn" style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Manage</a>
+                    <p class="text-muted mb-4" style="font-size: 13px;">Add and manage Towns, Zones, Union Councils, and
+                        Wards.</p>
+                    <a href="{% url 'manage_locations' %}" class="btn"
+                        style="background: #1A1A1A; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 14px;">Manage</a>
                 </div>
             </div>
             {% elif role == "Town President" %}
@@ -241,27 +381,174 @@
             </div>
             {% endif %}
         </div>
+
+        {% if role == "Admin" %}
+        <!-- ── Divider ─────────────────────────────────────────── -->
+        <div style="border-top: 1px solid #E5E5E5; margin-top: 24px; margin-bottom: 24px;"></div>
+
+        <!-- ── Charts Section ──────────────────────────────────── -->
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <h4 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A; margin: 0;">Analytics Overview
+            </h4>
+            <select id="chart-time-filter" class="form-select w-auto" style="border-radius: 8px; font-size: 14px;">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="365">This Year</option>
+                <option value="all">All Time</option>
+            </select>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Line Chart -->
+            <div class="col-lg-8">
+                <div class="dash-card h-100 p-4">
+                    <h6 class="fw-bold mb-3" style="color: #1A1A1A;">Registrations Over Time</h6>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Doughnut Chart -->
+            <div class="col-lg-4">
+                <div class="dash-card h-100 p-4">
+                    <h6 class="fw-bold mb-3" style="color: #1A1A1A;">Members by Town</h6>
+                    <div
+                        style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                        <canvas id="townsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Mobile Bottom Navigation (visible on small screens only) -->
-<div class="mobile-bottom-nav d-flex d-md-none">
-    <a href="{% url 'dashboard' %}" class="active">
-        <i class="bi bi-house-fill"></i>
-        <span>Overview</span>
-    </a>
-    <a href="{% url 'all_members' %}">
-        <i class="bi bi-people-fill"></i>
-        <span>Members</span>
-    </a>
-    <a href="{% url 'create_person' %}">
-        <i class="bi bi-person-plus-fill"></i>
-        <span>Register</span>
-    </a>
-    <a href="{% url 'manage_locations' %}">
-        <i class="bi bi-geo-alt-fill"></i>
-        <span>Locations</span>
-    </a>
-</div>
+{% include 'includes/mobile_nav.html' with active_page='dashboard' %}
+
+
+<script>
+    (function () {
+        const hour = new Date().getHours();
+        let greeting;
+        if (hour >= 5 && hour < 12) {
+            greeting = 'Good Morning';
+        } else if (hour >= 12 && hour < 17) {
+            greeting = 'Good Afternoon';
+        } else if (hour >= 17 && hour < 21) {
+            greeting = 'Good Evening';
+        } else {
+            greeting = 'Good Night';
+        }
+        document.getElementById('time-greeting').textContent = greeting;
+    })();
+</script>
+
+{% if role == "Admin" %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let timelineChart, townsChart;
+
+    const fetchChartData = (days) => {
+        fetch(`/dashboard/ajax/dashboard-charts/?days=${days}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                updateTimelineChart(data.timeline);
+                updateTownsChart(data.towns);
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    };
+
+    const updateTimelineChart = (data) => {
+        const canvas = document.getElementById('timelineChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (timelineChart) timelineChart.destroy();
+
+        timelineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'New Registrations',
+                    data: data.data,
+                    borderColor: '#C41E3A',
+                    backgroundColor: 'rgba(196, 30, 58, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#C41E3A',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    };
+
+    const updateTownsChart = (data) => {
+        const canvas = document.getElementById('townsChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (townsChart) townsChart.destroy();
+
+        townsChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.data,
+                    backgroundColor: [
+                        '#006B3F', '#C41E3A', '#3B82F6', '#8B5CF6', '#F59E0B', '#14B8A6'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                },
+                cutout: '65%'
+            }
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterSelect = document.getElementById('chart-time-filter');
+        if (filterSelect) {
+            // Initial fetch based on default route. Wait, the route is actually `/ajax/dashboard-charts/`
+            // Let's patch the fetch url to exactly match urls.py.
+
+            const fetchDataFixed = (days) => {
+                fetch(`/ajax/dashboard-charts/?days=${days}`)
+                    .then(r => r.json())
+                    .then(d => { updateTimelineChart(d.timeline); updateTownsChart(d.towns); })
+                    .catch(e => console.error(e));
+            };
+
+            fetchDataFixed(filterSelect.value);
+
+            filterSelect.addEventListener('change', (e) => {
+                fetchDataFixed(e.target.value);
+            });
+        }
+    });
+</script>
+{% endif %}
 
 {% endblock %}

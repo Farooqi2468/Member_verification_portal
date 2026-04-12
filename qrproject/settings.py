@@ -126,3 +126,29 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# settings.py
+
+AWS_ACCESS_KEY_ID = 'AKIASS4OJCEKNY5ZGY6R'
+AWS_SECRET_ACCESS_KEY = 'kUAvxQHK35m6q1fxZ4h6mafVsCCrEKh7A9nHX+1i'
+AWS_STORAGE_BUCKET_NAME = 'qr-code-storage-123456'
+AWS_S3_REGION_NAME = 'eu-north-1'  # e.g., 'us-east-1'
+
+# To make files public (optional)
+AWS_QUERYSTRING_AUTH = True 
+AWS_S3_ENDPOINT_URL = f"https://s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+
+
+# Use S3 for media storage (Django 4.2+)
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# URL for media files
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
