@@ -142,6 +142,67 @@
             padding: 24px 16px;
         }
     }
+
+    /* Password Toggle Styles */
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-wrapper input {
+        padding-right: 48px !important;
+    }
+
+    .eye-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-text-secondary);
+        transition: color 0.2s, transform 0.1s;
+        z-index: 10;
+        opacity: 0.7;
+    }
+
+    .eye-toggle:hover {
+        color: var(--ppp-red);
+        opacity: 1;
+    }
+
+    .eye-toggle:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
+    .eye-toggle svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* Toggle visibility of icons */
+    .eye-toggle .eye-open {
+        display: none;
+    }
+
+    .eye-toggle.visible .eye-open {
+        display: block;
+    }
+
+    .eye-toggle.visible .eye-closed {
+        display: none;
+    }
 </style>
 
 <div class="login-d-wrap mx-auto my-4" style="max-width: 100%;">
@@ -204,7 +265,25 @@
             </div>
             <div class="login-d-field">
                 <label for="{{ form.password.id_for_label }}">Password</label>
-                {{ form.password }}
+                <div class="password-wrapper">
+                    {{ form.password }}
+                    <button type="button" class="eye-toggle" id="password-toggle" title="Toggle password visibility">
+                        <!-- Closed eye with eyelashes (Hidden State) -->
+                        <svg class="eye-closed" viewBox="0 0 24 24">
+                            <path d="M3 10c4 4 14 4 18 0" />
+                            <line x1="4" y1="10.5" x2="2.5" y2="13.5" />
+                            <line x1="8" y1="13" x2="7" y2="16.5" />
+                            <line x1="12" y1="13.5" x2="12" y2="17.5" />
+                            <line x1="16" y1="13" x2="17" y2="16.5" />
+                            <line x1="20" y1="10.5" x2="21.5" y2="13.5" />
+                        </svg>
+                        <!-- Open eye (Visible State) -->
+                        <svg class="eye-open" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
+                    </button>
+                </div>
                 {% if form.password.errors %}
                 <div style="color: var(--ppp-red); font-size: 12px; margin-top: 4px;">{{ form.password.errors.0 }}</div>
                 {% endif %}
@@ -221,4 +300,29 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('password-toggle');
+        const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function() {
+                const isVisible = toggleBtn.classList.contains('visible');
+                
+                if (isVisible) {
+                    // Hide password
+                    passwordInput.type = 'password';
+                    toggleBtn.classList.remove('visible');
+                    toggleBtn.setAttribute('title', 'Show password');
+                } else {
+                    // Show password
+                    passwordInput.type = 'text';
+                    toggleBtn.classList.add('visible');
+                    toggleBtn.setAttribute('title', 'Hide password');
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

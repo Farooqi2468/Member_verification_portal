@@ -1,81 +1,121 @@
-# PPP Membership Portal & QR Generator
+# 🚩 PPP Member Verification Portal & QR Management System
 
-This is a Django-based web application designed to manage membership records for the PPP, generating distinct digital membership profiles and QR codes for each registered member.
+[![Django](https://img.shields.io/badge/Framework-Django%206.0.3-092e20?logo=django)](https://www.djangoproject.com/)
+[![Storage](https://img.shields.io/badge/Storage-AWS%20S3-FF9900?logo=amazons3)](https://aws.amazon.com/s3/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
 
-## Features
+A high-performance, secure, and modern membership management portal designed for the **Pakistan Peoples Party (PPP)**. This portal facilitates the digital registration of members, automated generation of secure QR-coded membership cards, and robust administrative oversight with real-time analytics.
 
-- **Member Registration & Management:** Create, update, and manage member profiles from a robust administrative dashboard.
-- **Data Validation:** Ensures accurate record-keeping with enforced input formats:
-  - **CNIC:** Must follow the `XXXXX-XXXXXXX-X` format.
-  - **Phone:** Must follow the 11-digit Pakistani format `03XXXXXXXXX` without hyphens.
-- **Dynamic Membership Cards:** Automatically generates a digital, glossy three-band (Red, Black, Green) membership card showing user details alongside a unique QR code.
-- **QR Code Scanning:** Specifically tailored layout providing a standalone view to display scanned profile data securely, masking sensitive info like CNIC or Phone to maintain privacy.
+---
 
-## Getting Started
+## 🚀 Key Features
 
-Follow these steps to set up and run the application on your local machine.
+### 💎 Digital Identity & QR Generation
+- **Automated QR Codes:** Every member receives a unique QR code linked directly to their cloud-hosted profile.
+- **Glossy Membership Cards:** Dynamic generation of vertical, three-band (Red, Black, Green) digital membership cards.
+- **Secure Verification:** Scanned QR codes lead to a privacy-focused verification page that masks sensitive data (CNIC/Phone) while confirming identity.
 
-### Prerequisites
-- Python installed on your system.
+### 🏠 Hierarchical Location Management
+Comprehensive management of administrative boundaries including:
+- **Towns**
+- **Zones**
+- **Union Councils (UCs)**
+- **Wards**
+- *Cascading dropdowns ensure data integrity during registration.*
 
-### 1. Activating the Virtual Environment
+### 🔐 Advanced Security & RBAC
+- **Strict Hierarchy:** Superusers retain full control, while Admins are restricted from viewing or managing Superuser accounts.
+- **Authenticated Access:** All management endpoints are protected via Django's authentication system.
+- **Privacy First:** Data masking on public-facing verification endpoints.
 
-It is highly recommended to run this project inside an isolated virtual environment. A virtual environment folder named `.venv` already exists in the project directory.
+### 📊 Administrative Dashboard & Analytics
+- **Real-time Metrics:** Overview of total members, registrations by region, and staff performance.
+- **Advanced Filtering:** Filter the entire directory by Town, Zone, UC, Ward, Registrar, or Registration Date.
+- **Data Portability:** Export filtered member lists directly to **CSV** for offline reporting.
 
-**To activate it on Windows (Command Prompt or PowerShell):**
+### ☁️ Cloud Infrastructure
+- **AWS S3 Integration:** High-availability storage for all media assets (Profile Images & QR Codes) using signed URLs for secure access.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** Python / Django 6.0.3
+- **Database:** SQLite (Development) / Scalable to PostgreSQL (Production)
+- **Cloud Storage:** Amazon S3 (via Boto3 & Django-Storages)
+- **Frontend:** Vanilla CSS, JavaScript, Bootstrap 5
+- **Utilities:** QRcode, Pillow (Image Processing)
+
+---
+
+## 📥 Getting Started
+
+### 1. Prerequisites
+- Python 3.10 or higher
+- AWS Account (for S3 storage)
+
+### 2. Environment Setup
+Clone the repository and activate the virtual environment:
 ```powershell
+# Windows
 .\.venv\Scripts\activate
 ```
 
-*(If the virtual environment is corrupted or empty, you can recreate it by running `python -m venv .venv` first)*
-
-### 2. Install Dependencies
-
-Once the virtual environment is correctly activated, make sure all necessary library packages are installed:
-
+### 3. Installation
+Install the necessary dependencies:
 ```powershell
 pip install -r requirements.txt
+# Ensure storage drivers are installed
+pip install django-storages boto3
 ```
-This application relies on:
-- `Django`
-- `qrcode`
-- `Pillow`
 
-### 3. Database Migrations
-
-Apply the database migrations to build up your database structure (SQLite is used by default):
-
+### 4. Database Initialization
 ```powershell
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 4. Create a Superuser (Optional)
-
-To access the backend Django admin panel, you can create an admin profile:
-
+### 5. Create Administrative Account
 ```powershell
 python manage.py createsuperuser
 ```
-Follow the on-screen prompts to set your desired username, email, and password.
 
-### 5. Start the Application
+---
 
-Start the local development server by executing:
+## ⚙️ Configuration
 
-```powershell
-python manage.py runserver 192.168.18.202:8000
+The system relies on AWS S3 for media storage. Ensure the following variables are correctly configured in `qrproject/settings.py` (or moved to an `.env` file for production):
+
+| Variable | Description |
+| :--- | :--- |
+| `AWS_ACCESS_KEY_ID` | Your AWS Access Key |
+| `AWS_SECRET_ACCESS_KEY` | Your AWS Secret Key |
+| `AWS_STORAGE_BUCKET_NAME` | S3 Bucket Name |
+| `AWS_S3_REGION_NAME` | AWS Region (e.g., `eu-north-1`) |
+
+---
+
+## 📂 Project Structure
+
+```text
+qrproject/
+├── qrapp/                # Core Application Logic
+│   ├── models.py         # Member, Town, Zone, UC, Ward models
+│   ├── views/            # Dashboard, Registration, Verification logic
+│   ├── templates/        # Responsive HTML5 layouts
+│   └── forms.py          # Validated Data Entry forms
+├── qrproject/            # Project Configuration
+│   ├── settings.py       # Global settings & AWS config
+│   └── urls.py           # Main routing table
+├── media/                # (Local cache) Managed via S3
+└── static/               # CSS, JS, and Branding Assets
 ```
-*(Optionally, use just `python manage.py runserver` for localhost access)*
 
-Once the server begins running, you can access the platform at:
-- **Main Dashboard/Registration:** `http://192.168.18.202:8000/` (or `http://127.0.0.1:8000/`)
-- **Django Admin Panel:** `http://192.168.18.202:8000/admin/`
+---
 
-## Project Structure
+## 📱 Mobile Responsiveness
+The portal features a **collapsible sidebar navigation** and a **mobile-optimized bottom navigation bar**, ensuring that field registrars can easily use the system on smartphones and tablets.
 
-- `manage.py`: Django's command-line utility for local administrative tasks.
-- `qrproject/`: Project core configurations (settings, master routing, etc).
-- `qrapp/`: Contains forms, models, endpoints, views, and logic generating the digital membership profiles and QR codes.
-- `media/`: Directory designated for saving the generated QR images.
-- `requirements.txt`: The definitive list of Python package dependencies needed for startup.
+---
+
+© 2026 PPP Member Verification Portal. All Rights Reserved.
