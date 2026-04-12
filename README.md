@@ -15,26 +15,25 @@ A high-performance, secure, and modern membership management portal designed for
 - **Glossy Membership Cards:** Dynamic generation of vertical, three-band (Red, Black, Green) digital membership cards.
 - **Secure Verification:** Scanned QR codes lead to a privacy-focused verification page that masks sensitive data (CNIC/Phone) while confirming identity.
 
+### 📊 Reports & Advanced Analytics
+- **Visual Growth Trends:** 6-month registration trends visualized with dynamic line charts.
+- **Geographic Breakdown:** Doughnut charts showing member distribution across various Towns.
+- **Registrar Performance:** Comparative bar charts identifying top-performing field staff.
+- **Data Integrity Audit:** Real-time tracking of incomplete profiles (missing CNIC, Phone, or Address).
+- **Printable Reports:** One-click "Print Report" functionality for physical documentation.
+
 ### 🏠 Hierarchical Location Management
 Comprehensive management of administrative boundaries including:
-- **Towns**
-- **Zones**
-- **Union Councils (UCs)**
-- **Wards**
-- *Cascading dropdowns ensure data integrity during registration.*
+- **Towns, Zones, Union Councils (UCs), and Wards.**
+- **Cascading Dropdowns:** Intelligent AJAX-based forms that prevent data entry errors.
 
-### 🔐 Advanced Security & RBAC
-- **Strict Hierarchy:** Superusers retain full control, while Admins are restricted from viewing or managing Superuser accounts.
-- **Authenticated Access:** All management endpoints are protected via Django's authentication system.
-- **Privacy First:** Data masking on public-facing verification endpoints.
-
-### 📊 Administrative Dashboard & Analytics
-- **Real-time Metrics:** Overview of total members, registrations by region, and staff performance.
-- **Advanced Filtering:** Filter the entire directory by Town, Zone, UC, Ward, Registrar, or Registration Date.
-- **Data Portability:** Export filtered member lists directly to **CSV** for offline reporting.
+### 🔐 Advanced Security & UX
+- **Strict RBAC:** Superusers retain full control; Admins are restricted from managing Superuser accounts or groups.
+- **Password Visibility:** Integrated toggle on login screens for improved user experience.
+- **Data Portability:** Filter and export member datasets directly to **CSV**.
 
 ### ☁️ Cloud Infrastructure
-- **AWS S3 Integration:** High-availability storage for all media assets (Profile Images & QR Codes) using signed URLs for secure access.
+- **AWS S3 Integration:** High-availability storage for all media assets using signed URLs for secure access.
 
 ---
 
@@ -43,7 +42,7 @@ Comprehensive management of administrative boundaries including:
 - **Backend:** Python / Django 6.0.3
 - **Database:** SQLite (Development) / Scalable to PostgreSQL (Production)
 - **Cloud Storage:** Amazon S3 (via Boto3 & Django-Storages)
-- **Frontend:** Vanilla CSS, JavaScript, Bootstrap 5
+- **Frontend:** Vanilla CSS, JavaScript, Bootstrap 5, **Chart.js**
 - **Utilities:** QRcode, Pillow (Image Processing)
 
 ---
@@ -101,8 +100,10 @@ The system relies on AWS S3 for media storage. Ensure the following variables ar
 qrproject/
 ├── qrapp/                # Core Application Logic
 │   ├── models.py         # Member, Town, Zone, UC, Ward models
-│   ├── views/            # Dashboard, Registration, Verification logic
+│   ├── views.py          # Dashboard, Registration, Reports & Analytics
 │   ├── templates/        # Responsive HTML5 layouts
+│   │   ├── reports.html  # Comprehensive analytics dashboard
+│   │   └── ...           # Registration, Members, Users templates
 │   └── forms.py          # Validated Data Entry forms
 ├── qrproject/            # Project Configuration
 │   ├── settings.py       # Global settings & AWS config
@@ -119,3 +120,4 @@ The portal features a **collapsible sidebar navigation** and a **mobile-optimize
 ---
 
 © 2026 PPP Member Verification Portal. All Rights Reserved.
+
