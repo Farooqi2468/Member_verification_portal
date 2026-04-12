@@ -1,7 +1,9 @@
+import io
 import os
 import qrcode
 import csv
 from datetime import timedelta, datetime
+from django.core.files.base import ContentFile
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
@@ -80,8 +82,14 @@ def create_person(request):
 
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
-            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
-            img.save(qr_path)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.person_id}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+            person.save()
+
             return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm()
@@ -219,11 +227,17 @@ def update_person(request, pk):
     if request.method == 'POST':
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
-            person = form.save()
+            person = form.save(commit=False)
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
             img = qrcode.make(url)
-            qr_path = os.path.join(settings.MEDIA_ROOT, f"qr_{person.person_id}.png")
-            img.save(qr_path)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.person_id}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+            person.save()
+
             return redirect('admin_person_detail', pk=person.person_id)
     else:
         form = PersonForm(instance=person)
