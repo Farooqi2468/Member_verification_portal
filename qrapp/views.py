@@ -10,13 +10,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
+from django.contrib.auth import update_session_auth_hash
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm
 from .models import Person, Town, Zone, UnionCouncil, Ward
 
 
@@ -577,3 +578,39 @@ def reports_view(request):
         'is_superuser': request.user.is_superuser,
     }
     return render(request, 'reports.html', context)
+
+
+@login_required
+def settings_view(request):
+    user = request.user
+    role = get_user_role(user)
+    profile_form = ProfileUpdateForm(instance=user)
+    password_form = PasswordUpdateForm(user=user)
+    active_tab = 'profile'
+
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            profile_form = ProfileUpdateForm(request.POST, instance=user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, 'Your profile has been updated successfully!')
+                return redirect('settings')
+            active_tab = 'profile'
+        elif 'update_password' in request.POST:
+            password_form = PasswordUpdateForm(request.POST, user=user)
+            if password_form.is_valid():
+                user.set_password(password_form.cleaned_data['new_password'])
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Your password has been changed successfully!')
+                return redirect('settings')
+            active_tab = 'password'
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+        'active_page': 'settings',
+        'active_tab': active_tab,
+        'role': role,
+    }
+    return render(request, 'settings.html', context)

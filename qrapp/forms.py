@@ -2,6 +2,7 @@ from django import forms
 from .models import Person, Town, Zone, UnionCouncil, Ward
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import password_validation
 
 
 class PersonForm(forms.ModelForm):
@@ -196,3 +197,53 @@ class RoleUserChangeForm(forms.ModelForm):
                     user.is_superuser = False
                 user.save()
         return user
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email Address'}),
+        }
+
+
+class PasswordUpdateForm(forms.Form):
+    current_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Current Password', 'id': 'id_current_password'}),
+        label='Current Password'
+    )
+    new_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'New Password', 'id': 'id_new_password'}),
+        label='New Password',
+        help_text=password_validation.password_validators_help_texts(),
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm New Password', 'id': 'id_confirm_password'}),
+        label='Confirm New Password'
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        current_password = self.cleaned_data.get('current_password')
+        if self.user and not self.user.check_password(current_password):
+            raise forms.ValidationError('Your current password is incorrect.')
+        return current_password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if new_password and confirm_password and new_password != confirm_password:
+            self.add_error('confirm_password', 'New passwords do not match.')
+        if new_password:
+            try:
+                password_validation.validate_password(new_password, self.user)
+            except forms.ValidationError as e:
+                self.add_error('new_password', e)
+        return cleaned_data
