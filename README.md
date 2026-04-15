@@ -102,7 +102,7 @@ The system relies on AWS S3 for media storage. Ensure the following variables ar
 | `AWS_ACCESS_KEY_ID` | Your AWS Access Key |
 | `AWS_SECRET_ACCESS_KEY` | Your AWS Secret Key |
 | `AWS_STORAGE_BUCKET_NAME` | S3 Bucket Name |
-| `AWS_S3_REGION_NAME` | AWS Region (e.g., `eu-north-1`) |
+| `AWS_S3_REGION_NAME` | AWS Region (e.g., `us-east-1`) |
 
 ---
 
