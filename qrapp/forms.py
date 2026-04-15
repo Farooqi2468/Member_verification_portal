@@ -134,6 +134,17 @@ class RoleUserCreationForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
         self.request_user = kwargs.pop('request_user', None)
         super().__init__(*args, **kwargs)
+        # Style password fields to match the settings page
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter password',
+            'id': 'id_password1',
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirm password',
+            'id': 'id_password2',
+        })
         if self.request_user and not self.request_user.is_superuser:
             self.fields['group'].queryset = Group.objects.exclude(name='Superuser')
 

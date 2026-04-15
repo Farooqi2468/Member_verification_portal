@@ -167,10 +167,10 @@ def create_system_user(request):
         if form.is_valid():
             form.save()
             messages.success(request, f"User {form.cleaned_data.get('username')} created successfully!")
-            return redirect('dashboard')
+            return redirect('all_system_users')
     else:
         form = RoleUserCreationForm(request_user=request.user)
-    return render(request, 'create_user.html', {'form': form, 'active_page': 'create_user'})
+    return render(request, 'create_user.html', {'form': form, 'active_page': 'all_users', 'is_superuser': request.user.is_superuser})
 
 
 @login_required

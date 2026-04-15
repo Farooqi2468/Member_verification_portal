@@ -2,67 +2,339 @@
 
 {% block layout %}
 <style>
-:root {
-  --ppp-red: #C41E3A;
-  --ppp-green: #006B3F;
-}
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-black: #1A1A1A;
+    }
 
-.qr-form-card {
-    background: #fff;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
-    padding: 32px;
-    max-width: 600px;
-    margin: 0 auto;
-}
+    /* ── Settings Card ── */
+    .settings-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+    .settings-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    .settings-card-header {
+        background: #f8f9fa;
+        padding: 20px 28px;
+        border-bottom: 1px solid #E5E5E5;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .settings-card-header i {
+        font-size: 22px;
+        color: var(--ppp-red);
+    }
+    .settings-card-header h5 {
+        margin: 0;
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: var(--ppp-black);
+        font-size: 1.1rem;
+    }
+    .settings-card-body {
+        padding: 28px;
+    }
 
-.qr-form-title {
-    font-family: 'Georgia', serif;
-    font-weight: 600;
-    font-size: 20px;
-    margin-bottom: 4px;
-}
+    /* ── Form Styling ── */
+    .form-label-custom {
+        font-weight: 600;
+        font-size: 13px;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .form-control:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1.5px solid #ddd;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
 
-.qr-form-sub {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 24px;
-}
+    /* ── Header Icon ── */
+    .create-user-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--ppp-red), var(--ppp-red-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .create-user-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 24px 0;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .create-user-meta h4 {
+        margin: 0 0 4px 0;
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: var(--ppp-black);
+        font-size: 1.15rem;
+    }
+    .create-user-meta p {
+        margin: 0;
+        color: #888;
+        font-size: 13px;
+    }
 
-.qr-input-group {
-    margin-bottom: 16px;
-}
+    /* ── Submit Button ── */
+    .btn-settings-save {
+        background: var(--ppp-black);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 32px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-settings-save:hover {
+        background: var(--ppp-red);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(196, 30, 58, 0.25);
+    }
 
-.qr-input-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+    /* ── Password Toggle ── */
+    .password-wrapper {
+        position: relative;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .password-toggle:hover {
+        color: var(--ppp-black);
+    }
 
-.qr-input-group .form-control {
-    border: 1.5px solid #eee;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    transition: all 0.2s;
-}
+    /* ── Alert Styling ── */
+    .settings-alert {
+        border: none;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: tabFadeIn 0.3s ease;
+    }
+    .settings-alert i { font-size: 18px; }
+    @keyframes tabFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-.qr-input-group .form-control:focus {
-    border-color: var(--ppp-red);
-    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-}
+    /* ── Info Card ── */
+    .info-side-card {
+        background: #fdfdfd;
+        border: 1px dashed #ddd;
+        border-radius: 14px;
+        padding: 24px;
+    }
+    .info-side-card h6 {
+        font-weight: 700;
+        color: var(--ppp-black);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-item .info-label { color: #888; font-weight: 500; }
+    .info-item .info-value { color: var(--ppp-black); font-weight: 600; }
 
-.qr-input-group .helptext {
-    font-size: 11px;
-    color: #888;
-    margin-top: 4px;
-    display: block;
-}
+    /* ── Role Descriptions Collapsible ── */
+    .role-desc-card {
+        background: #fdfdfd;
+        border: 1px dashed #ddd;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .role-desc-header {
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+    .role-desc-header:hover {
+        background: #f5f5f5;
+    }
+    .role-desc-header h6 {
+        margin: 0;
+        font-weight: 700;
+        color: var(--ppp-black);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+    .role-desc-toggle {
+        font-size: 14px;
+        color: #999;
+        transition: transform 0.3s ease;
+    }
+    .role-desc-toggle.collapsed {
+        transform: rotate(-90deg);
+    }
+    .role-desc-body {
+        max-height: 1200px;
+        overflow: hidden;
+        transition: max-height 0.4s ease, padding 0.3s ease;
+        padding: 0 24px 20px 24px;
+    }
+    .role-desc-body.collapsed {
+        max-height: 0;
+        padding: 0 24px;
+    }
+    .role-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        background: #fff;
+        border: 1px solid #f0f0f0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .role-item:last-child { margin-bottom: 0; }
+    .role-item:hover {
+        border-color: #ddd;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .role-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .role-item-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .role-item-title {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--ppp-black);
+        margin-bottom: 2px;
+    }
+    .role-item-desc {
+        font-size: 12px;
+        color: #888;
+        line-height: 1.5;
+        margin: 0;
+    }
 
+    /* ── Error List ── */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 6px 0 0 0;
+    }
+    .errorlist li {
+        color: #dc3545;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 2px 0;
+    }
+
+    /* ── Help Text ── */
+    .password-requirements {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-top: 16px;
+    }
+    .password-requirements h6 {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #888;
+        margin-bottom: 10px;
+    }
+    .password-requirements ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .password-requirements li {
+        font-size: 12px;
+        color: #666;
+        padding: 3px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .password-requirements li i {
+        color: #aaa;
+        font-size: 10px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 16px;
+            padding-bottom: 80px;
+        }
+        .settings-card-body { padding: 20px; }
+        .create-user-header { flex-direction: column; text-align: center; gap: 12px; }
+        .role-desc-header { padding: 14px 18px; }
+        .role-desc-body { padding: 0 18px 16px 18px; }
+        .role-desc-body.collapsed { padding: 0 18px; }
+        .role-item { padding: 10px 12px; gap: 10px; }
+        .role-icon { width: 32px; height: 32px; font-size: 14px; }
+    }
 </style>
 
 <div class="dash-wrap">
@@ -76,47 +348,289 @@
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-        
-        <div class="qr-form-card shadow-sm">
-            <h2 class="qr-form-title">Create System User</h2>
-            <p class="qr-form-sub">Register a new user and assign them a role in the system.</p>
+        <div class="mb-4">
+            <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Create System User</h2>
+            <div class="text-secondary">Register a new user and assign them a role in the system.</div>
+        </div>
 
-            <form method="post">
-                {% csrf_token %}
+        <!-- ── Success / Error Messages ── -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="settings-alert alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
 
-                {% if form.errors %}
-                    <div class="alert alert-danger mb-4" style="border-radius: 8px;">
-                        <strong style="font-size: 13px;">Please correct the following errors:</strong>
-                        <ul class="mb-0 mt-1" style="font-size: 12px; padding-left: 20px;">
-                            {% for field in form %}
-                                {% for error in field.errors %}
-                                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        <div class="row g-4">
+            <!-- ── Left Column: Form ── -->
+            <div class="col-lg-8">
+                <div class="settings-card">
+                    <div class="settings-card-body">
+                        <!-- Header -->
+                        <div class="create-user-header">
+                            <div class="create-user-icon">
+                                <i class="bi bi-person-plus-fill"></i>
+                            </div>
+                            <div class="create-user-meta">
+                                <h4>New User Registration</h4>
+                                <p>Fill in the details below to create a new system user account.</p>
+                            </div>
+                        </div>
+
+                        <!-- Error Summary -->
+                        {% if form.errors %}
+                        <div class="settings-alert alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                            <div>
+                                <strong>Please correct the errors below.</strong>
+                                {% for error in form.non_field_errors %}
+                                <div class="mt-1" style="font-size: 13px;">{{ error }}</div>
                                 {% endfor %}
-                            {% endfor %}
-                            {% for error in form.non_field_errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-
-                {% for field in form %}
-                    <div class="qr-input-group">
-                        <label>{{ field.label }} {% if field.field.required %}<span class="text-danger">*</span>{% endif %}</label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <small class="helptext">{{ field.help_text|safe }}</small>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                         {% endif %}
-                    </div>
-                {% endfor %}
 
-                <button type="submit" class="btn btn-lg w-100 mt-4" style="background: var(--ppp-red); color: #fff; border-radius: 10px; font-weight: 600; padding: 14px;">
-                    Create User
-                </button>
-            </form>
+                        <form method="post" action="{% url 'create_system_user' %}" id="create-user-form">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <!-- Username -->
+                                <div class="col-12">
+                                    <label class="form-label form-label-custom" for="id_username">Username <span class="text-danger">*</span></label>
+                                    {{ form.username }}
+                                    {% if form.username.help_text %}
+                                    <small class="text-muted mt-1 d-block" style="font-size: 11px;">{{ form.username.help_text|safe }}</small>
+                                    {% endif %}
+                                    {% if form.username.errors %}
+                                    <ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+
+                                <!-- First Name & Last Name -->
+                                <div class="col-md-6">
+                                    <label class="form-label form-label-custom" for="id_first_name">First Name</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                    <ul class="errorlist">{% for e in form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label form-label-custom" for="id_last_name">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                    <ul class="errorlist">{% for e in form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-12">
+                                    <label class="form-label form-label-custom" for="id_email">Email Address</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                    <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Role -->
+                                <div class="col-12">
+                                    <label class="form-label form-label-custom" for="id_group">Role <span class="text-danger">*</span></label>
+                                    {{ form.group }}
+                                    {% if form.group.errors %}
+                                    <ul class="errorlist">{% for e in form.group.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="col-12">
+                                    <hr style="border-color: #f0f0f0; margin: 8px 0;">
+                                    <p class="text-muted mb-0" style="font-size: 14px;">
+                                        <i class="bi bi-shield-lock me-1"></i>
+                                        Set a secure password for the new user account.
+                                    </p>
+                                </div>
+
+                                <!-- Password -->
+                                <div class="col-md-6">
+                                    <label class="form-label form-label-custom" for="id_password1">Password <span class="text-danger">*</span></label>
+                                    <div class="password-wrapper">
+                                        {{ form.password1 }}
+                                        <button type="button" class="password-toggle" data-target="id_password1">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password1.errors %}
+                                    <ul class="errorlist">{% for e in form.password1.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div class="col-md-6">
+                                    <label class="form-label form-label-custom" for="id_password2">Confirm Password <span class="text-danger">*</span></label>
+                                    <div class="password-wrapper">
+                                        {{ form.password2 }}
+                                        <button type="button" class="password-toggle" data-target="id_password2">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password2.errors %}
+                                    <ul class="errorlist">{% for e in form.password2.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Password Requirements -->
+                            <div class="password-requirements">
+                                <h6><i class="bi bi-key me-1"></i> Password Requirements</h6>
+                                <ul>
+                                    <li><i class="bi bi-circle-fill"></i> At least 8 characters long</li>
+                                    <li><i class="bi bi-circle-fill"></i> Cannot be too similar to personal information</li>
+                                    <li><i class="bi bi-circle-fill"></i> Cannot be a commonly used password</li>
+                                    <li><i class="bi bi-circle-fill"></i> Cannot be entirely numeric</li>
+                                </ul>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-end">
+                                <button type="submit" class="btn-settings-save" id="create-user-btn">
+                                    <i class="bi bi-person-plus"></i> Create User
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Right Column: Info Panel ── -->
+            <div class="col-lg-4">
+                <div class="role-desc-card mb-4" id="role-descriptions-panel">
+                    <div class="role-desc-header" id="role-desc-toggler" onclick="toggleRoleDescriptions()">
+                        <h6><i class="bi bi-people-fill" style="color: var(--ppp-red);"></i> Role Descriptions</h6>
+                        <i class="bi bi-chevron-down role-desc-toggle" id="role-desc-chevron"></i>
+                    </div>
+                    <div class="role-desc-body" id="role-desc-body">
+                        <!-- Admin -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #C41E3A, #8B1528);">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Admin</div>
+                                <p class="role-item-desc">Full access to all management features including members, users, locations, and reports.</p>
+                            </div>
+                        </div>
+
+                        {% if is_superuser %}
+                        <!-- Superuser (only visible to superusers) -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #1A1A1A, #444);">
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Superuser</div>
+                                <p class="role-item-desc">Highest privilege level. Full system access including managing other admins and superusers.</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Town Presidents -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #006B3F, #004D2E);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Town Presidents</div>
+                                <p class="role-item-desc">Oversee town-level operations and manage member activities within their assigned town.</p>
+                            </div>
+                        </div>
+
+                        <!-- Members -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Members</div>
+                                <p class="role-item-desc">Registered party members with access to view their own profile and membership details.</p>
+                            </div>
+                        </div>
+
+                        <!-- Citizens -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #7C3AED, #6D28D9);">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Citizens</div>
+                                <p class="role-item-desc">General citizens with basic access to public-facing features and self-registration capabilities.</p>
+                            </div>
+                        </div>
+
+                        <!-- Event Organizers -->
+                        <div class="role-item">
+                            <div class="role-icon" style="background: linear-gradient(135deg, #EA580C, #C2410C);">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div class="role-item-content">
+                                <div class="role-item-title">Event Organizers</div>
+                                <p class="role-item-desc">Manage and coordinate party events, rallies, and community outreach programmes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-side-card mb-4">
+                    <h6><i class="bi bi-info-circle" style="color: var(--ppp-red);"></i> Quick Tips</h6>
+                    <ul style="margin: 0; padding: 0 0 0 16px; font-size: 13px; color: #666; line-height: 2;">
+                        <li>Usernames must be unique across the system</li>
+                        <li>Use a strong password with mixed characters</li>
+                        <li>Email address is optional but recommended</li>
+                        <li>Assign the appropriate role based on responsibilities</li>
+                    </ul>
+                </div>
+
+                <div class="info-side-card" style="border-color: rgba(196,30,58,0.2); background: rgba(196,30,58,0.02);">
+                    <h6><i class="bi bi-shield-exclamation" style="color: var(--ppp-red);"></i> Security Notice</h6>
+                    <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.6;">
+                        Share the newly created credentials securely. Ask the user to change their password upon their first login.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 {% include 'includes/mobile_nav.html' with active_page='create_user' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        });
+    });
+});
+
+// Role Descriptions collapsible toggle
+function toggleRoleDescriptions() {
+    const body = document.getElementById('role-desc-body');
+    const chevron = document.getElementById('role-desc-chevron');
+    body.classList.toggle('collapsed');
+    chevron.classList.toggle('collapsed');
+}
+</script>
 {% endblock %}
