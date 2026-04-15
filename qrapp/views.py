@@ -533,7 +533,11 @@ def reports_view(request):
     town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
     
     # 2. Registrar Performance (Top 10)
-    registrar_stats = User.objects.filter(is_active=True).annotate(
+    # ROLE-BASED VISIBILITY: Non-superusers cannot see superuser accounts
+    registrar_qs = User.objects.filter(is_active=True)
+    if not request.user.is_superuser:
+        registrar_qs = registrar_qs.filter(is_superuser=False)
+    registrar_stats = registrar_qs.annotate(
         member_count=Count('persons_created')
     ).order_by('-member_count')[:10]
     
@@ -570,5 +574,6 @@ def reports_view(request):
         'registrar_stats': registrar_stats,
         'integrity_data': integrity_data,
         'growth_stats': growth_stats,
+        'is_superuser': request.user.is_superuser,
     }
     return render(request, 'reports.html', context)
