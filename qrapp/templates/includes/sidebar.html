@@ -33,7 +33,7 @@
             <i class="bi bi-bar-chart-fill text-white"></i> 
             <span class="sidebar-text">Reports</span>
         </a>
-        <a class="nav-link" href="#" title="Settings">
+        <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{% url 'settings' %}" title="Settings">
             <i class="bi bi-gear-fill text-white"></i> 
             <span class="sidebar-text">Settings</span>
         </a>

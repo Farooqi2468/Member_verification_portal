@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-black: #1A1A1A;
+    }
+
+    /* ── Settings Card ── */
+    .settings-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 16px;
+        overflow: hidden;
+        transition: box-shadow 0.3s ease;
+    }
+    .settings-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    .settings-card-header {
+        background: #f8f9fa;
+        padding: 20px 28px;
+        border-bottom: 1px solid #E5E5E5;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .settings-card-header i {
+        font-size: 22px;
+        color: var(--ppp-red);
+    }
+    .settings-card-header h5 {
+        margin: 0;
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: var(--ppp-black);
+        font-size: 1.1rem;
+    }
+    .settings-card-body {
+        padding: 28px;
+    }
+
+    /* ── Tab Navigation ── */
+    .settings-tabs {
+        display: flex;
+        gap: 4px;
+        background: #f0f0f0;
+        padding: 4px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+    }
+    .settings-tab {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        color: #666;
+        font-weight: 600;
+        font-size: 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .settings-tab:hover {
+        color: var(--ppp-black);
+        background: rgba(255,255,255,0.5);
+    }
+    .settings-tab.active {
+        background: #fff;
+        color: var(--ppp-black);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .settings-tab i {
+        font-size: 16px;
+    }
+
+    /* ── Tab Content ── */
+    .tab-panel {
+        display: none;
+        animation: tabFadeIn 0.3s ease;
+    }
+    .tab-panel.active {
+        display: block;
+    }
+    @keyframes tabFadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Form Styling ── */
+    .form-label-custom {
+        font-weight: 600;
+        font-size: 13px;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .form-control:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+    }
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1.5px solid #ddd;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    /* ── Profile Header ── */
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 24px 0;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .profile-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--ppp-red), var(--ppp-red-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        letter-spacing: -1px;
+    }
+    .profile-meta h4 {
+        margin: 0 0 4px 0;
+        font-family: 'Georgia', serif;
+        font-weight: 700;
+        color: var(--ppp-black);
+        font-size: 1.15rem;
+    }
+    .profile-meta .role-badge {
+        display: inline-block;
+        background: rgba(196, 30, 58, 0.1);
+        color: var(--ppp-red);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .profile-meta .username-text {
+        color: #888;
+        font-size: 13px;
+        margin-top: 2px;
+    }
+
+    /* ── Submit Button ── */
+    .btn-settings-save {
+        background: var(--ppp-black);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 32px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-settings-save:hover {
+        background: var(--ppp-red);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(196, 30, 58, 0.25);
+    }
+
+    /* ── Password Toggle ── */
+    .password-wrapper {
+        position: relative;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 0;
+        transition: color 0.2s;
+    }
+    .password-toggle:hover {
+        color: var(--ppp-black);
+    }
+
+    /* ── Alert Styling ── */
+    .settings-alert {
+        border: none;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: tabFadeIn 0.3s ease;
+    }
+    .settings-alert i { font-size: 18px; }
+
+    /* ── Info Card ── */
+    .info-side-card {
+        background: #fdfdfd;
+        border: 1px dashed #ddd;
+        border-radius: 14px;
+        padding: 24px;
+    }
+    .info-side-card h6 {
+        font-weight: 700;
+        color: var(--ppp-black);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-item .info-label { color: #888; font-weight: 500; }
+    .info-item .info-value { color: var(--ppp-black); font-weight: 600; }
+
+    /* ── Help Text ── */
+    .password-requirements {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-top: 16px;
+    }
+    .password-requirements h6 {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #888;
+        margin-bottom: 10px;
+    }
+    .password-requirements ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .password-requirements li {
+        font-size: 12px;
+        color: #666;
+        padding: 3px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .password-requirements li i {
+        color: #aaa;
+        font-size: 10px;
+    }
+
+    /* ── Error List ── */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 6px 0 0 0;
+    }
+    .errorlist li {
+        color: #dc3545;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 2px 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 16px;
+            padding-bottom: 80px;
+        }
+        .settings-card-body { padding: 20px; }
+        .profile-header { flex-direction: column; text-align: center; gap: 12px; }
+        .settings-tab span.d-md-inline { display: none; }
+    }
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='settings' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div class="mb-3">
+            <a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        <div class="mb-4">
+            <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Account Settings</h2>
+            <div class="text-secondary">Manage your profile information and security preferences.</div>
+        </div>
+
+        <!-- ── Success / Error Messages ── -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="settings-alert alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- ── Left Column: Forms ── -->
+            <div class="col-lg-8">
+                <div class="settings-card">
+                    <div class="settings-card-body">
+                        <!-- Tab Navigation -->
+                        <div class="settings-tabs" role="tablist">
+                            <button class="settings-tab {% if active_tab == 'profile' %}active{% endif %}" data-tab="profile" role="tab" id="tab-profile-btn">
+                                <i class="bi bi-person-fill"></i>
+                                <span>Profile Details</span>
+                            </button>
+                            <button class="settings-tab {% if active_tab == 'password' %}active{% endif %}" data-tab="password" role="tab" id="tab-password-btn">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Change Password</span>
+                            </button>
+                        </div>
+
+                        <!-- ═══════ Profile Tab ═══════ -->
+                        <div class="tab-panel {% if active_tab == 'profile' %}active{% endif %}" id="tab-profile">
+                            <!-- Profile Header -->
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    {{ request.user.first_name|first|default:request.user.username|first|upper }}
+                                </div>
+                                <div class="profile-meta">
+                                    <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+                                    <div class="username-text">@{{ request.user.username }}</div>
+                                    <div class="mt-1">
+                                        <span class="role-badge">{{ role|default:"User" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form method="post" action="{% url 'settings' %}" id="profile-form">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-custom" for="id_first_name">First Name</label>
+                                        {{ profile_form.first_name }}
+                                        {% if profile_form.first_name.errors %}
+                                        <ul class="errorlist">{% for e in profile_form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-custom" for="id_last_name">Last Name</label>
+                                        {{ profile_form.last_name }}
+                                        {% if profile_form.last_name.errors %}
+                                        <ul class="errorlist">{% for e in profile_form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label form-label-custom" for="id_email">Email Address</label>
+                                        {{ profile_form.email }}
+                                        {% if profile_form.email.errors %}
+                                        <ul class="errorlist">{% for e in profile_form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label form-label-custom">Username</label>
+                                        <input type="text" class="form-control" value="{{ request.user.username }}" disabled style="background: #f8f9fa; color: #999;">
+                                        <small class="text-muted mt-1 d-block">Username cannot be changed. Contact a Super Admin if needed.</small>
+                                    </div>
+                                </div>
+                                <div class="mt-4 d-flex justify-content-end">
+                                    <button type="submit" name="update_profile" class="btn-settings-save" id="save-profile-btn">
+                                        <i class="bi bi-check-lg"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- ═══════ Password Tab ═══════ -->
+                        <div class="tab-panel {% if active_tab == 'password' %}active{% endif %}" id="tab-password">
+                            <div class="mb-4">
+                                <p class="text-muted mb-0" style="font-size: 14px;">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Ensure your account stays secure by using a strong, unique password.
+                                </p>
+                            </div>
+
+                            <form method="post" action="{% url 'settings' %}" id="password-form">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label form-label-custom" for="id_current_password">Current Password</label>
+                                        <div class="password-wrapper">
+                                            {{ password_form.current_password }}
+                                            <button type="button" class="password-toggle" data-target="id_current_password">
+                                                <i class="bi bi-eye-slash"></i>
+                                            </button>
+                                        </div>
+                                        {% if password_form.current_password.errors %}
+                                        <ul class="errorlist">{% for e in password_form.current_password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-custom" for="id_new_password">New Password</label>
+                                        <div class="password-wrapper">
+                                            {{ password_form.new_password }}
+                                            <button type="button" class="password-toggle" data-target="id_new_password">
+                                                <i class="bi bi-eye-slash"></i>
+                                            </button>
+                                        </div>
+                                        {% if password_form.new_password.errors %}
+                                        <ul class="errorlist">{% for e in password_form.new_password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label form-label-custom" for="id_confirm_password">Confirm New Password</label>
+                                        <div class="password-wrapper">
+                                            {{ password_form.confirm_password }}
+                                            <button type="button" class="password-toggle" data-target="id_confirm_password">
+                                                <i class="bi bi-eye-slash"></i>
+                                            </button>
+                                        </div>
+                                        {% if password_form.confirm_password.errors %}
+                                        <ul class="errorlist">{% for e in password_form.confirm_password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="password-requirements">
+                                    <h6><i class="bi bi-key me-1"></i> Password Requirements</h6>
+                                    <ul>
+                                        <li><i class="bi bi-circle-fill"></i> At least 8 characters long</li>
+                                        <li><i class="bi bi-circle-fill"></i> Cannot be too similar to your personal information</li>
+                                        <li><i class="bi bi-circle-fill"></i> Cannot be a commonly used password</li>
+                                        <li><i class="bi bi-circle-fill"></i> Cannot be entirely numeric</li>
+                                    </ul>
+                                </div>
+
+                                <div class="mt-4 d-flex justify-content-end">
+                                    <button type="submit" name="update_password" class="btn-settings-save" id="save-password-btn">
+                                        <i class="bi bi-shield-check"></i> Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Right Column: Account Info ── -->
+            <div class="col-lg-4">
+                <div class="info-side-card mb-4">
+                    <h6><i class="bi bi-person-vcard" style="color: var(--ppp-red);"></i> Account Information</h6>
+                    <div class="info-item">
+                        <span class="info-label">Username</span>
+                        <span class="info-value">{{ request.user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Full Name</span>
+                        <span class="info-value">{{ request.user.get_full_name|default:"Not set" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ request.user.email|default:"Not set" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Role</span>
+                        <span class="info-value">{{ role|default:"User" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date Joined</span>
+                        <span class="info-value">{{ request.user.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Login</span>
+                        <span class="info-value">{{ request.user.last_login|date:"M d, Y H:i"|default:"Never" }}</span>
+                    </div>
+                </div>
+
+                <div class="info-side-card" style="border-color: rgba(196,30,58,0.2); background: rgba(196,30,58,0.02);">
+                    <h6><i class="bi bi-shield-exclamation" style="color: var(--ppp-red);"></i> Security Tips</h6>
+                    <ul style="margin: 0; padding: 0 0 0 16px; font-size: 13px; color: #666; line-height: 2;">
+                        <li>Use a unique password not used on other sites</li>
+                        <li>Change your password regularly</li>
+                        <li>Never share your credentials</li>
+                        <li>Log out from shared devices</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='settings' %}
+
+<!-- ── JavaScript ── -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    const tabs = document.querySelectorAll('.settings-tab');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = this.getAttribute('data-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+
+            this.classList.add('active');
+            document.getElementById('tab-' + target).classList.add('active');
+        });
+    });
+
+    // Password visibility toggle
+    document.querySelectorAll('.password-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -18,6 +18,7 @@ urlpatterns = [
     path('dashboard/delete/<str:pk>/', views.delete_person, name='delete_person'),
     path('dashboard/person/<str:pk>/', views.admin_person_detail, name='admin_person_detail'),
     path('dashboard/reports/', views.reports_view, name='reports_view'),
+    path('dashboard/settings/', views.settings_view, name='settings'),
 
     # Location Management
     path('dashboard/locations/', views.manage_locations, name='manage_locations'),
