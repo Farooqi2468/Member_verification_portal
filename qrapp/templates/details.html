@@ -263,7 +263,7 @@
         <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn" style="top: -40px; right: 0;">&times;</button>
         
         <!-- Member Card -->
-        <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 15%, #1A1A1A 85%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); text-align: left; position: relative; overflow: hidden;">
+        <div id="qrMemberCard" style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 15%, #1A1A1A 85%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); text-align: left; position: relative; overflow: hidden;">
             <!-- Header section with Name and QR -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
                 <div style="flex: 1; padding-right: 12px;">
@@ -274,7 +274,7 @@
                 </div>
                 <div style="text-align: center; flex-shrink: 0;">
                     <div class="qr-display-box" style="padding: 6px; margin: 0; background: #fff; border-radius: 8px;">
-                        <img src="{% if person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.person_id }}.png{% endif %}" width="70" alt="QR Code" style="display: block;">
+                        <img id="qrCodeImg" src="{% if qr_base64 %}{{ qr_base64 }}{% elif person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.person_id }}.png{% endif %}" width="70" alt="QR Code" style="display: block;">
                     </div>
                     <div style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">#{{ person.person_id }}</div>
                 </div>
@@ -319,12 +319,13 @@
         </div>
 
         <div style="width: 100%;">
-            <button class="btn w-100 mb-2" style="background: var(--ppp-red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px;">Download Cards</button>
+            <button id="downloadCardBtn" class="btn w-100 mb-2" onclick="downloadCard()" style="background: var(--ppp-red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px;">Download Card</button>
             <button class="btn btn-outline-light w-100" style="font-size: 13px; padding: 10px; border-radius: 8px;">Print Cards</button>
         </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
     // Close modal if user clicks outside the card
     window.onclick = function(event) {
@@ -332,6 +333,35 @@
         if (event.target == modal) {
             modal.style.display = "none";
         }
+    }
+
+    function downloadCard() {
+        var btn = document.getElementById('downloadCardBtn');
+        var card = document.getElementById('qrMemberCard');
+
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+
+        // QR image is already a base64 data URL embedded by Django — no CORS issue.
+        html2canvas(card, {
+            useCORS: false,
+            allowTaint: false,
+            scale: 2,
+            backgroundColor: null,
+            logging: false
+        }).then(function(canvas) {
+            var link = document.createElement('a');
+            link.download = 'member-card-{{ person.person_id }}.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            btn.disabled = false;
+            btn.textContent = 'Download Card';
+        }).catch(function(err) {
+            console.error('Download failed:', err);
+            btn.disabled = false;
+            btn.textContent = 'Download Card';
+            alert('Download failed. Please try again.');
+        });
     }
 </script>
 </div>

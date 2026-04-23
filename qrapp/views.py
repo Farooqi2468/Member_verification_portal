@@ -1,5 +1,7 @@
 import io
 import os
+import base64
+import urllib.request
 import qrcode
 import csv
 from datetime import timedelta, datetime
@@ -229,9 +231,23 @@ def person_detail(request, pk):
 def admin_person_detail(request, pk):
     person = get_object_or_404(Person, person_id=pk)
     is_admin = request.user.groups.filter(name='Admin').exists() or request.user.is_superuser
+
+    # Read QR image and encode as base64 so it can be embedded directly in HTML.
+    # This avoids any CORS issue — html2canvas sees a data: URL, not an S3 URL.
+    qr_base64 = None
+    if person.qr_code:
+        try:
+            person.qr_code.open('rb')
+            qr_bytes = person.qr_code.read()
+            person.qr_code.close()
+            qr_base64 = 'data:image/png;base64,' + base64.b64encode(qr_bytes).decode('utf-8')
+        except Exception:
+            qr_base64 = None
+
     return render(request, 'details.html', {
         'person': person,
-        'is_admin': is_admin
+        'is_admin': is_admin,
+        'qr_base64': qr_base64,
     })
 
 
@@ -614,3 +630,30 @@ def settings_view(request):
         'role': role,
     }
     return render(request, 'settings.html', context)
+
+
+@login_required
+@admin_only
+def qr_image_proxy(request, pk):
+    """Proxies the QR image from S3 through Django so the browser can fetch it
+    from the same origin, bypassing the CORS restriction on canvas taint."""
+    person = get_object_or_404(Person, person_id=pk)
+    if not person.qr_code:
+        from django.http import Http404
+        raise Http404("QR code not found")
+
+    qr_url = person.qr_code.url
+    # If the URL is relative, build an absolute URL
+    if qr_url.startswith('/'):
+        qr_url = request.build_absolute_uri(qr_url)
+
+    try:
+        with urllib.request.urlopen(qr_url) as resp:
+            image_data = resp.read()
+            content_type = resp.headers.get('Content-Type', 'image/png')
+        response = HttpResponse(image_data, content_type=content_type)
+        response['Cache-Control'] = 'private, max-age=3600'
+        return response
+    except Exception:
+        from django.http import Http404
+        raise Http404("Could not fetch QR image")
