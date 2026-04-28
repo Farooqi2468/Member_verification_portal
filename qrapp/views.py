@@ -343,6 +343,93 @@ def all_members(request):
     return render(request, 'all_members.html', context)
 
 
+@require_POST
+@login_required
+@admin_only
+def import_members_csv(request):
+    if 'csv_file' not in request.FILES:
+        messages.error(request, "No file uploaded.")
+        return redirect('all_members')
+
+    csv_file = request.FILES['csv_file']
+    if not csv_file.name.endswith('.csv'):
+        messages.error(request, "This is not a CSV file.")
+        return redirect('all_members')
+
+    try:
+        # Read the file and decode it
+        file_data = csv_file.read().decode('utf-8')
+        lines = file_data.splitlines()
+        reader = csv.DictReader(lines)
+        
+        success_count = 0
+        error_count = 0
+
+        for row in reader:
+            # Clean keys to make it more resilient to trailing spaces or case differences
+            cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
+            
+            person_id = cleaned_row.get('person_id')
+            if not person_id:
+                error_count += 1
+                continue
+            
+            # Map location names to existing objects. Do not auto-create as per user request.
+            town_name = cleaned_row.get('town', '')
+            zone_name = cleaned_row.get('zone', '')
+            uc_name = cleaned_row.get('union_council', '')
+            ward_name = cleaned_row.get('ward', '')
+
+            town_obj = Town.objects.filter(name__iexact=town_name).first() if town_name else None
+            zone_obj = Zone.objects.filter(name__iexact=zone_name).first() if zone_name else None
+            uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first() if uc_name else None
+            ward_obj = Ward.objects.filter(name__iexact=ward_name).first() if ward_name else None
+
+            # Handle CNIC carefully to avoid unique constraint issues if empty
+            cnic_val = cleaned_row.get('cnic', '') or None
+
+            # Create or update the person
+            person, created = Person.objects.update_or_create(
+                person_id=person_id,
+                defaults={
+                    'name': cleaned_row.get('name', ''),
+                    'father_name': cleaned_row.get('father_name', ''),
+                    'cnic': cnic_val,
+                    'phone': cleaned_row.get('phone', ''),
+                    'address': cleaned_row.get('address', ''),
+                    'town': town_obj,
+                    'zone': zone_obj,
+                    'union_council': uc_obj,
+                    'ward': ward_obj,
+                    'made_by': request.user,
+                }
+            )
+
+            # Generate QR code if newly created or if missing
+            if created or not person.qr_code:
+                url = request.build_absolute_uri(f"/person/{person.person_id}/")
+                img = qrcode.make(url)
+                
+                buffer = io.BytesIO()
+                img.save(buffer, format='PNG')
+                file_name = f"qr_{person.person_id}.png"
+                
+                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+                person.save()
+
+            success_count += 1
+            
+        if success_count > 0:
+            messages.success(request, f"Successfully imported/updated {success_count} members.")
+        if error_count > 0:
+            messages.warning(request, f"Skipped {error_count} rows due to missing 'person_id'.")
+
+    except Exception as e:
+        messages.error(request, f"Error processing CSV file: {str(e)}")
+
+    return redirect('all_members')
+
+
 @login_required
 @admin_only
 def update_person(request, pk):

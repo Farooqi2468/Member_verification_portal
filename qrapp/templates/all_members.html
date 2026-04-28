@@ -307,6 +307,10 @@
                     <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-funnel-fill"></i> Filters
                     </button>
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#importCsvModal"
+                        style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-upload"></i> Import CSV
+                    </button>
                     <a href="?export=csv{{ query_params }}" class="btn"
                         style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-download"></i> Export CSV
@@ -496,6 +500,33 @@
                 </div>
             </div>
             {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header" style="background: var(--ppp-red); color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="importCsvModalLabel">Import Members from CSV</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'import_members_csv' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">Upload a CSV file to bulk import members. The system will match location names to existing locations.</p>
+                    <p class="text-muted small mb-3">Suggested columns: <strong>person_id, name, father_name, cnic, phone, address, town, zone, union_council, ward</strong></p>
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label" style="font-weight: 600; font-size: 13px;">Select CSV File</label>
+                        <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eee;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Upload & Import</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
