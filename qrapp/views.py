@@ -19,8 +19,8 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm
-from .models import Person, Town, Zone, UnionCouncil, Ward
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book
 
 
 def home(request):
@@ -744,3 +744,101 @@ def qr_image_proxy(request, pk):
     except Exception:
         from django.http import Http404
         raise Http404("Could not fetch QR image")
+
+
+@login_required
+@admin_only
+def book_list(request):
+    books_list = Book.objects.all().order_by('-id')
+
+    q = request.GET.get('q', '')
+    status = request.GET.get('status', '')
+    date_type = request.GET.get('date_type', '')
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+
+    if q:
+        books_list = books_list.filter(
+            Q(name__icontains=q) |
+            Q(office_person__icontains=q) |
+            Q(sr_no__icontains=q) |
+            Q(return_person_name__icontains=q)
+        )
+    
+    if status:
+        books_list = books_list.filter(return_status=status)
+
+    if date_type in ['receiving_date', 'issue_date', 'return_date']:
+        if start_date:
+            try:
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+                books_list = books_list.filter(**{f"{date_type}__gte": start_date_obj})
+            except ValueError:
+                pass
+        if end_date:
+            try:
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+                books_list = books_list.filter(**{f"{date_type}__lte": end_date_obj})
+            except ValueError:
+                pass
+
+    paginator = Paginator(books_list, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'current_filters': {
+            'q': q,
+            'status': status,
+            'date_type': date_type,
+            'start_date': start_date,
+            'end_date': end_date
+        },
+        'query_params': query_params,
+        'active_page': 'books'
+    }
+    return render(request, 'book_list.html', context)
+
+@login_required
+@admin_only
+def book_create(request):
+    if request.method == 'POST':
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Book added successfully!')
+            return redirect('book_list')
+    else:
+        form = BookForm()
+    return render(request, 'book_form.html', {'form': form, 'active_page': 'books'})
+
+@login_required
+@admin_only
+def book_update(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Book updated successfully!')
+            return redirect('book_list')
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'book_form.html', {'form': form, 'active_page': 'books', 'is_update': True})
+
+@require_POST
+@login_required
+@admin_only
+def book_delete(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    book.delete()
+    messages.success(request, 'Book deleted successfully!')
+    return redirect('book_list')

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Person, Town, Zone, UnionCouncil, Ward
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import password_validation
@@ -258,3 +258,20 @@ class PasswordUpdateForm(forms.Form):
             except forms.ValidationError as e:
                 self.add_error('new_password', e)
         return cleaned_data
+
+
+class BookForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = '__all__'
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Book Name'}),
+            'receiving_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'office_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Office Person'}),
+            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'return_status': forms.Select(attrs={'class': 'form-control'}),
+            'return_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'return_person_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Return Person Name'}),
+            'sr_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Serial Number'}),
+            'no_of_pages': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Pages'}),
+        }

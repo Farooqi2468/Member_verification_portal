@@ -119,6 +119,17 @@
             <li><a class="dropdown-item {% if active_page == 'create_user' %}active{% endif %}" href="{% url 'create_system_user' %}"><i class="bi bi-person-badge-fill"></i> Create User</a></li>
         </ul>
     </div>
+    <!-- Books Manager Dropup (Admin Only) -->
+    <div class="nav-item dropup-center dropup {% if active_page == 'books' %}active{% endif %}">
+        <div data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center;">
+            <i class="bi bi-book-fill"></i>
+            <span>Books</span>
+        </div>
+        <ul class="dropdown-menu">
+            <li class="dropdown-header">Books Module</li>
+            <li><a class="dropdown-item {% if active_page == 'books' %}active{% endif %}" href="{% url 'book_list' %}"><i class="bi bi-book-fill"></i> All Books</a></li>
+        </ul>
+    </div>
     {% endif %}
 
     <!-- System & Setup Dropup -->

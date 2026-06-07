@@ -73,3 +73,24 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.person_id})"
+
+
+class Book(models.Model):
+    name = models.CharField(max_length=200)
+    receiving_date = models.DateField()
+    office_person = models.CharField(max_length=100)
+    issue_date = models.DateField(null=True, blank=True)
+    
+    RETURN_STATUS_CHOICES = [
+        ('Returned', 'Returned'),
+        ('Not Returned', 'Not Returned'),
+    ]
+    return_status = models.CharField(max_length=20, choices=RETURN_STATUS_CHOICES, default='Not Returned')
+    
+    return_date = models.DateField(null=True, blank=True)
+    return_person_name = models.CharField(max_length=100, null=True, blank=True)
+    sr_no = models.CharField(max_length=50, unique=True)
+    no_of_pages = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} (Sr No: {self.sr_no})"

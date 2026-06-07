@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<div class="dash-wrap">
+    {% include 'includes/sidebar.html' with active_page='books' %}
+    <div class="dash-main">
+        <div class="mb-3">
+            <a href="{% url 'book_list' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i> Back to Books Directory
+            </a>
+        </div>
+        
+        <div class="card shadow-sm" style="border-radius: 12px; border: none;">
+            <div class="card-header" style="background: #1A1A1A; color: #fff; border-top-left-radius: 12px; border-top-right-radius: 12px; padding: 16px 24px;">
+                <h5 class="mb-0 fw-bold" style="font-family: 'Georgia', serif;">{% if is_update %}Update Book Record{% else %}Add New Book Record{% endif %}</h5>
+            </div>
+            <div class="card-body p-4 p-md-5" style="background: #fff; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        {% for field in form %}
+                        <div class="col-md-6">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-bold" style="font-size: 13px; color: #333;">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text small">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                            <div class="text-danger small mt-1" style="font-weight: 500;">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-5 pt-4 border-top d-flex gap-3">
+                        <button type="submit" class="btn px-4" style="background: var(--ppp-red, #C41E3A); color: white; font-weight: 600; border-radius: 8px;">
+                            <i class="bi bi-check-circle me-1"></i> Save Book
+                        </button>
+                        <a href="{% url 'book_list' %}" class="btn btn-light px-4" style="border-radius: 8px; font-weight: 600; border: 1px solid #ddd;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'includes/mobile_nav.html' with active_page='books' %}
+{% endblock %}

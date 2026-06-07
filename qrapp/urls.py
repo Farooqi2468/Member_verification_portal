@@ -38,4 +38,10 @@ urlpatterns = [
     path('ajax/ucs/', views.ajax_get_ucs, name='ajax_get_ucs'),
     path('ajax/wards/', views.ajax_get_wards, name='ajax_get_wards'),
     path('ajax/dashboard-charts/', views.ajax_dashboard_charts, name='ajax_dashboard_charts'),
+
+    # Books Module
+    path('dashboard/books/', views.book_list, name='book_list'),
+    path('dashboard/books/create/', views.book_create, name='book_create'),
+    path('dashboard/books/update/<int:pk>/', views.book_update, name='book_update'),
+    path('dashboard/books/delete/<int:pk>/', views.book_delete, name='book_delete'),
 ]
