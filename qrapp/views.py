@@ -468,16 +468,29 @@ def delete_person(request, pk):
 @login_required
 @admin_only
 def manage_locations(request):
+    q = request.GET.get('q', '')
+    towns = Town.objects.all()
+    zones = Zone.objects.select_related('town').all()
+    ucs = UnionCouncil.objects.select_related('zone__town').all()
+    wards = Ward.objects.select_related('union_council__zone__town').all()
+
+    if q:
+        towns = towns.filter(name__icontains=q)
+        zones = zones.filter(Q(name__icontains=q) | Q(town__name__icontains=q))
+        ucs = ucs.filter(Q(name__icontains=q) | Q(zone__name__icontains=q) | Q(zone__town__name__icontains=q))
+        wards = wards.filter(Q(name__icontains=q) | Q(union_council__name__icontains=q) | Q(union_council__zone__name__icontains=q) | Q(union_council__zone__town__name__icontains=q))
+
     context = {
         'town_form': TownForm(),
         'zone_form': ZoneForm(),
         'uc_form': UnionCouncilForm(),
         'ward_form': WardForm(),
-        'towns': Town.objects.all(),
-        'zones': Zone.objects.select_related('town').all(),
-        'ucs': UnionCouncil.objects.select_related('zone__town').all(),
-        'wards': Ward.objects.select_related('union_council__zone__town').all(),
+        'towns': towns,
+        'zones': zones,
+        'ucs': ucs,
+        'wards': wards,
         'active_tab': request.GET.get('tab', 'town'),
+        'q': q,
     }
     return render(request, 'locations.html', context)
 
@@ -490,6 +503,20 @@ def add_town(request):
     if form.is_valid():
         form.save()
     return redirect(f"{request.META.get('HTTP_REFERER', '/dashboard/locations/')}?tab=town")
+
+
+@require_POST
+@login_required
+@admin_only
+def update_town(request, pk):
+    town = get_object_or_404(Town, pk=pk)
+    form = TownForm(request.POST, instance=town)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Town '{town.name}' updated successfully.")
+    else:
+        messages.error(request, "Failed to update town. Please check the inputs.")
+    return redirect(f"/dashboard/locations/?tab=town")
 
 
 @require_POST
@@ -508,6 +535,20 @@ def add_zone(request):
     form = ZoneForm(request.POST)
     if form.is_valid():
         form.save()
+    return redirect('/dashboard/locations/?tab=zone')
+
+
+@require_POST
+@login_required
+@admin_only
+def update_zone(request, pk):
+    zone = get_object_or_404(Zone, pk=pk)
+    form = ZoneForm(request.POST, instance=zone)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Zone '{zone.name}' updated successfully.")
+    else:
+        messages.error(request, "Failed to update zone. Please check the inputs.")
     return redirect('/dashboard/locations/?tab=zone')
 
 
@@ -533,6 +574,20 @@ def add_uc(request):
 @require_POST
 @login_required
 @admin_only
+def update_uc(request, pk):
+    uc = get_object_or_404(UnionCouncil, pk=pk)
+    form = UnionCouncilForm(request.POST, instance=uc)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Union Council '{uc.name}' updated successfully.")
+    else:
+        messages.error(request, "Failed to update union council. Please check the inputs.")
+    return redirect('/dashboard/locations/?tab=uc')
+
+
+@require_POST
+@login_required
+@admin_only
 def delete_uc(request, pk):
     uc = get_object_or_404(UnionCouncil, pk=pk)
     uc.delete()
@@ -546,6 +601,20 @@ def add_ward(request):
     form = WardForm(request.POST)
     if form.is_valid():
         form.save()
+    return redirect('/dashboard/locations/?tab=ward')
+
+
+@require_POST
+@login_required
+@admin_only
+def update_ward(request, pk):
+    ward = get_object_or_404(Ward, pk=pk)
+    form = WardForm(request.POST, instance=ward)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"Ward '{ward.name}' updated successfully.")
+    else:
+        messages.error(request, "Failed to update ward. Please check the inputs.")
     return redirect('/dashboard/locations/?tab=ward')
 
 

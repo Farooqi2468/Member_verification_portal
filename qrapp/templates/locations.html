@@ -201,9 +201,19 @@
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-        <div style="margin-bottom: 28px;">
-            <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0 0 4px;">Manage Locations</h2>
-            <div style="font-size: 13px; color: #888;">Add and manage Towns, Zones, Union Councils, and Wards.</div>
+        <div style="margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0 0 4px;">Manage Locations</h2>
+                <div style="font-size: 13px; color: #888;">Add and manage Towns, Zones, Union Councils, and Wards.</div>
+            </div>
+            <form method="GET" style="display: flex; gap: 8px;">
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+                <input type="text" name="q" value="{{ q }}" class="loc-input" style="margin-bottom: 0; width: 250px;" placeholder="Search locations...">
+                <button type="submit" class="btn" style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 0 16px;">Search</button>
+                {% if q %}
+                <a href="?tab={{ active_tab }}" class="btn" style="background: #eee; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 10px 16px; text-decoration: none;">Clear</a>
+                {% endif %}
+            </form>
         </div>
 
         <!-- Tabs -->
@@ -246,11 +256,37 @@
                                 <td><strong>{{ town.name }}</strong></td>
                                 <td><span class="loc-badge">{{ town.zones.count }}</span></td>
                                 <td>
-                                    <form method="post" action="{% url 'delete_town' town.pk %}"
-                                        onsubmit="return confirm('Delete {{ town.name }}?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="loc-btn-del">Delete</button>
-                                    </form>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateTownModal{{ town.pk }}">Update</button>
+                                        <form method="post" action="{% url 'delete_town' town.pk %}"
+                                            onsubmit="return confirm('Delete {{ town.name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="loc-btn-del">Delete</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Update Town Modal -->
+                                    <div class="modal fade" id="updateTownModal{{ town.pk }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="border-radius: 12px; border: none;">
+                                                <div class="modal-header" style="background: #f9f9f9; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                                    <h5 class="modal-title" style="font-size: 15px; font-weight: 700;">Update Town</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" action="{% url 'update_town' town.pk %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body p-4 text-start">
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block;">Town Name</label>
+                                                        <input type="text" name="name" class="loc-input" value="{{ town.name }}" required>
+                                                    </div>
+                                                    <div class="modal-footer" style="border-top: 1px solid #eee;">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                                                        <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Save Changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
@@ -296,11 +332,43 @@
                                 <td><span class="loc-badge">{{ zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ zone.union_councils.count }}</span></td>
                                 <td>
-                                    <form method="post" action="{% url 'delete_zone' zone.pk %}"
-                                        onsubmit="return confirm('Delete {{ zone.name }}?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="loc-btn-del">Delete</button>
-                                    </form>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateZoneModal{{ zone.pk }}">Update</button>
+                                        <form method="post" action="{% url 'delete_zone' zone.pk %}"
+                                            onsubmit="return confirm('Delete {{ zone.name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="loc-btn-del">Delete</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Update Zone Modal -->
+                                    <div class="modal fade" id="updateZoneModal{{ zone.pk }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="border-radius: 12px; border: none;">
+                                                <div class="modal-header" style="background: #f9f9f9; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                                    <h5 class="modal-title" style="font-size: 15px; font-weight: 700;">Update Zone</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" action="{% url 'update_zone' zone.pk %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body p-4 text-start">
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block;">Town</label>
+                                                        <select name="town" class="loc-input" required>
+                                                            {% for t in towns %}
+                                                            <option value="{{ t.id }}" {% if t.id == zone.town.id %}selected{% endif %}>{{ t.name }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block; margin-top: 12px;">Zone Name</label>
+                                                        <input type="text" name="name" class="loc-input" value="{{ zone.name }}" required>
+                                                    </div>
+                                                    <div class="modal-footer" style="border-top: 1px solid #eee;">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                                                        <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Save Changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
@@ -348,11 +416,43 @@
                                 <td><span class="loc-badge">{{ uc.zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ uc.wards.count }}</span></td>
                                 <td>
-                                    <form method="post" action="{% url 'delete_uc' uc.pk %}"
-                                        onsubmit="return confirm('Delete {{ uc.name }}?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="loc-btn-del">Delete</button>
-                                    </form>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateUcModal{{ uc.pk }}">Update</button>
+                                        <form method="post" action="{% url 'delete_uc' uc.pk %}"
+                                            onsubmit="return confirm('Delete {{ uc.name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="loc-btn-del">Delete</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Update UC Modal -->
+                                    <div class="modal fade" id="updateUcModal{{ uc.pk }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="border-radius: 12px; border: none;">
+                                                <div class="modal-header" style="background: #f9f9f9; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                                    <h5 class="modal-title" style="font-size: 15px; font-weight: 700;">Update Union Council</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" action="{% url 'update_uc' uc.pk %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body p-4 text-start">
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block;">Zone</label>
+                                                        <select name="zone" class="loc-input" required>
+                                                            {% for z in zones %}
+                                                            <option value="{{ z.id }}" {% if z.id == uc.zone.id %}selected{% endif %}>{{ z.name }} ({{ z.town.name }})</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block; margin-top: 12px;">Union Council Name</label>
+                                                        <input type="text" name="name" class="loc-input" value="{{ uc.name }}" required>
+                                                    </div>
+                                                    <div class="modal-footer" style="border-top: 1px solid #eee;">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                                                        <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Save Changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
@@ -400,11 +500,43 @@
                                 <td><span class="loc-badge">{{ ward.union_council.zone.name }}</span></td>
                                 <td><span class="loc-badge">{{ ward.union_council.zone.town.name }}</span></td>
                                 <td>
-                                    <form method="post" action="{% url 'delete_ward' ward.pk %}"
-                                        onsubmit="return confirm('Delete {{ ward.name }}?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="loc-btn-del">Delete</button>
-                                    </form>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateWardModal{{ ward.pk }}">Update</button>
+                                        <form method="post" action="{% url 'delete_ward' ward.pk %}"
+                                            onsubmit="return confirm('Delete {{ ward.name }}?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="loc-btn-del">Delete</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Update Ward Modal -->
+                                    <div class="modal fade" id="updateWardModal{{ ward.pk }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content" style="border-radius: 12px; border: none;">
+                                                <div class="modal-header" style="background: #f9f9f9; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                                                    <h5 class="modal-title" style="font-size: 15px; font-weight: 700;">Update Ward</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form method="post" action="{% url 'update_ward' ward.pk %}">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body p-4 text-start">
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block;">Union Council</label>
+                                                        <select name="union_council" class="loc-input" required>
+                                                            {% for u in ucs %}
+                                                            <option value="{{ u.id }}" {% if u.id == ward.union_council.id %}selected{% endif %}>{{ u.name }} ({{ u.zone.name }})</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; display: block; margin-top: 12px;">Ward Name</label>
+                                                        <input type="text" name="name" class="loc-input" value="{{ ward.name }}" required>
+                                                    </div>
+                                                    <div class="modal-footer" style="border-top: 1px solid #eee;">
+                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                                                        <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Save Changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             {% empty %}
