@@ -25,12 +25,16 @@ urlpatterns = [
     # Location Management
     path('dashboard/locations/', views.manage_locations, name='manage_locations'),
     path('dashboard/locations/town/add/', views.add_town, name='add_town'),
+    path('dashboard/locations/town/update/<int:pk>/', views.update_town, name='update_town'),
     path('dashboard/locations/town/delete/<int:pk>/', views.delete_town, name='delete_town'),
     path('dashboard/locations/zone/add/', views.add_zone, name='add_zone'),
+    path('dashboard/locations/zone/update/<int:pk>/', views.update_zone, name='update_zone'),
     path('dashboard/locations/zone/delete/<int:pk>/', views.delete_zone, name='delete_zone'),
     path('dashboard/locations/uc/add/', views.add_uc, name='add_uc'),
+    path('dashboard/locations/uc/update/<int:pk>/', views.update_uc, name='update_uc'),
     path('dashboard/locations/uc/delete/<int:pk>/', views.delete_uc, name='delete_uc'),
     path('dashboard/locations/ward/add/', views.add_ward, name='add_ward'),
+    path('dashboard/locations/ward/update/<int:pk>/', views.update_ward, name='update_ward'),
     path('dashboard/locations/ward/delete/<int:pk>/', views.delete_ward, name='delete_ward'),
 
     # AJAX Cascade Endpoints
