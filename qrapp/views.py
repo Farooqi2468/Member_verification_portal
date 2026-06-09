@@ -480,6 +480,32 @@ def manage_locations(request):
         ucs = ucs.filter(Q(name__icontains=q) | Q(zone__name__icontains=q) | Q(zone__town__name__icontains=q))
         wards = wards.filter(Q(name__icontains=q) | Q(union_council__name__icontains=q) | Q(union_council__zone__name__icontains=q) | Q(union_council__zone__town__name__icontains=q))
 
+    active_tab = request.GET.get('tab', 'town')
+
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{active_tab}s_export.csv"'
+        writer = csv.writer(response)
+        
+        if active_tab == 'town':
+            writer.writerow(['Town Name', 'Number of Zones'])
+            for t in towns:
+                writer.writerow([t.name, t.zones.count()])
+        elif active_tab == 'zone':
+            writer.writerow(['Zone Name', 'Town', 'Number of UCs'])
+            for z in zones:
+                writer.writerow([z.name, z.town.name, z.union_councils.count()])
+        elif active_tab == 'uc':
+            writer.writerow(['UC Name', 'Zone', 'Town', 'Number of Wards'])
+            for u in ucs:
+                writer.writerow([u.name, u.zone.name, u.zone.town.name, u.wards.count()])
+        elif active_tab == 'ward':
+            writer.writerow(['Ward Name', 'Union Council', 'Zone', 'Town'])
+            for w in wards:
+                writer.writerow([w.name, w.union_council.name, w.union_council.zone.name, w.union_council.zone.town.name])
+                
+        return response
+
     context = {
         'town_form': TownForm(),
         'zone_form': ZoneForm(),

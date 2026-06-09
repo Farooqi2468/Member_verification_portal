@@ -206,14 +206,19 @@
                 <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0 0 4px;">Manage Locations</h2>
                 <div style="font-size: 13px; color: #888;">Add and manage Towns, Zones, Union Councils, and Wards.</div>
             </div>
-            <form method="GET" style="display: flex; gap: 8px;">
-                <input type="hidden" name="tab" value="{{ active_tab }}">
-                <input type="text" name="q" value="{{ q }}" class="loc-input" style="margin-bottom: 0; width: 250px;" placeholder="Search locations...">
-                <button type="submit" class="btn" style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 0 16px;">Search</button>
-                {% if q %}
-                <a href="?tab={{ active_tab }}" class="btn" style="background: #eee; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 10px 16px; text-decoration: none;">Clear</a>
-                {% endif %}
-            </form>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <form method="GET" style="display: flex; gap: 8px; margin: 0;">
+                    <input type="hidden" name="tab" value="{{ active_tab }}">
+                    <input type="text" name="q" value="{{ q }}" class="loc-input" style="margin-bottom: 0; width: 250px;" placeholder="Search locations...">
+                    <button type="submit" class="btn" style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 0 16px;">Search</button>
+                    {% if q %}
+                    <a href="?tab={{ active_tab }}" class="btn" style="background: #eee; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 10px 16px; text-decoration: none;">Clear</a>
+                    {% endif %}
+                </form>
+                <a href="?tab={{ active_tab }}&export=csv{% if q %}&q={{ q }}{% endif %}" class="btn" style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 10px 16px; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-download"></i> Export CSV
+                </a>
+            </div>
         </div>
 
         <!-- Tabs -->
