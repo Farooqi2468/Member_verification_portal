@@ -182,7 +182,9 @@ def create_person(request):
         form = PersonForm(request.POST)
         if form.is_valid():
             person = form.save(commit=False)
-            person.made_by = request.user
+            # If admin left the registrar dropdown blank, fall back to themselves
+            if not person.made_by:
+                person.made_by = request.user
             person.save()
 
             url = request.build_absolute_uri(f"/person/{person.person_id}/")

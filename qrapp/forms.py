@@ -11,7 +11,8 @@ class PersonForm(forms.ModelForm):
         fields = [
             'person_id', 'name', 'father_name',
             'cnic', 'phone', 'address',
-            'town', 'zone', 'union_council', 'ward'
+            'town', 'zone', 'union_council', 'ward',
+            'made_by'
         ]
         widgets = {
             'person_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
@@ -34,6 +35,7 @@ class PersonForm(forms.ModelForm):
             'zone': forms.Select(attrs={'class': 'form-control', 'id': 'id_zone'}),
             'union_council': forms.Select(attrs={'class': 'form-control', 'id': 'id_union_council'}),
             'ward': forms.Select(attrs={'class': 'form-control', 'id': 'id_ward'}),
+            'made_by': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -72,6 +74,12 @@ class PersonForm(forms.ModelForm):
             self.fields['ward'].queryset = Ward.objects.all()
         self.fields['ward'].empty_label = "— Select Ward —"
         self.fields['ward'].required = False
+
+        # Registrar (made_by) dropdown
+        self.fields['made_by'].queryset = User.objects.filter(is_active=True).order_by('username')
+        self.fields['made_by'].required = False
+        self.fields['made_by'].empty_label = "— Select Registrar (defaults to you) —"
+        self.fields['made_by'].label = "Registered By"
 
 
 class TownForm(forms.ModelForm):
