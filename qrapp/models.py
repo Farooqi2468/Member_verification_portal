@@ -48,6 +48,16 @@ class Ward(models.Model):
         unique_together = ('name', 'union_council')
 
 
+class Member(models.Model):
+    member_id = models.CharField(max_length=50, primary_key=True)
+    member_name = models.CharField(max_length=100)
+    member_phone = models.CharField(max_length=15, null=True, blank=True)
+    no_of_registrations = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.member_name} ({self.member_id})"
+
+
 class Person(models.Model):
     # person_id acts as the primary key entered from the form
     person_id = models.CharField(max_length=50, primary_key=True, default=100011)
@@ -65,8 +75,8 @@ class Person(models.Model):
     union_council = models.ForeignKey(UnionCouncil, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
 
-    # Foreign key to the User table
-    made_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='persons_created')
+    # Foreign key to the Member table
+    made_by = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='persons_created')
 
     qr_code = models.ImageField(upload_to='qrcodes/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

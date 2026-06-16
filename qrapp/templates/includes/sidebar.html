@@ -55,6 +55,10 @@
             <i class="bi bi-person-badge-fill text-white"></i> 
             <span class="sidebar-text">Create User</span>
         </a>
+        <a class="nav-link {% if active_page == 'all_real_members' %}active{% endif %}" href="{% url 'all_real_members' %}" title="All Real Members">
+            <i class="bi bi-people text-white"></i> 
+            <span class="sidebar-text">Real Members List</span>
+        </a>
         {% endif %}
     </nav>
 </div>

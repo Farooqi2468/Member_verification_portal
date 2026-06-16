@@ -205,7 +205,7 @@
         {% if is_admin %}
         <div class="data-row">
             <span class="data-label">Registered by</span>
-            <span class="data-value">{{ person.made_by.username|default:"Admin" }}</span>
+            <span class="data-value">{{ person.made_by.member_name|default:"Admin" }}</span>
         </div>
         {% endif %}
         <div class="data-row">

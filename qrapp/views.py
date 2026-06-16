@@ -19,8 +19,9 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm
-from .models import Person, Town, Zone, UnionCouncil, Ward, Book
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm, MemberForm
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member
+from django.db.models import F
 
 
 def home(request):
@@ -57,7 +58,7 @@ def dashboard(request):
         'total_zones':     Zone.objects.count(),
         'total_ucs':       UnionCouncil.objects.count(),
         'total_wards':     Ward.objects.count(),
-        'registered_by_me': Person.objects.filter(made_by=request.user).count(),
+        'registered_by_me': 0, # Disabled since made_by is now a Member
     }
     return render(request, 'dashboard.html', context)
 
@@ -184,9 +185,28 @@ def create_person(request):
         form = PersonForm(request.POST)
         if form.is_valid():
             person = form.save(commit=False)
-            # If admin left the registrar dropdown blank, fall back to themselves
-            if not person.made_by:
-                person.made_by = request.user
+            
+            member_id = form.cleaned_data.get('member_id')
+            member_name = form.cleaned_data.get('member_name')
+            member_phone = form.cleaned_data.get('member_phone')
+            
+            if member_id:
+                member, created = Member.objects.get_or_create(
+                    member_id=member_id,
+                    defaults={
+                        'member_name': member_name,
+                        'member_phone': member_phone,
+                        'no_of_registrations': 1
+                    }
+                )
+                
+                if not created:
+                    member.no_of_registrations = F('no_of_registrations') + 1
+                    member.save()
+                    member.refresh_from_db()
+                    
+                person.made_by = member
+                
             person.save()
 
             url = request.build_absolute_uri(f"/person/{person.person_id}/")
@@ -306,7 +326,7 @@ def all_members(request):
                 p.zone.name if p.zone else '',
                 p.union_council.name if p.union_council else '',
                 p.ward.name if p.ward else '',
-                p.made_by.username if p.made_by else '',
+                p.made_by.member_name if p.made_by else '',
                 p.created_at.strftime('%Y-%m-%d %H:%M:%S')
             ])
         return response
@@ -319,10 +339,7 @@ def all_members(request):
     # Initial context for dropdowns
     towns = Town.objects.all()
     
-    # ROLE-BASED VISIBILITY: Non-superusers cannot see superusers in registrar list
-    registrars = User.objects.filter(is_active=True).order_by('username')
-    if not request.user.is_superuser:
-        registrars = registrars.filter(is_superuser=False)
+    registrars = Member.objects.all().order_by('member_name')
     # Query string for pagination
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -405,7 +422,7 @@ def import_members_csv(request):
                     'zone': zone_obj,
                     'union_council': uc_obj,
                     'ward': ward_obj,
-                    'made_by': request.user,
+                    'made_by': None,
                 }
             )
 
@@ -736,10 +753,7 @@ def reports_view(request):
     town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
     
     # 2. Registrar Performance (Top 10)
-    # ROLE-BASED VISIBILITY: Non-superusers cannot see superuser accounts
-    registrar_qs = User.objects.filter(is_active=True)
-    if not request.user.is_superuser:
-        registrar_qs = registrar_qs.filter(is_superuser=False)
+    registrar_qs = Member.objects.all()
     registrar_stats = registrar_qs.annotate(
         member_count=Count('persons_created')
     ).order_by('-member_count')[:10]
@@ -941,3 +955,87 @@ def book_delete(request, pk):
     book.delete()
     messages.success(request, 'Book deleted successfully!')
     return redirect('book_list')
+
+@login_required
+@admin_only
+def all_real_members(request):
+    members_list = Member.objects.all().order_by('-member_name')
+    q = request.GET.get('q', '')
+
+    if q:
+        members_list = members_list.filter(
+            Q(member_name__icontains=q) |
+            Q(member_id__icontains=q) |
+            Q(member_phone__icontains=q)
+        )
+
+    # CSV Export
+    if request.GET.get('export') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="real_members_export.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Member ID', 'Name', 'Phone', 'No of Registrations'])
+        
+        for m in members_list:
+            writer.writerow([m.member_id, m.member_name, m.member_phone, m.no_of_registrations])
+        return response
+
+    paginator = Paginator(members_list, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    query_dict = request.GET.copy()
+    if 'page' in query_dict:
+        del query_dict['page']
+    query_params = query_dict.urlencode()
+    if query_params:
+        query_params = f"&{query_params}"
+
+    context = {
+        'page_obj': page_obj,
+        'current_filters': {'q': q},
+        'query_params': query_params,
+        'active_page': 'all_real_members'
+    }
+    return render(request, 'all_real_members.html', context)
+
+
+@login_required
+@admin_only
+def create_real_member(request):
+    if request.method == 'POST':
+        form = MemberForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Member created successfully!')
+            return redirect('all_real_members')
+    else:
+        form = MemberForm()
+    return render(request, 'member_form.html', {'form': form, 'active_page': 'all_real_members'})
+
+
+@login_required
+@admin_only
+def update_real_member(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+    if request.method == 'POST':
+        form = MemberForm(request.POST, instance=member)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Member updated successfully!')
+            return redirect('all_real_members')
+    else:
+        form = MemberForm(instance=member)
+    return render(request, 'member_form.html', {'form': form, 'is_update': True, 'member': member, 'active_page': 'all_real_members'})
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_real_member(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+    member.delete()
+    messages.success(request, 'Member deleted successfully!')
+    return redirect('all_real_members')
+

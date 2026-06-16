@@ -1,18 +1,21 @@
 from django import forms
-from .models import Person, Town, Zone, UnionCouncil, Ward, Book
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import password_validation
 
 
 class PersonForm(forms.ModelForm):
+    member_id = forms.CharField(max_length=50, required=True, label="Member ID", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member ID'}))
+    member_name = forms.CharField(max_length=100, required=True, label="Member Name", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
+    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
+
     class Meta:
         model = Person
         fields = [
             'person_id', 'name', 'father_name',
             'cnic', 'phone', 'address',
-            'town', 'zone', 'union_council', 'ward',
-            'made_by'
+            'town', 'zone', 'union_council', 'ward'
         ]
         widgets = {
             'person_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
@@ -35,7 +38,7 @@ class PersonForm(forms.ModelForm):
             'zone': forms.Select(attrs={'class': 'form-control', 'id': 'id_zone'}),
             'union_council': forms.Select(attrs={'class': 'form-control', 'id': 'id_union_council'}),
             'ward': forms.Select(attrs={'class': 'form-control', 'id': 'id_ward'}),
-            'made_by': forms.Select(attrs={'class': 'form-control'}),
+            'ward': forms.Select(attrs={'class': 'form-control', 'id': 'id_ward'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -75,11 +78,6 @@ class PersonForm(forms.ModelForm):
         self.fields['ward'].empty_label = "— Select Ward —"
         self.fields['ward'].required = False
 
-        # Registrar (made_by) dropdown
-        self.fields['made_by'].queryset = User.objects.filter(is_active=True).order_by('username')
-        self.fields['made_by'].required = False
-        self.fields['made_by'].empty_label = "— Select Registrar (defaults to you) —"
-        self.fields['made_by'].label = "Registered By"
 
 
 class TownForm(forms.ModelForm):
@@ -282,4 +280,17 @@ class BookForm(forms.ModelForm):
             'return_person_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Return Person Name'}),
             'sr_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Serial Number'}),
             'no_of_pages': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Pages'}),
-        }
+        }
+
+
+class MemberForm(forms.ModelForm):
+    class Meta:
+        model = Member
+        fields = ['member_id', 'member_name', 'member_phone', 'no_of_registrations']
+        widgets = {
+            'member_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member ID'}),
+            'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
+            'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'no_of_registrations': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total Registrations'}),
+        }
+
