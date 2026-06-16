@@ -209,7 +209,7 @@
                                     <thead>
                                         <tr>
                                             <th>Rank</th>
-                                            <th>Username</th>
+                                            <th>Member Name</th>
                                             <th class="text-end">Registrations</th>
                                         </tr>
                                     </thead>
@@ -218,12 +218,7 @@
                                         <tr>
                                             <td>#{{ forloop.counter }}</td>
                                             <td>
-                                                {% if user.is_superuser and not is_superuser %}
-                                                <div class="fw-bold text-muted fst-italic">Super Admin</div>
-                                                {% else %}
-                                                <div class="fw-bold">{{ user.username }}</div>
-                                                {% endif %}
-                                                <div class="text-muted" style="font-size: 11px;">{{ user.groups.first.name }}</div>
+                                                <div class="fw-bold">{{ user.member_name }}</div>
                                             </td>
                                             <td class="text-end">
                                                 <span class="badge bg-dark rounded-pill">{{ user.member_count }}</span>
@@ -302,7 +297,7 @@
         new Chart(document.getElementById('performanceChart'), {
             type: 'bar',
             data: {
-                labels: [{% for user in registrar_stats %}'{% if user.is_superuser and not is_superuser %}Super Admin{% else %}{{ user.username|escapejs|default:"" }}{% endif %}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                labels: [{% for user in registrar_stats %}'{{ user.member_name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
                 datasets: [{
                     label: 'Registrations',
                     data: [{% for user in registrar_stats %}{{ user.member_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],

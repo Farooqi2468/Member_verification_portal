@@ -250,12 +250,22 @@
                             {{ form.address }}
                         </div>
 
-                        <div class="qr-input-group">
-                            <label>
-                                {{ form.made_by.label }}
-                                <span style="font-weight: 400; color: #999; text-transform: none; font-size: 11px; letter-spacing: 0;">(optional — defaults to you)</span>
-                            </label>
-                            {{ form.made_by }}
+                        <hr style="border-top: 1px dashed #E5E5E5; margin: 24px 0;">
+                        <h6 style="font-family: 'Georgia', serif; font-weight: 600; font-size: 16px; margin-bottom: 16px; color: var(--ppp-red);">Member Registration Details</h6>
+
+                        <div class="row">
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_id.label }}</label>
+                                {{ form.member_id }}
+                            </div>
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_name.label }}</label>
+                                {{ form.member_name }}
+                            </div>
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_phone.label }}</label>
+                                {{ form.member_phone }}
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-lg w-100 mt-3" style="background: var(--ppp-green); color: #fff; border-radius: 10px; font-weight: 600; padding: 14px;">

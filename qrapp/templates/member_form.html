@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-green: #006B3F;
+    }
+    .form-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 32px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .form-title {
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        font-size: 20px;
+        margin-bottom: 24px;
+        color: #1A1A1A;
+    }
+    .form-group {
+        margin-bottom: 16px;
+    }
+    .form-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #444;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .btn-save {
+        background: var(--ppp-green);
+        color: white;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 12px 24px;
+        border: none;
+        width: 100%;
+        margin-top: 16px;
+    }
+</style>
+
+<div class="dash-wrap">
+    {% include 'includes/sidebar.html' with active_page='all_real_members' %}
+
+    <div class="dash-main">
+        <div class="mb-3">
+            <a href="{% url 'all_real_members' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i> Back to Real Members List
+            </a>
+        </div>
+        
+        <div class="form-card shadow-sm">
+            <h2 class="form-title">{% if is_update %}Update Member{% else %}Create New Member{% endif %}</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {% if form.errors %}
+                <div class="alert alert-danger" style="border-radius: 8px;">
+                    <ul class="mb-0 ps-3">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li style="font-size: 13px;">{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li style="font-size: 13px;">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn-save">
+                    {% if is_update %}Save Changes{% else %}Create Member{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='all_real_members' %}
+
+{% endblock %}

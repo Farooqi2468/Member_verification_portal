@@ -342,9 +342,9 @@
                         <div class="col-md-4">
                             <label class="form-label">Registered By</label>
                             <select name="registrar" class="form-select">
-                                <option value="">— All Users —</option>
+                                <option value="">— All Members —</option>
                                 {% for u in registrars %}
-                                <option value="{{ u.id }}" {% if current_filters.registrar == u.id %}selected{% endif %}>{{ u.username }}</option>
+                                <option value="{{ u.member_id }}" {% if current_filters.registrar == u.member_id %}selected{% endif %}>{{ u.member_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -396,7 +396,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ person.made_by.username|default:"System" }}</td>
+                            <td>{{ person.made_by.member_name|default:"System" }}</td>
                             <td style="text-align: right;">
                                 <div class="action-buttons-wrap">
                                     <!-- Details Button -->

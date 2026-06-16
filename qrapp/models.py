@@ -48,6 +48,16 @@ class Ward(models.Model):
         unique_together = ('name', 'union_council')
 
 
+class Member(models.Model):
+    member_id = models.CharField(max_length=50, primary_key=True)
+    member_name = models.CharField(max_length=100)
+    member_phone = models.CharField(max_length=15, null=True, blank=True)
+    no_of_registrations = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.member_name} ({self.member_id})"
+
+
 class Person(models.Model):
     # membership_number acts as the primary key entered from the form
     membership_number = models.CharField(max_length=50, primary_key=True, default=100011)
@@ -98,4 +108,4 @@ class Book(models.Model):
     no_of_pages = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} (Sr No: {self.sr_no})"
+        return f"{self.name} (Sr No: {self.sr_no})"
