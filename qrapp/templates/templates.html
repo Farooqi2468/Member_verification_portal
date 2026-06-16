@@ -225,8 +225,23 @@
 
                         <div class="row">
                             <div class="col-md-6 qr-input-group">
-                                <label>{{ form.person_id.label }} (ID Number)</label>
-                                {{ form.person_id }}
+                                <label>{{ form.membership_number.label }} (ID Number)</label>
+                                {{ form.membership_number }}
+                            </div>
+                            <div class="col-md-6 qr-input-group">
+                                <label>{{ form.member_name.label }}</label>
+                                {{ form.member_name }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 qr-input-group">
+                                <label>{{ form.member_membership_id.label }}</label>
+                                {{ form.member_membership_id }}
+                            </div>
+                            <div class="col-md-6 qr-input-group">
+                                <label>{{ form.member_phone.label }}</label>
+                                {{ form.member_phone }}
                             </div>
                         </div>
 
@@ -298,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const ucSel   = document.getElementById('id_union_council');
     const wardSel = document.getElementById('id_ward');
     const nameInput = document.querySelector('input[name="name"]');
-    const idInput   = document.querySelector('input[name="person_id"]');
+    const idInput   = document.querySelector('input[name="membership_number"]');
     const prevName  = document.getElementById('prevName');
     const prevId    = document.getElementById('prevId');
     const prevTown  = document.getElementById('prevTown');

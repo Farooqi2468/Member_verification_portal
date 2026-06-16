@@ -241,7 +241,7 @@
                 </div>
                 <div class="detail-row">
                     <div class="label">Member ID</div>
-                    <div class="value" style="font-family: monospace; font-size: 13px;">#{{ person.person_id }}</div>
+                    <div class="value" style="font-family: monospace; font-size: 13px;">#{{ person.membership_number }}</div>
                 </div>
             </div>
         </div>
@@ -274,9 +274,9 @@
                 </div>
                 <div style="text-align: center; flex-shrink: 0;">
                     <div class="qr-display-box" style="padding: 6px; margin: 0; background: #fff; border-radius: 8px;">
-                        <img id="qrCodeImg" src="{% if qr_base64 %}{{ qr_base64 }}{% elif person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.person_id }}.png{% endif %}" width="70" alt="QR Code" style="display: block;">
+                        <img id="qrCodeImg" src="{% if qr_base64 %}{{ qr_base64 }}{% elif person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.membership_number }}.png{% endif %}" width="70" alt="QR Code" style="display: block;">
                     </div>
-                    <div style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">#{{ person.person_id }}</div>
+                    <div style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">#{{ person.membership_number }}</div>
                 </div>
             </div>
 
@@ -351,7 +351,7 @@
             logging: false
         }).then(function(canvas) {
             var link = document.createElement('a');
-            link.download = 'member-card-{{ person.person_id }}.png';
+            link.download = 'member-card-{{ person.membership_number }}.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
             btn.disabled = false;
@@ -378,7 +378,7 @@
             var printWin = window.open('', '_blank', 'width=600,height=500');
             printWin.document.write(
                 '<!DOCTYPE html><html><head>' +
-                '<title>Member Card &mdash; {{ person.person_id }}</title>' +
+                '<title>Member Card &mdash; {{ person.membership_number }}</title>' +
                 '<style>' +
                 '  * { margin: 0; padding: 0; box-sizing: border-box; }' +
                 '  body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #fff; }' +

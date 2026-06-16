@@ -189,24 +189,24 @@ def create_person(request):
                 person.made_by = request.user
             person.save()
 
-            url = request.build_absolute_uri(f"/person/{person.person_id}/")
+            url = request.build_absolute_uri(f"/person/{person.membership_number}/")
             img = qrcode.make(url)
             
             buffer = io.BytesIO()
             img.save(buffer, format='PNG')
-            file_name = f"qr_{person.person_id}.png"
+            file_name = f"qr_{person.membership_number}.png"
             
             person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
             person.save()
 
-            return redirect('admin_person_detail', pk=person.person_id)
+            return redirect('admin_person_detail', pk=person.membership_number)
     else:
         form = PersonForm()
     return render(request, 'templates.html', {'form': form})
 
 
 def person_detail(request, pk):
-    person = get_object_or_404(Person, person_id=pk)
+    person = get_object_or_404(Person, membership_number=pk)
 
     # Secure string masking
     masked_phone = person.phone if person.phone else "--"
@@ -233,7 +233,7 @@ def person_detail(request, pk):
 @login_required
 @admin_only
 def admin_person_detail(request, pk):
-    person = get_object_or_404(Person, person_id=pk)
+    person = get_object_or_404(Person, membership_number=pk)
     is_admin = request.user.groups.filter(name='Admin').exists() or request.user.is_superuser
 
     # Read QR image and encode as base64 so it can be embedded directly in HTML.
@@ -270,7 +270,7 @@ def all_members(request):
     if q:
         members_list = members_list.filter(
             Q(name__icontains=q) | 
-            Q(person_id__icontains=q) | 
+            Q(membership_number__icontains=q) | 
             Q(cnic__icontains=q) |
             Q(phone__icontains=q)
         )
@@ -301,7 +301,7 @@ def all_members(request):
         
         for p in members_list:
             writer.writerow([
-                p.person_id, p.name, p.father_name, p.cnic, p.phone, p.address,
+                p.membership_number, p.name, p.father_name, p.cnic, p.phone, p.address,
                 p.town.name if p.town else '',
                 p.zone.name if p.zone else '',
                 p.union_council.name if p.union_council else '',
@@ -373,8 +373,8 @@ def import_members_csv(request):
             # Clean keys to make it more resilient to trailing spaces or case differences
             cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
             
-            person_id = cleaned_row.get('person_id')
-            if not person_id:
+            membership_number = cleaned_row.get('membership_number')
+            if not membership_number:
                 error_count += 1
                 continue
             
@@ -394,7 +394,7 @@ def import_members_csv(request):
 
             # Create or update the person
             person, created = Person.objects.update_or_create(
-                person_id=person_id,
+                membership_number=membership_number,
                 defaults={
                     'name': cleaned_row.get('name', ''),
                     'father_name': cleaned_row.get('father_name', ''),
@@ -411,12 +411,12 @@ def import_members_csv(request):
 
             # Generate QR code if newly created or if missing
             if created or not person.qr_code:
-                url = request.build_absolute_uri(f"/person/{person.person_id}/")
+                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
                 img = qrcode.make(url)
                 
                 buffer = io.BytesIO()
                 img.save(buffer, format='PNG')
-                file_name = f"qr_{person.person_id}.png"
+                file_name = f"qr_{person.membership_number}.png"
                 
                 person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
                 person.save()
@@ -426,7 +426,7 @@ def import_members_csv(request):
         if success_count > 0:
             messages.success(request, f"Successfully imported/updated {success_count} members.")
         if error_count > 0:
-            messages.warning(request, f"Skipped {error_count} rows due to missing 'person_id'.")
+            messages.warning(request, f"Skipped {error_count} rows due to missing 'membership_number'.")
 
     except Exception as e:
         messages.error(request, f"Error processing CSV file: {str(e)}")
@@ -437,22 +437,22 @@ def import_members_csv(request):
 @login_required
 @admin_only
 def update_person(request, pk):
-    person = get_object_or_404(Person, person_id=pk)
+    person = get_object_or_404(Person, membership_number=pk)
     if request.method == 'POST':
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
             person = form.save(commit=False)
-            url = request.build_absolute_uri(f"/person/{person.person_id}/")
+            url = request.build_absolute_uri(f"/person/{person.membership_number}/")
             img = qrcode.make(url)
             
             buffer = io.BytesIO()
             img.save(buffer, format='PNG')
-            file_name = f"qr_{person.person_id}.png"
+            file_name = f"qr_{person.membership_number}.png"
             
             person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
             person.save()
 
-            return redirect('admin_person_detail', pk=person.person_id)
+            return redirect('admin_person_detail', pk=person.membership_number)
     else:
         form = PersonForm(instance=person)
     return render(request, 'templates.html', {'form': form, 'is_update': True, 'person': person})
@@ -462,7 +462,7 @@ def update_person(request, pk):
 @login_required
 @admin_only
 def delete_person(request, pk):
-    person = get_object_or_404(Person, person_id=pk)
+    person = get_object_or_404(Person, membership_number=pk)
     person.delete()
     return redirect('all_members')
 
@@ -699,7 +699,7 @@ def ajax_dashboard_charts(request):
         persons_qs
         .annotate(date=TruncDate('created_at'))
         .values('date')
-        .annotate(count=Count('person_id'))
+        .annotate(count=Count('membership_number'))
         .order_by('date')
     )
     
@@ -711,7 +711,7 @@ def ajax_dashboard_charts(request):
         persons_qs
         .filter(town__isnull=False)
         .values('town__name')
-        .annotate(count=Count('person_id'))
+        .annotate(count=Count('membership_number'))
         .order_by('-count')
     )
     
@@ -823,7 +823,7 @@ def settings_view(request):
 def qr_image_proxy(request, pk):
     """Proxies the QR image from S3 through Django so the browser can fetch it
     from the same origin, bypassing the CORS restriction on canvas taint."""
-    person = get_object_or_404(Person, person_id=pk)
+    person = get_object_or_404(Person, membership_number=pk)
     if not person.qr_code:
         from django.http import Http404
         raise Http404("QR code not found")
