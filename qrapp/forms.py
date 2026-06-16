@@ -13,12 +13,16 @@ class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
         fields = [
-            'person_id', 'name', 'father_name',
+            'membership_number', 'name', 'father_name',
             'cnic', 'phone', 'address',
-            'town', 'zone', 'union_council', 'ward'
+            'town', 'zone', 'union_council', 'ward',
+            'made_by', 'member_name', 'member_membership_id', 'member_phone'
         ]
         widgets = {
-            'person_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
+            'membership_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
+            'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
+            'member_membership_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Membership ID'}),
+            'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Father's Name"}),
             'cnic': forms.TextInput(attrs={
@@ -293,4 +297,4 @@ class MemberForm(forms.ModelForm):
             'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
             'no_of_registrations': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total Registrations'}),
         }
-
+

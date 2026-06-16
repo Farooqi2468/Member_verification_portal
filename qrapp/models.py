@@ -59,8 +59,8 @@ class Member(models.Model):
 
 
 class Person(models.Model):
-    # person_id acts as the primary key entered from the form
-    person_id = models.CharField(max_length=50, primary_key=True, default=100011)
+    # membership_number acts as the primary key entered from the form
+    membership_number = models.CharField(max_length=50, primary_key=True, default=100011)
 
     name = models.CharField(max_length=100, null=True, blank=True)
     father_name = models.CharField(max_length=100, blank=True, null=True)
@@ -75,14 +75,19 @@ class Person(models.Model):
     union_council = models.ForeignKey(UnionCouncil, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
     ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
 
-    # Foreign key to the Member table
-    made_by = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='persons_created')
+    # New fields
+    member_name = models.CharField(max_length=100, null=True, blank=True)
+    member_membership_id = models.CharField(max_length=50, null=True, blank=True)
+    member_phone = models.CharField(max_length=15, null=True, blank=True)
+
+    # Foreign key to the User table
+    made_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='persons_created')
 
     qr_code = models.ImageField(upload_to='qrcodes/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} ({self.person_id})"
+        return f"{self.name} ({self.membership_number})"
 
 
 class Book(models.Model):
@@ -103,4 +108,4 @@ class Book(models.Model):
     no_of_pages = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name} (Sr No: {self.sr_no})"
+        return f"{self.name} (Sr No: {self.sr_no})"
