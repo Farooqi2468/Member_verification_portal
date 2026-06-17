@@ -172,6 +172,32 @@
             position: relative;
         }
 
+        @media (max-width: 991.98px) {
+            .dash-sidebar {
+                position: fixed !important;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                z-index: 1045;
+                transition: left 0.3s ease;
+                height: 100vh;
+                overflow-y: auto;
+            }
+            .dash-sidebar.show-mobile {
+                left: 0 !important;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 1040;
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+
         /* ── Print Styles ── */
         @media print {
             .navbar, .navbar-custom, .dash-sidebar, .sidebar, .btn, .no-print, .action-buttons-wrap, .pagination-container, .mobile-actions, .filter-section {
@@ -225,8 +251,7 @@
             </a>
 
             <!-- Toggle button -->
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 shadow-none" type="button" onclick="toggleMobileSidebar()">
                 <span class="navbar-toggler-icon navbar-toggler-icon-custom"></span>
             </button>
 
@@ -324,6 +349,25 @@
                 });
             }
         });
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('baseSidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('show-mobile');
+                
+                // Toggle overlay
+                let overlay = document.getElementById('mobileSidebarOverlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'mobileSidebarOverlay';
+                    overlay.className = 'sidebar-overlay show';
+                    document.body.appendChild(overlay);
+                    overlay.onclick = toggleMobileSidebar;
+                } else {
+                    overlay.classList.toggle('show');
+                }
+            }
+        }
     </script>
 </body>
 

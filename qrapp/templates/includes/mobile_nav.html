@@ -87,62 +87,15 @@
 </style>
 
 <div class="mobile-bottom-nav d-flex d-md-none">
-    <!-- Overview -->
+    <!-- Overview / Dashboard -->
     <a href="{% url 'dashboard' %}" class="{% if active_page == 'dashboard' %}active{% endif %}">
         <i class="bi bi-speedometer2"></i>
-        <span>Overview</span>
+        <span>Dashboard</span>
     </a>
 
-    <!-- Members Manager Dropup -->
-    <div class="nav-item dropup-center dropup {% if active_page == 'members' or active_page == 'register' %}active{% endif %}">
-        <div data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center;">
-            <i class="bi bi-people-fill"></i>
-            <span>Members</span>
-        </div>
-        <ul class="dropdown-menu">
-            <li class="dropdown-header">Members Manager</li>
-            <li><a class="dropdown-item {% if active_page == 'members' %}active{% endif %}" href="{% url 'all_members' %}"><i class="bi bi-people-fill"></i> All Members</a></li>
-            <li><a class="dropdown-item {% if active_page == 'register' %}active{% endif %}" href="{% url 'create_person' %}"><i class="bi bi-person-plus-fill"></i> Register</a></li>
-        </ul>
-    </div>
-
-    <!-- Users Manager Dropup (Admin Only) -->
-    {% if request.user.groups.all.0.name == 'Admin' or request.user.is_superuser %}
-    <div class="nav-item dropup-center dropup {% if active_page == 'all_users' or active_page == 'create_user' %}active{% endif %}">
-        <div data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center;">
-            <i class="bi bi-person-badge-fill"></i>
-            <span>Users</span>
-        </div>
-        <ul class="dropdown-menu">
-            <li class="dropdown-header">Users Manager</li>
-            <li><a class="dropdown-item {% if active_page == 'all_users' %}active{% endif %}" href="{% url 'all_system_users' %}"><i class="bi bi-person-lines-fill"></i> All Users</a></li>
-            <li><a class="dropdown-item {% if active_page == 'create_user' %}active{% endif %}" href="{% url 'create_system_user' %}"><i class="bi bi-person-badge-fill"></i> Create User</a></li>
-        </ul>
-    </div>
-    <!-- Books Manager Dropup (Admin Only) -->
-    <div class="nav-item dropup-center dropup {% if active_page == 'books' %}active{% endif %}">
-        <div data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center;">
-            <i class="bi bi-book-fill"></i>
-            <span>Books</span>
-        </div>
-        <ul class="dropdown-menu">
-            <li class="dropdown-header">Books Module</li>
-            <li><a class="dropdown-item {% if active_page == 'books' %}active{% endif %}" href="{% url 'book_list' %}"><i class="bi bi-book-fill"></i> All Books</a></li>
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- System & Setup Dropup -->
-    <div class="nav-item dropup-center dropup {% if active_page == 'locations' %}active{% endif %}">
-        <div data-bs-toggle="dropdown" aria-expanded="false" style="display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center;">
-            <i class="bi bi-gear-fill"></i>
-            <span>System</span>
-        </div>
-        <ul class="dropdown-menu">
-            <li class="dropdown-header">System & Setup</li>
-            <li><a class="dropdown-item {% if active_page == 'locations' %}active{% endif %}" href="{% url 'manage_locations' %}"><i class="bi bi-geo-alt-fill"></i> Locations</a></li>
-            <li><a class="dropdown-item {% if active_page == 'reports' %}active{% endif %}" href="{% url 'reports_view' %}"><i class="bi bi-bar-chart-fill"></i> Reports</a></li>
-            <li><a class="dropdown-item {% if active_page == 'settings' %}active{% endif %}" href="{% url 'settings' %}"><i class="bi bi-gear-fill"></i> Settings</a></li>
-        </ul>
-    </div>
+    <!-- Settings -->
+    <a href="{% url 'settings' %}" class="{% if active_page == 'settings' %}active{% endif %}">
+        <i class="bi bi-gear-fill"></i>
+        <span>Settings</span>
+    </a>
 </div>
