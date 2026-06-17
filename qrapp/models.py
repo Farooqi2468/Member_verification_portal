@@ -80,8 +80,8 @@ class Person(models.Model):
     member_membership_id = models.CharField(max_length=50, null=True, blank=True)
     member_phone = models.CharField(max_length=15, null=True, blank=True)
 
-    # Foreign key to the User table
-    made_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='persons_created')
+    # Foreign key to the Member table
+    made_by = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='persons_created')
 
     qr_code = models.ImageField(upload_to='qrcodes/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

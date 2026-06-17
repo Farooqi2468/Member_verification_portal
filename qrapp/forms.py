@@ -16,7 +16,7 @@ class PersonForm(forms.ModelForm):
             'membership_number', 'name', 'father_name',
             'cnic', 'phone', 'address',
             'town', 'zone', 'union_council', 'ward',
-            'made_by', 'member_name', 'member_membership_id', 'member_phone'
+            'member_name', 'member_membership_id', 'member_phone'
         ]
         widgets = {
             'membership_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
