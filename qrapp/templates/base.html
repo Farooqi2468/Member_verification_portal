@@ -171,6 +171,30 @@
             overflow-y: auto;
             position: relative;
         }
+
+        /* ── Print Styles ── */
+        @media print {
+            .navbar, .navbar-custom, .dash-sidebar, .sidebar, .btn, .no-print, .action-buttons-wrap, .pagination-container, .mobile-actions, .filter-section {
+                display: none !important;
+            }
+            .dash-wrap, body {
+                background: #fff !important;
+            }
+            .dash-main {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                overflow: visible !important;
+            }
+            .table-card {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            a[href]:after {
+                content: none !important;
+            }
+        }
     </style>
 </head>
 

@@ -151,6 +151,10 @@
                     <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-funnel-fill"></i> Filters
                     </button>
+                    <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                        style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
+                        <i class="bi bi-printer-fill"></i> Print
+                    </button>
                     <a href="{% url 'book_create' %}" class="btn" style="background: var(--ppp-red, #C41E3A); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         + New Book
                     </a>
@@ -210,7 +214,7 @@
                             <th style="padding: 12px; font-weight: 600; color: #888; text-transform: uppercase;">Office Person</th>
                             <th style="padding: 12px; font-weight: 600; color: #888; text-transform: uppercase;">Rec. Date</th>
                             <th style="padding: 12px; font-weight: 600; color: #888; text-transform: uppercase;">Status</th>
-                            <th style="padding: 12px; font-weight: 600; color: #888; text-transform: uppercase; text-align: right;">Actions</th>
+                            <th class="no-print" style="padding: 12px; font-weight: 600; color: #888; text-transform: uppercase; text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -227,7 +231,7 @@
                                 <span class="badge" style="background-color: var(--ppp-red, #C41E3A);">Not Returned</span>
                                 {% endif %}
                             </td>
-                            <td style="padding: 16px 12px; text-align: right;">
+                            <td class="no-print" style="padding: 16px 12px; text-align: right;">
                                 <a href="{% url 'book_update' book.pk %}" class="btn btn-sm" style="background: #ffc107; color: #000; border-radius: 6px;" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>

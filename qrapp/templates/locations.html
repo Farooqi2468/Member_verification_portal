@@ -218,11 +218,15 @@
                 <a href="?tab={{ active_tab }}&export=csv{% if q %}&q={{ q }}{% endif %}" class="btn" style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; padding: 10px 16px; text-decoration: none; display: flex; align-items: center; gap: 6px;">
                     <i class="bi bi-download"></i> Export CSV
                 </a>
+                <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                    style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333; padding: 10px 16px; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-printer-fill"></i> Print
+                </button>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div class="loc-tabs">
+        <div class="loc-tabs no-print">
             <a href="?tab=town" class="loc-tab {% if active_tab == 'town' %}active{% endif %}"> Towns <span
                     class="loc-badge">{{ towns|length }}</span></a>
             <a href="?tab=zone" class="loc-tab {% if active_tab == 'zone' %}active{% endif %}"> Zones <span
@@ -236,7 +240,7 @@
         <!-- ── TOWN PANEL ──────────────────────────────── -->
         <div class="loc-panel {% if active_tab == 'town' %}active{% endif %}">
             <div class="loc-grid">
-                <div class="loc-form-card">
+                <div class="loc-form-card no-print">
                     <div class="loc-form-title">Add New Town</div>
                     <form method="post" action="{% url 'add_town' %}">
                         {% csrf_token %}
@@ -251,7 +255,7 @@
                                 <th>#</th>
                                 <th>Town Name</th>
                                 <th>Zones</th>
-                                <th></th>
+                                <th class="no-print"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -260,7 +264,7 @@
                                 <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
                                 <td><strong>{{ town.name }}</strong></td>
                                 <td><span class="loc-badge">{{ town.zones.count }}</span></td>
-                                <td>
+                                <td class="no-print">
                                     <div style="display: flex; gap: 6px;">
                                         <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateTownModal{{ town.pk }}">Update</button>
                                         <form method="post" action="{% url 'delete_town' town.pk %}"
@@ -308,7 +312,7 @@
         <!-- ── ZONE PANEL ──────────────────────────────── -->
         <div class="loc-panel {% if active_tab == 'zone' %}active{% endif %}">
             <div class="loc-grid">
-                <div class="loc-form-card">
+                <div class="loc-form-card no-print">
                     <div class="loc-form-title">Add New Zone</div>
                     <form method="post" action="{% url 'add_zone' %}">
                         {% csrf_token %}
@@ -326,7 +330,7 @@
                                 <th>Zone Name</th>
                                 <th>Town</th>
                                 <th>UCs</th>
-                                <th></th>
+                                <th class="no-print"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -336,7 +340,7 @@
                                 <td><strong>{{ zone.name }}</strong></td>
                                 <td><span class="loc-badge">{{ zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ zone.union_councils.count }}</span></td>
-                                <td>
+                                <td class="no-print">
                                     <div style="display: flex; gap: 6px;">
                                         <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateZoneModal{{ zone.pk }}">Update</button>
                                         <form method="post" action="{% url 'delete_zone' zone.pk %}"
@@ -390,7 +394,7 @@
         <!-- ── UNION COUNCIL PANEL ────────────────────── -->
         <div class="loc-panel {% if active_tab == 'uc' %}active{% endif %}">
             <div class="loc-grid">
-                <div class="loc-form-card">
+                <div class="loc-form-card no-print">
                     <div class="loc-form-title">Add New Union Council</div>
                     <form method="post" action="{% url 'add_uc' %}">
                         {% csrf_token %}
@@ -409,7 +413,7 @@
                                 <th>Zone</th>
                                 <th>Town</th>
                                 <th>Wards</th>
-                                <th></th>
+                                <th class="no-print"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -420,7 +424,7 @@
                                 <td><span class="loc-badge">{{ uc.zone.name }}</span></td>
                                 <td><span class="loc-badge">{{ uc.zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ uc.wards.count }}</span></td>
-                                <td>
+                                <td class="no-print">
                                     <div style="display: flex; gap: 6px;">
                                         <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateUcModal{{ uc.pk }}">Update</button>
                                         <form method="post" action="{% url 'delete_uc' uc.pk %}"
@@ -474,7 +478,7 @@
         <!-- ── WARD PANEL ──────────────────────────────── -->
         <div class="loc-panel {% if active_tab == 'ward' %}active{% endif %}">
             <div class="loc-grid">
-                <div class="loc-form-card">
+                <div class="loc-form-card no-print">
                     <div class="loc-form-title">Add New Ward</div>
                     <form method="post" action="{% url 'add_ward' %}">
                         {% csrf_token %}
@@ -493,7 +497,7 @@
                                 <th>Union Council</th>
                                 <th>Zone</th>
                                 <th>Town</th>
-                                <th></th>
+                                <th class="no-print"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -504,7 +508,7 @@
                                 <td><span class="loc-badge">{{ ward.union_council.name }}</span></td>
                                 <td><span class="loc-badge">{{ ward.union_council.zone.name }}</span></td>
                                 <td><span class="loc-badge">{{ ward.union_council.zone.town.name }}</span></td>
-                                <td>
+                                <td class="no-print">
                                     <div style="display: flex; gap: 6px;">
                                         <button type="button" class="loc-btn-del" style="border-color: #ffc107; color: #1a1a1a;" data-bs-toggle="modal" data-bs-target="#updateWardModal{{ ward.pk }}">Update</button>
                                         <form method="post" action="{% url 'delete_ward' ward.pk %}"

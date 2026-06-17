@@ -315,6 +315,10 @@
                         style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-download"></i> Export CSV
                     </a>
+                    <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                        style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
+                        <i class="bi bi-printer-fill"></i> Print
+                    </button>
                     <a href="{% url 'create_person' %}" class="btn"
                         style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">+
                         New Member</a>
@@ -377,7 +381,7 @@
                             <th>Phone Number</th>
                             <th>Location Assignment</th>
                             <th>Made By</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th class="no-print" style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -397,7 +401,7 @@
                                 </div>
                             </td>
                             <td>{{ person.made_by.member_name|default:"System" }}</td>
-                            <td style="text-align: right;">
+                            <td class="no-print" style="text-align: right;">
                                 <div class="action-buttons-wrap">
                                     <!-- Details Button -->
                                     <a href="{% url 'admin_person_detail' person.membership_number %}"

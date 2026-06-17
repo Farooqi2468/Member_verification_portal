@@ -101,6 +101,10 @@
                     <a href="?export=csv{{ query_params|default:'' }}" class="btn" style="background: var(--ppp-green); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-file-earmark-spreadsheet-fill"></i> Export CSV
                     </a>
+                    <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                        style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
+                        <i class="bi bi-printer-fill"></i> Print
+                    </button>
                 </div>
             </div>
 
@@ -127,7 +131,7 @@
                             <th>Member Name</th>
                             <th>Phone</th>
                             <th style="text-align: right;">Total Registrations</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th class="no-print" style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -137,7 +141,7 @@
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
                             <td style="text-align: right; font-weight: 600;">{{ member.no_of_registrations }}</td>
-                            <td style="text-align: right;">
+                            <td class="no-print" style="text-align: right;">
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="{% url 'update_real_member' member.member_id %}" class="btn btn-sm btn-outline-primary" style="font-size: 12px; font-weight: 500;">
                                         <i class="bi bi-pencil-square"></i> Update
