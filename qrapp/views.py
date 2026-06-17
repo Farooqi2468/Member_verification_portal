@@ -186,6 +186,23 @@ def create_person(request):
         if form.is_valid():
             person = form.save(commit=False)
             
+            uc_name = form.cleaned_data.get('union_council_name')
+            ward_name = form.cleaned_data.get('ward_name')
+            
+            if uc_name and person.zone:
+                uc, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=person.zone, defaults={'name': uc_name})
+                person.union_council = uc
+                if ward_name:
+                    ward, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc, defaults={'name': ward_name})
+                    person.ward = ward
+            elif uc_name:
+                uc = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+                if uc:
+                    person.union_council = uc
+                    if ward_name:
+                        ward, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc, defaults={'name': ward_name})
+                        person.ward = ward
+            
             member_id = form.cleaned_data.get('member_id')
             member_name = form.cleaned_data.get('member_name')
             member_phone = form.cleaned_data.get('member_phone')
@@ -459,6 +476,24 @@ def update_person(request, pk):
         form = PersonForm(request.POST, instance=person)
         if form.is_valid():
             person = form.save(commit=False)
+
+            uc_name = form.cleaned_data.get('union_council_name')
+            ward_name = form.cleaned_data.get('ward_name')
+            
+            if uc_name and person.zone:
+                uc, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=person.zone, defaults={'name': uc_name})
+                person.union_council = uc
+                if ward_name:
+                    ward, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc, defaults={'name': ward_name})
+                    person.ward = ward
+            elif uc_name:
+                uc = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+                if uc:
+                    person.union_council = uc
+                    if ward_name:
+                        ward, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc, defaults={'name': ward_name})
+                        person.ward = ward
+
             url = request.build_absolute_uri(f"/person/{person.membership_number}/")
             img = qrcode.make(url)
             

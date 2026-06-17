@@ -248,11 +248,11 @@
                         <div class="row">
                             <div class="col-md-6 qr-input-group">
                                 <label>Union Council</label>
-                                {{ form.union_council }}
+                                {{ form.union_council_name }}
                             </div>
                             <div class="col-md-6 qr-input-group">
                                 <label>Ward</label>
-                                {{ form.ward }}
+                                {{ form.ward_name }}
                             </div>
                         </div>
 
@@ -336,8 +336,8 @@
 
         const townSel = document.getElementById('id_town');
         const zoneSel = document.getElementById('id_zone');
-        const ucSel = document.getElementById('id_union_council');
-        const wardSel = document.getElementById('id_ward');
+        const ucInput = document.getElementById('id_union_council_name');
+        const wardInput = document.getElementById('id_ward_name');
         const nameInput = document.querySelector('input[name="name"]');
         const idInput = document.querySelector('input[name="membership_number"]');
         const prevName = document.getElementById('prevName');
@@ -364,7 +364,7 @@
         }
 
         // Initialize Select2 on the dropdowns
-        $('#id_town, #id_zone, #id_union_council, #id_ward').select2({
+        $('#id_town, #id_zone').select2({
             theme: 'bootstrap-5',
             width: '100%',
             matcher: matchCustom
@@ -398,7 +398,7 @@
             prevName.innerText = nameInput.value || 'Member Name';
             prevId.innerText = idInput.value ? '#' + idInput.value : '# ——';
             const townText = townSel.selectedIndex > 0 ? townSel.options[townSel.selectedIndex].text : '';
-            const ucText = ucSel.selectedIndex > 0 ? ucSel.options[ucSel.selectedIndex].text : '';
+            const ucText = ucInput ? ucInput.value : '';
             let area = townText || '';
             if (ucText) area += (area ? ' · ' : '') + ucText;
             prevTown.innerText = area || 'Area / Union Council';
@@ -406,8 +406,6 @@
 
         $('#id_town').on('change', function () {
             resetSelect(zoneSel, '— Select Zone —');
-            resetSelect(ucSel, '— Select Union Council —');
-            resetSelect(wardSel, '— Select Ward —');
             updatePreview();
             if (!this.value) return;
             fetch('/ajax/zones/?town_id=' + this.value)
@@ -416,22 +414,12 @@
         });
 
         $('#id_zone').on('change', function () {
-            resetSelect(ucSel, '— Select Union Council —');
-            resetSelect(wardSel, '— Select Ward —');
             if (!this.value) return;
-            fetch('/ajax/ucs/?zone_id=' + this.value)
-                .then(function (r) { return r.json(); })
-                .then(function (data) { populateSelect(ucSel, data, '— Select Union Council —'); });
         });
 
-        $('#id_union_council').on('change', function () {
-            resetSelect(wardSel, '— Select Ward —');
-            updatePreview();
-            if (!this.value) return;
-            fetch('/ajax/wards/?uc_id=' + this.value)
-                .then(function (r) { return r.json(); })
-                .then(function (data) { populateSelect(wardSel, data, '— Select Ward —'); });
-        });
+        if (ucInput) {
+            ucInput.addEventListener('input', updatePreview);
+        }
 
         nameInput.addEventListener('input', updatePreview);
         idInput.addEventListener('input', updatePreview);
