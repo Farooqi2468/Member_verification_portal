@@ -1,7 +1,24 @@
 {% extends 'base.html' %}
 
 {% block layout %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
+    /* Custom Select2 styling to match the existing form fields */
+    .select2-container--bootstrap-5 .select2-selection {
+        border: 1.5px solid #eee !important;
+        border-radius: 8px !important;
+        padding: 5px 14px !important;
+        font-size: 14px !important;
+        min-height: 43px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection:focus,
+    .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+        border-color: var(--ppp-red) !important;
+        box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1) !important;
+    }
     :root {
         --ppp-red: #C41E3A;
         --ppp-red-dark: #8B1528;
@@ -315,7 +332,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    $(document).ready(function () {
 
         const townSel = document.getElementById('id_town');
         const zoneSel = document.getElementById('id_zone');
@@ -327,7 +344,36 @@
         const prevId = document.getElementById('prevId');
         const prevTown = document.getElementById('prevTown');
 
+        // Custom Matcher for flexible searching (e.g. "uc1" matches "UC-1")
+        function matchCustom(params, data) {
+            if ($.trim(params.term) === '') {
+                return data;
+            }
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
+            
+            // Remove spaces, hyphens, and convert to lowercase for comparison
+            var term = params.term.toLowerCase().replace(/[\s\-]/g, '');
+            var text = data.text.toLowerCase().replace(/[\s\-]/g, '');
+            
+            if (text.indexOf(term) > -1) {
+                return $.extend({}, data, true);
+            }
+            return null;
+        }
+
+        // Initialize Select2 on the dropdowns
+        $('#id_town, #id_zone, #id_union_council, #id_ward').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            matcher: matchCustom
+        });
+
         function populateSelect(sel, items, emptyLabel) {
+            if ($(sel).data('select2')) {
+                $(sel).select2('destroy');
+            }
             const current = sel.value;
             sel.innerHTML = `<option value="">${emptyLabel}</option>`;
             items.forEach(function (item) {
@@ -337,10 +383,15 @@
                 if (String(item.id) === String(current)) opt.selected = true;
                 sel.appendChild(opt);
             });
+            $(sel).select2({ theme: 'bootstrap-5', width: '100%', matcher: matchCustom });
         }
 
         function resetSelect(sel, emptyLabel) {
+            if ($(sel).data('select2')) {
+                $(sel).select2('destroy');
+            }
             sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+            $(sel).select2({ theme: 'bootstrap-5', width: '100%', matcher: matchCustom });
         }
 
         function updatePreview() {
@@ -353,7 +404,7 @@
             prevTown.innerText = area || 'Area / Union Council';
         }
 
-        townSel.addEventListener('change', function () {
+        $('#id_town').on('change', function () {
             resetSelect(zoneSel, '— Select Zone —');
             resetSelect(ucSel, '— Select Union Council —');
             resetSelect(wardSel, '— Select Ward —');
@@ -364,7 +415,7 @@
                 .then(function (data) { populateSelect(zoneSel, data, '— Select Zone —'); });
         });
 
-        zoneSel.addEventListener('change', function () {
+        $('#id_zone').on('change', function () {
             resetSelect(ucSel, '— Select Union Council —');
             resetSelect(wardSel, '— Select Ward —');
             if (!this.value) return;
@@ -373,7 +424,7 @@
                 .then(function (data) { populateSelect(ucSel, data, '— Select Union Council —'); });
         });
 
-        ucSel.addEventListener('change', function () {
+        $('#id_union_council').on('change', function () {
             resetSelect(wardSel, '— Select Ward —');
             updatePreview();
             if (!this.value) return;
