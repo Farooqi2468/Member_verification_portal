@@ -6,9 +6,9 @@ from django.contrib.auth import password_validation
 
 
 class PersonForm(forms.ModelForm):
-    member_id = forms.CharField(max_length=50, required=True, label="Member ID", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member ID'}))
-    member_name = forms.CharField(max_length=100, required=True, label="Member Name", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
-    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
+    member_id = forms.CharField(max_length=50, required=True, label="Member Serial No/ ممبرشپ کرنے والے کا ممبرشپ نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member ID'}))
+    member_name = forms.CharField(max_length=100, required=True, label="Member Name / ممبرشپ کرنے والے کا نام", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
+    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone /ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
 
     class Meta:
         model = Person

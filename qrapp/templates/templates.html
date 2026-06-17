@@ -2,149 +2,154 @@
 
 {% block layout %}
 <style>
-:root {
-  --ppp-red: #C41E3A;
-  --ppp-red-dark: #8B1528;
-  --ppp-green: #006B3F;
-  --ppp-green-dark: #004D2C;
-}
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
+    }
 
-.qr-d-layout {
-    display: flex;
-    gap: 32px;
-    align-items: flex-start;
-}
-
-.qr-form-area {
-    flex: 1;
-    min-width: 0;
-}
-
-.qr-preview-area {
-    width: 340px;
-    flex-shrink: 0;
-}
-
-.qr-form-card {
-    background: #fff;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
-    padding: 32px;
-}
-
-.qr-form-title {
-    font-family: 'Georgia', serif;
-    font-weight: 600;
-    font-size: 20px;
-    margin-bottom: 4px;
-}
-
-.qr-form-sub {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 24px;
-}
-
-.qr-input-group {
-    margin-bottom: 16px;
-}
-
-.qr-input-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.qr-input-group .form-control {
-    border: 1.5px solid #eee;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-
-.qr-input-group .form-control:focus {
-    border-color: var(--ppp-red);
-    box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-}
-
-.qr-preview-panel {
-    background: #fff;
-    border: 1px solid #E5E5E5;
-    border-radius: 12px;
-    padding: 24px;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    height: fit-content;
-}
-
-.qr-preview-label {
-    font-size: 11px;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 20px;
-}
-
-.qr-preview-card {
-    background: #fff;
-    border: 1px solid #eee;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-@media (max-width: 992px) {
     .qr-d-layout {
-        flex-direction: column;
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
     }
+
+    .qr-form-area {
+        flex: 1;
+        min-width: 0;
+    }
+
     .qr-preview-area {
-        width: 100%;
+        width: 340px;
+        flex-shrink: 0;
     }
-    .qr-preview-panel {
-        position: static;
-    }
-}
 
-@media (max-width: 767.98px) {
-    .dash-main {
-        padding: 20px 12px;
-        padding-bottom: 80px;
-    }
     .qr-form-card {
-        padding: 20px 16px;
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 32px;
     }
-    .qr-form-title {
-        font-size: 18px;
-    }
-    .qr-preview-panel {
-        padding: 16px;
-    }
-}
 
+    .qr-form-title {
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .qr-form-sub {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 24px;
+    }
+
+    .qr-input-group {
+        margin-bottom: 16px;
+    }
+
+    .qr-input-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .qr-input-group .form-control {
+        border: 1.5px solid #eee;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .qr-input-group .form-control:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
+    }
+
+    .qr-preview-panel {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        height: fit-content;
+    }
+
+    .qr-preview-label {
+        font-size: 11px;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }
+
+    .qr-preview-card {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 992px) {
+        .qr-d-layout {
+            flex-direction: column;
+        }
+
+        .qr-preview-area {
+            width: 100%;
+        }
+
+        .qr-preview-panel {
+            position: static;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 12px;
+            padding-bottom: 80px;
+        }
+
+        .qr-form-card {
+            padding: 20px 16px;
+        }
+
+        .qr-form-title {
+            font-size: 18px;
+        }
+
+        .qr-preview-panel {
+            padding: 16px;
+        }
+    }
 </style>
 
 <div class="dash-wrap">
     <!-- Sidebar -->
     {% if is_update %}
-        {% include 'includes/sidebar.html' with active_page='members' %}
+    {% include 'includes/sidebar.html' with active_page='members' %}
     {% else %}
-        {% include 'includes/sidebar.html' with active_page='register' %}
+    {% include 'includes/sidebar.html' with active_page='register' %}
     {% endif %}
 
     <!-- Main Content -->
     <div class="dash-main">
         <div class="mb-3">
-            <a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+            <a href="{% url 'dashboard' %}"
+                class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-        
+
         <div class="qr-d-layout">
             <!-- Form Column -->
             <div class="qr-form-area">
@@ -154,9 +159,9 @@
                     </h2>
                     <p class="qr-form-sub">
                         {% if is_update %}
-                            Update the details for this current membership profile.
+                        Update the details for this current membership profile.
                         {% else %}
-                            Enter the member's details to generate their digital membership profile and QR code.
+                        Enter the member's details to generate their digital membership profile and QR code.
                         {% endif %}
                     </p>
 
@@ -164,37 +169,31 @@
                         {% csrf_token %}
 
                         {% if form.errors %}
-                            <div class="alert alert-danger mb-4" style="border-radius: 8px;">
-                                <strong style="font-size: 13px;">Please correct the following errors:</strong>
-                                <ul class="mb-0 mt-1" style="font-size: 12px; padding-left: 20px;">
-                                    {% for field in form %}
-                                        {% for error in field.errors %}
-                                            <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                                        {% endfor %}
-                                    {% endfor %}
-                                    {% for error in form.non_field_errors %}
-                                        <li>{{ error }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
+                        <div class="alert alert-danger mb-4" style="border-radius: 8px;">
+                            <strong style="font-size: 13px;">Please correct the following errors:</strong>
+                            <ul class="mb-0 mt-1" style="font-size: 12px; padding-left: 20px;">
+                                {% for field in form %}
+                                {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                         {% endif %}
 
-                        <h6 style="font-family: 'Georgia', serif; font-weight: 600; font-size: 16px; margin-bottom: 16px; color: var(--ppp-red);">Member Registration Details</h6>
-                        <div class="row">
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.member_id.label }}</label>
-                                {{ form.member_id }}
-                            </div>
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.member_name.label }}</label>
-                                {{ form.member_name }}
-                            </div>
-                            <div class="col-md-4 qr-input-group">
-                                <label>{{ form.member_phone.label }}</label>
-                                {{ form.member_phone }}
-                            </div>
-                        </div>
+                        <!-- <h6
+                            style="font-family: 'Georgia', serif; font-weight: 600; font-size: 16px; margin-bottom: 16px; color: var(--ppp-red);">
+                            Member Registration Details</h6> -->
+
                         <hr style="border-top: 1px dashed #E5E5E5; margin: 24px 0;">
+
+                        <div class="qr-input-group">
+                            <label>{{ form.membership_number.label }} (ID Number) / پارٹی ممبرشپ نمبر</label>
+                            {{ form.membership_number }}
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 qr-input-group">
@@ -241,20 +240,30 @@
                         </div>
 
                         <div class="qr-input-group">
-                            <label>{{ form.membership_number.label }} (ID Number)</label>
-                            {{ form.membership_number }}
-                        </div>
-
-                        <div class="qr-input-group">
                             <label>{{ form.address.label }}</label>
                             {{ form.address }}
                         </div>
-
-                        <button type="submit" class="btn btn-lg w-100 mt-3" style="background: var(--ppp-green); color: #fff; border-radius: 10px; font-weight: 600; padding: 14px;">
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_id.label }}</label>
+                                {{ form.member_id }}
+                            </div>
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_name.label }}</label>
+                                {{ form.member_name }}
+                            </div>
+                            <div class="col-md-4 qr-input-group">
+                                <label>{{ form.member_phone.label }}</label>
+                                {{ form.member_phone }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-lg w-100 mt-3"
+                            style="background: var(--ppp-green); color: #fff; border-radius: 10px; font-weight: 600; padding: 14px;">
                             {% if is_update %}
-                                Save Changes
+                            Save Changes
                             {% else %}
-                                Register &amp; Generate QR Code
+                            Register &amp; Generate QR Code
                             {% endif %}
                         </button>
                     </form>
@@ -265,12 +274,17 @@
             <div class="qr-preview-area">
                 <div class="qr-preview-panel">
                     <div class="qr-preview-label">Live Card Preview</div>
-                    
-                    <div class="qr-preview-card" id="cardPreview" style="background: transparent; border: none; padding: 0;">
-                         <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); padding: 25px; border-radius: 12px; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.15);">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+
+                    <div class="qr-preview-card" id="cardPreview"
+                        style="background: transparent; border: none; padding: 0;">
+                        <div
+                            style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); padding: 25px; border-radius: 12px; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.15);">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z" fill="#fff"/>
+                                    <path
+                                        d="M12 2L14.4 9.4H22.2L15.9 14.1L18.3 21.5L12 16.8L5.7 21.5L8.1 14.1L1.8 9.4H9.6L12 2Z"
+                                        fill="#fff" />
                                 </svg>
                                 <div style="text-align: right;">
                                     <div style="font-size: 8px; text-transform: uppercase;">Membership ID</div>
@@ -278,19 +292,22 @@
                                 </div>
                             </div>
                             <div style="text-align: left;">
-                                <div style="font-size: 16px; font-weight: 600; margin-bottom: 2px;" id="prevName">Member Name</div>
+                                <div style="font-size: 16px; font-weight: 600; margin-bottom: 2px;" id="prevName">Member
+                                    Name</div>
                                 <div style="font-size: 10px; opacity: 0.7;" id="prevTown">Area / Union Council</div>
                             </div>
-                         </div>
+                        </div>
 
-                         <div style="margin-top: 20px;">
-                            <div style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); padding: 25px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: 700; font-family: 'Georgia', serif; letter-spacing: 1px; min-height: 140px; box-shadow: 0 10px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-top: 20px;">
+                            <div
+                                style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%); padding: 25px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; font-weight: 700; font-family: 'Georgia', serif; letter-spacing: 1px; min-height: 140px; box-shadow: 0 10px 20px rgba(0,0,0,0.15);">
                                 PPP Lahore<br>Urban Member
                             </div>
-                         </div>
+                        </div>
                     </div>
 
-                    <p style="font-size: 12px; color: #888;">Complete the form to see the generated membership details.</p>
+                    <p style="font-size: 12px; color: #888;">Complete the form to see the generated membership details.
+                    </p>
                 </div>
             </div>
         </div>
@@ -298,83 +315,83 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const townSel = document.getElementById('id_town');
-    const zoneSel = document.getElementById('id_zone');
-    const ucSel   = document.getElementById('id_union_council');
-    const wardSel = document.getElementById('id_ward');
-    const nameInput = document.querySelector('input[name="name"]');
-    const idInput   = document.querySelector('input[name="membership_number"]');
-    const prevName  = document.getElementById('prevName');
-    const prevId    = document.getElementById('prevId');
-    const prevTown  = document.getElementById('prevTown');
+        const townSel = document.getElementById('id_town');
+        const zoneSel = document.getElementById('id_zone');
+        const ucSel = document.getElementById('id_union_council');
+        const wardSel = document.getElementById('id_ward');
+        const nameInput = document.querySelector('input[name="name"]');
+        const idInput = document.querySelector('input[name="membership_number"]');
+        const prevName = document.getElementById('prevName');
+        const prevId = document.getElementById('prevId');
+        const prevTown = document.getElementById('prevTown');
 
-    function populateSelect(sel, items, emptyLabel) {
-        const current = sel.value;
-        sel.innerHTML = `<option value="">${emptyLabel}</option>`;
-        items.forEach(function(item) {
-            const opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name;
-            if (String(item.id) === String(current)) opt.selected = true;
-            sel.appendChild(opt);
+        function populateSelect(sel, items, emptyLabel) {
+            const current = sel.value;
+            sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+            items.forEach(function (item) {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.name;
+                if (String(item.id) === String(current)) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function resetSelect(sel, emptyLabel) {
+            sel.innerHTML = `<option value="">${emptyLabel}</option>`;
+        }
+
+        function updatePreview() {
+            prevName.innerText = nameInput.value || 'Member Name';
+            prevId.innerText = idInput.value ? '#' + idInput.value : '# ——';
+            const townText = townSel.selectedIndex > 0 ? townSel.options[townSel.selectedIndex].text : '';
+            const ucText = ucSel.selectedIndex > 0 ? ucSel.options[ucSel.selectedIndex].text : '';
+            let area = townText || '';
+            if (ucText) area += (area ? ' · ' : '') + ucText;
+            prevTown.innerText = area || 'Area / Union Council';
+        }
+
+        townSel.addEventListener('change', function () {
+            resetSelect(zoneSel, '— Select Zone —');
+            resetSelect(ucSel, '— Select Union Council —');
+            resetSelect(wardSel, '— Select Ward —');
+            updatePreview();
+            if (!this.value) return;
+            fetch('/ajax/zones/?town_id=' + this.value)
+                .then(function (r) { return r.json(); })
+                .then(function (data) { populateSelect(zoneSel, data, '— Select Zone —'); });
         });
-    }
 
-    function resetSelect(sel, emptyLabel) {
-        sel.innerHTML = `<option value="">${emptyLabel}</option>`;
-    }
+        zoneSel.addEventListener('change', function () {
+            resetSelect(ucSel, '— Select Union Council —');
+            resetSelect(wardSel, '— Select Ward —');
+            if (!this.value) return;
+            fetch('/ajax/ucs/?zone_id=' + this.value)
+                .then(function (r) { return r.json(); })
+                .then(function (data) { populateSelect(ucSel, data, '— Select Union Council —'); });
+        });
 
-    function updatePreview() {
-        prevName.innerText = nameInput.value || 'Member Name';
-        prevId.innerText   = idInput.value ? '#' + idInput.value : '# ——';
-        const townText = townSel.selectedIndex > 0 ? townSel.options[townSel.selectedIndex].text : '';
-        const ucText   = ucSel.selectedIndex   > 0 ? ucSel.options[ucSel.selectedIndex].text   : '';
-        let area = townText || '';
-        if (ucText) area += (area ? ' · ' : '') + ucText;
-        prevTown.innerText = area || 'Area / Union Council';
-    }
+        ucSel.addEventListener('change', function () {
+            resetSelect(wardSel, '— Select Ward —');
+            updatePreview();
+            if (!this.value) return;
+            fetch('/ajax/wards/?uc_id=' + this.value)
+                .then(function (r) { return r.json(); })
+                .then(function (data) { populateSelect(wardSel, data, '— Select Ward —'); });
+        });
 
-    townSel.addEventListener('change', function () {
-        resetSelect(zoneSel, '— Select Zone —');
-        resetSelect(ucSel,   '— Select Union Council —');
-        resetSelect(wardSel, '— Select Ward —');
-        updatePreview();
-        if (!this.value) return;
-        fetch('/ajax/zones/?town_id=' + this.value)
-            .then(function(r){ return r.json(); })
-            .then(function(data){ populateSelect(zoneSel, data, '— Select Zone —'); });
+        nameInput.addEventListener('input', updatePreview);
+        idInput.addEventListener('input', updatePreview);
     });
-
-    zoneSel.addEventListener('change', function () {
-        resetSelect(ucSel,   '— Select Union Council —');
-        resetSelect(wardSel, '— Select Ward —');
-        if (!this.value) return;
-        fetch('/ajax/ucs/?zone_id=' + this.value)
-            .then(function(r){ return r.json(); })
-            .then(function(data){ populateSelect(ucSel, data, '— Select Union Council —'); });
-    });
-
-    ucSel.addEventListener('change', function () {
-        resetSelect(wardSel, '— Select Ward —');
-        updatePreview();
-        if (!this.value) return;
-        fetch('/ajax/wards/?uc_id=' + this.value)
-            .then(function(r){ return r.json(); })
-            .then(function(data){ populateSelect(wardSel, data, '— Select Ward —'); });
-    });
-
-    nameInput.addEventListener('input', updatePreview);
-    idInput.addEventListener('input', updatePreview);
-});
 </script>
 </div>
 
 {% if is_update %}
-    {% include 'includes/mobile_nav.html' with active_page='members' %}
+{% include 'includes/mobile_nav.html' with active_page='members' %}
 {% else %}
-    {% include 'includes/mobile_nav.html' with active_page='register' %}
+{% include 'includes/mobile_nav.html' with active_page='register' %}
 {% endif %}
 
 {% endblock %}
