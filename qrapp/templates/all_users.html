@@ -363,7 +363,7 @@
                                     <span style="background: rgba(0, 107, 63, 0.1); color: var(--ppp-green-dark); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase;">Superuser</span>
                                 {% endif %}
                             </td>
-                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td style="font-size: 11px; white-space: nowrap;">{{ user.date_joined|date:"M d, Y h:i A" }}</td>
                             <td class="no-print" style="text-align: right;">
                                 <div class="action-buttons-wrap">
                                     <!-- Update Button -->

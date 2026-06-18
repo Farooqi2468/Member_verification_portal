@@ -381,6 +381,7 @@
                             <th>Phone Number</th>
                             <th>Location Assignment</th>
                             <th>Registered By</th>
+                            <th>Date & Time</th>
                             <th class="no-print" style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
@@ -401,6 +402,7 @@
                                 </div>
                             </td>
                             <td>{{ person.made_by.member_name|default:"System" }}</td>
+                            <td style="font-size: 11px; white-space: nowrap;">{{ person.created_at|date:"M d, Y h:i A" }}</td>
                             <td class="no-print" style="text-align: right;">
                                 <div class="action-buttons-wrap">
                                     <!-- Details Button -->
@@ -429,7 +431,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 No members have been registered yet.
                             </td>
                         </tr>
