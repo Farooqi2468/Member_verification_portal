@@ -454,8 +454,12 @@
         const memberIdInput = document.querySelector('input[name="member_id"]');
         if (memberIdInput) {
             memberIdInput.addEventListener('input', function(e) {
-                const mId = e.target.value;
-                if (mId.length > 2) {
+                const mId = e.target.value.trim();
+                if (mId.length === 0) {
+                    if (memberNameInput) memberNameInput.value = '';
+                    if (memberPhoneInput) memberPhoneInput.value = '';
+                    if (memberCnicInput) memberCnicInput.value = '';
+                } else if (mId.length > 2) {
                     fetch('/ajax/get-member-info/?member_id=' + encodeURIComponent(mId))
                         .then(r => r.json())
                         .then(data => {
