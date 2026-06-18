@@ -271,6 +271,9 @@
         </div>
         
         <div id="modalContent" style="display: none;">
+            <div class="px-3 py-2 bg-white border-bottom no-print-modal">
+                <input type="text" id="modalSearchInput" class="form-control form-control-sm" placeholder="Search members by name, phone, or CNIC..." onkeyup="filterModalTable()">
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped mb-0 table-modal" style="font-size: 13px;">
                     <thead class="table-light">
@@ -339,6 +342,9 @@ function showMemberRegistrations(memberId) {
                     });
                 }
                 document.getElementById('modalContent').style.display = 'block';
+                // Reset search when opening
+                document.getElementById('modalSearchInput').value = '';
+                filterModalTable();
             } else {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
                 document.getElementById('modalContent').style.display = 'block';
@@ -350,6 +356,38 @@ function showMemberRegistrations(memberId) {
             document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
             document.getElementById('modalContent').style.display = 'block';
         });
+}
+
+function filterModalTable() {
+    var input, filter, tbody, tr, td, i, txtValue;
+    input = document.getElementById("modalSearchInput");
+    filter = input.value.toUpperCase();
+    tbody = document.getElementById("modalTableBody");
+    tr = tbody.getElementsByTagName("tr");
+
+    for (i = 0; i < tr.length; i++) {
+        // Skip the "no members found" row if it exists
+        if (tr[i].getElementsByTagName("td").length === 1) continue;
+        
+        // Check all columns in the row
+        var match = false;
+        var tds = tr[i].getElementsByTagName("td");
+        for (var j = 1; j < tds.length; j++) { // Start at 1 to skip the index column
+            if (tds[j]) {
+                txtValue = tds[j].textContent || tds[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+        }
+        
+        if (match) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
 }
 </script>
 
