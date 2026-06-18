@@ -332,9 +332,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (jumpBtn) {
         const performJump = () => {
-            const page = jumpInput.value;
-            const max = jumpInput.getAttribute('max');
-            if (page && page >= 1 && page <= parseInt(max)) {
+            const pageStr = jumpInput.value;
+            const page = parseInt(pageStr, 10);
+            const max = parseInt(jumpInput.getAttribute('max'), 10);
+            if (!isNaN(page) && page >= 1 && page <= max) {
                 const url = new URL(window.location.href);
                 url.searchParams.set('page', page);
                 window.location.href = url.toString();
