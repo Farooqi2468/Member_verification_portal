@@ -8,7 +8,8 @@ from django.contrib.auth import password_validation
 class PersonForm(forms.ModelForm):
     member_id = forms.CharField(max_length=50, required=True, label="Member Serial No/ ممبرشپ کرنے والے کا ممبرشپ نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial Number'}))
     member_name = forms.CharField(max_length=100, required=True, label="Member Name / ممبرشپ کرنے والے کا نام", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
-    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone /ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
+    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone / ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
+    member_cnic = forms.CharField(max_length=15, required=False, label="Member CNIC / ممبرشپ کرنے والے کا شناختی کارڈ", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member CNIC'}))
 
     class Meta:
         model = Person
@@ -16,13 +17,14 @@ class PersonForm(forms.ModelForm):
             'membership_number', 'name', 'father_name',
             'cnic', 'phone', 'address',
             'town', 'zone', 
-            'member_name', 'member_membership_id', 'member_phone'
+            'member_name', 'member_membership_id', 'member_phone', 'member_cnic'
         ]
         widgets = {
             'membership_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
             'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
             'member_membership_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Membership ID'}),
             'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}),
+            'member_cnic': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member CNIC'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Father's Name"}),
             'cnic': forms.TextInput(attrs={
@@ -278,11 +280,12 @@ class BookForm(forms.ModelForm):
 class MemberForm(forms.ModelForm):
     class Meta:
         model = Member
-        fields = ['member_id', 'member_name', 'member_phone', 'no_of_registrations']
+        fields = ['member_id', 'member_name', 'member_phone', 'member_cnic', 'no_of_registrations']
         widgets = {
             'member_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial No'}),
             'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
             'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'member_cnic': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'CNIC'}),
             'no_of_registrations': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total Registrations'}),
         }
 

@@ -45,6 +45,7 @@ urlpatterns = [
     path('ajax/zones/', views.ajax_get_zones, name='ajax_get_zones'),
     path('ajax/ucs/', views.ajax_get_ucs, name='ajax_get_ucs'),
     path('ajax/wards/', views.ajax_get_wards, name='ajax_get_wards'),
+    path('ajax/get-member-info/', views.ajax_get_member_info, name='ajax_get_member_info'),
     path('ajax/dashboard-charts/', views.ajax_dashboard_charts, name='ajax_dashboard_charts'),
 
     # Books Module

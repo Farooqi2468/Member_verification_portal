@@ -52,6 +52,7 @@ class Member(models.Model):
     member_id = models.CharField(max_length=50, primary_key=True)
     member_name = models.CharField(max_length=100)
     member_phone = models.CharField(max_length=15, null=True, blank=True)
+    member_cnic = models.CharField(max_length=15, null=True, blank=True)
     no_of_registrations = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -79,6 +80,7 @@ class Person(models.Model):
     member_name = models.CharField(max_length=100, null=True, blank=True)
     member_membership_id = models.CharField(max_length=50, null=True, blank=True)
     member_phone = models.CharField(max_length=15, null=True, blank=True)
+    member_cnic = models.CharField(max_length=15, null=True, blank=True)
 
     # Foreign key to the Member table
     made_by = models.ForeignKey(Member, on_delete=models.SET_NULL, null=True, related_name='persons_created')

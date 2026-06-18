@@ -130,6 +130,7 @@
                             <th>Member Serial Number</th>
                             <th>Member Name</th>
                             <th>Phone</th>
+                            <th>CNIC</th>
                             <th style="text-align: right;">Total Registrations</th>
                             <th class="no-print" style="text-align: right;">Actions</th>
                         </tr>
@@ -140,6 +141,7 @@
                             <td style="font-weight: 600; color: #1A1A1A;">{{ member.member_id }}</td>
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
+                            <td>{{ member.member_cnic|default:"--" }}</td>
                             <td style="text-align: right; font-weight: 600;">{{ member.no_of_registrations }}</td>
                             <td class="no-print" style="text-align: right;">
                                 <div class="d-flex gap-2 justify-content-end">
@@ -157,7 +159,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 No members found.
                             </td>
                         </tr>

@@ -206,6 +206,7 @@ def create_person(request):
             member_id = form.cleaned_data.get('member_id')
             member_name = form.cleaned_data.get('member_name')
             member_phone = form.cleaned_data.get('member_phone')
+            member_cnic = form.cleaned_data.get('member_cnic')
             
             if member_id:
                 member, created = Member.objects.get_or_create(
@@ -213,6 +214,7 @@ def create_person(request):
                     defaults={
                         'member_name': member_name,
                         'member_phone': member_phone,
+                        'member_cnic': member_cnic,
                         'no_of_registrations': 1
                     }
                 )
@@ -729,6 +731,22 @@ def ajax_get_wards(request):
     return JsonResponse(list(wards), safe=False)
 
 
+def ajax_get_member_info(request):
+    member_id = request.GET.get('member_id')
+    if member_id:
+        try:
+            member = Member.objects.get(member_id=member_id)
+            return JsonResponse({
+                'success': True,
+                'member_name': member.member_name,
+                'member_phone': member.member_phone,
+                'member_cnic': member.member_cnic,
+            })
+        except Member.DoesNotExist:
+            return JsonResponse({'success': False})
+    return JsonResponse({'success': False})
+
+
 @login_required
 @admin_only
 def ajax_dashboard_charts(request):
@@ -1010,10 +1028,10 @@ def all_real_members(request):
         response['Content-Disposition'] = 'attachment; filename="real_members_export.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['Member ID', 'Name', 'Phone', 'No of Registrations'])
+        writer.writerow(['Member ID', 'Name', 'Phone', 'CNIC', 'No of Registrations'])
         
         for m in members_list:
-            writer.writerow([m.member_id, m.member_name, m.member_phone, m.no_of_registrations])
+            writer.writerow([m.member_id, m.member_name, m.member_phone, m.member_cnic, m.no_of_registrations])
         return response
 
     paginator = Paginator(members_list, 15)
