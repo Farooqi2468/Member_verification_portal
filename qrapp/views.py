@@ -1147,3 +1147,25 @@ def membership_summary_delete(request, pk):
     summary.delete()
     messages.success(request, 'Membership Summary deleted successfully!')
     return redirect('membership_summary')
+
+
+@login_required
+def ajax_get_registered_persons(request):
+    member_id = request.GET.get('member_id')
+    if not member_id:
+        return JsonResponse({'status': 'error', 'message': 'Missing member_id parameter'}, status=400)
+    
+    # Fetch persons whose made_by_id matches
+    persons = Person.objects.filter(made_by_id=member_id).order_by('-created_at')
+    
+    data = []
+    for p in persons:
+        data.append({
+            'name': p.name,
+            'father_name': p.father_name,
+            'phone': p.phone,
+            'cnic': p.cnic,
+            'date': p.created_at.strftime("%b %d, %Y")
+        })
+        
+    return JsonResponse({'status': 'success', 'data': data})

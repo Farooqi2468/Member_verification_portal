@@ -82,6 +82,56 @@
         padding: 8px 16px;
         border: none;
     }
+    
+    .member-link {
+        color: var(--ppp-red);
+        text-decoration: none;
+        border-bottom: 1px dashed var(--ppp-red);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .member-link:hover {
+        color: #1A1A1A;
+        border-bottom-color: #1A1A1A;
+    }
+
+    /* Print styles specifically for the modal */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #registeredMembersModal, #registeredMembersModal * {
+            visibility: visible;
+        }
+        #registeredMembersModal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: white !important;
+        }
+        .modal-dialog {
+            margin: 0;
+            max-width: 100%;
+            width: 100%;
+        }
+        .modal-content {
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .modal-header .btn-close, .modal-footer, .no-print-modal {
+            display: none !important;
+        }
+        .modal-title {
+            color: black !important;
+        }
+        .table-modal th {
+            background-color: #f8f9fa !important;
+            color: black !important;
+            -webkit-print-color-adjust: exact;
+        }
+    }
 </style>
 
 <div class="dash-wrap">
@@ -138,7 +188,9 @@
                     <tbody>
                         {% for member in page_obj %}
                         <tr>
-                            <td style="font-weight: 600; color: #1A1A1A;">{{ member.member_id }}</td>
+                            <td style="font-weight: 600;">
+                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ member.member_id }}</a>
+                            </td>
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
                             <td>{{ member.member_cnic|default:"--" }}</td>
@@ -187,5 +239,106 @@
 </div>
 
 {% include 'includes/mobile_nav.html' with active_page='all_real_members' %}
+
+<!-- Modal for Registered Members -->
+<div class="modal fade" id="registeredMembersModal" tabindex="-1" aria-labelledby="registeredMembersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 bg-light">
+        <h5 class="modal-title fw-bold" id="registeredMembersModalLabel" style="font-family: 'Georgia', serif; color: #1A1A1A;">
+            <i class="bi bi-people-fill me-2"></i> Members Registered by <span id="modalSerialNo"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="modalLoading" class="text-center py-5">
+            <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Fetching registrations...</p>
+        </div>
+        
+        <div id="modalContent" style="display: none;">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 table-modal" style="font-size: 13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Father Name</th>
+                            <th>Phone</th>
+                            <th>CNIC</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody">
+                        <!-- Content loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary no-print-modal" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn text-white no-print-modal" style="background: #1A1A1A;" onclick="window.print()">
+            <i class="bi bi-printer-fill me-1"></i> Print Table
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showMemberRegistrations(memberId) {
+    // Show Modal
+    var modalEl = document.getElementById('registeredMembersModal');
+    var modal = new bootstrap.Modal(modalEl);
+    
+    // Set Title and Loading State
+    document.getElementById('modalSerialNo').innerText = memberId;
+    document.getElementById('modalLoading').style.display = 'block';
+    document.getElementById('modalContent').style.display = 'none';
+    
+    modal.show();
+    
+    // Fetch Data
+    fetch(`/ajax/registered-persons/?member_id=${encodeURIComponent(memberId)}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('modalLoading').style.display = 'none';
+            var tbody = document.getElementById('modalTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.status === 'success') {
+                if (data.data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
+                } else {
+                    data.data.forEach((person, index) => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td class="fw-bold">${person.name}</td>
+                                <td>${person.father_name || '--'}</td>
+                                <td>${person.phone || '--'}</td>
+                                <td>${person.cnic || '--'}</td>
+                                <td><small class="text-muted">${person.date}</small></td>
+                            </tr>
+                        `;
+                    });
+                }
+                document.getElementById('modalContent').style.display = 'block';
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
+                document.getElementById('modalContent').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('modalLoading').style.display = 'none';
+            document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
+            document.getElementById('modalContent').style.display = 'block';
+        });
+}
+</script>
 
 {% endblock %}
