@@ -208,21 +208,27 @@ def create_person(request):
             member_phone = form.cleaned_data.get('member_phone')
             member_cnic = form.cleaned_data.get('member_cnic')
             
-            if member_id:
-                member, created = Member.objects.get_or_create(
-                    member_id=member_id,
-                    defaults={
-                        'member_name': member_name,
-                        'member_phone': member_phone,
-                        'member_cnic': member_cnic,
-                        'no_of_registrations': 1
-                    }
-                )
+            if member_id or member_cnic:
+                member = None
                 
-                if not created:
+                if member_cnic:
+                    member = Member.objects.filter(member_cnic=member_cnic).first()
+                    
+                if not member and member_id:
+                    member = Member.objects.filter(member_id=member_id).first()
+                    
+                if member:
                     member.no_of_registrations = F('no_of_registrations') + 1
                     member.save()
                     member.refresh_from_db()
+                elif member_id:
+                    member = Member.objects.create(
+                        member_id=member_id,
+                        member_name=member_name,
+                        member_phone=member_phone,
+                        member_cnic=member_cnic,
+                        no_of_registrations=1
+                    )
                     
                 person.made_by = member
                 
