@@ -111,3 +111,14 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.name} (Sr No: {self.sr_no})"
+
+
+class MembershipSummary(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    total_issued = models.PositiveIntegerField(default=0)
+    total_returned = models.PositiveIntegerField(default=0)
+    total_outstanding = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Summary for {self.name}"

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member, MembershipSummary
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import password_validation
@@ -265,6 +265,7 @@ class BookForm(forms.ModelForm):
         model = Book
         fields = '__all__'
         widgets = {
+            'sr_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Serial Number'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Book Name'}),
             'receiving_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'office_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Office Person'}),
@@ -272,7 +273,6 @@ class BookForm(forms.ModelForm):
             'return_status': forms.Select(attrs={'class': 'form-control'}),
             'return_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'return_person_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Return Person Name'}),
-            'sr_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Serial Number'}),
             'no_of_pages': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Number of Pages'}),
         }
 
@@ -289,3 +289,20 @@ class MemberForm(forms.ModelForm):
             'no_of_registrations': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total Registrations'}),
         }
 
+
+class MembershipSummaryForm(forms.ModelForm):
+    class Meta:
+        model = MembershipSummary
+        fields = ['name', 'total_issued', 'total_returned', 'total_outstanding']
+        labels = {
+            'name': 'Entity Name (Town, Organization, or Individual)',
+            'total_issued': 'Total Cards Issued',
+            'total_returned': 'Total Completed Cards Returned',
+            'total_outstanding': 'Outstanding Cards (Issued minus Returned)'
+        }
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Town A or John Doe'}),
+            'total_issued': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+            'total_returned': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+            'total_outstanding': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '0'}),
+        }

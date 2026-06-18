@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='membership_summary' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div class="container-fluid py-4">
+            <div class="row mb-4">
+                <div class="col-12 col-xl-8 mx-auto">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                            <h4 class="mb-0" style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">
+                                <i class="bi {% if is_update %}bi-pencil-square{% else %}bi-plus-circle-fill{% endif %} me-2" style="color: var(--ppp-red);"></i> 
+                                {% if is_update %}Edit Entity Record{% else %}Add New Entity Record{% endif %}
+                            </h4>
+                        </div>
+                        <div class="card-body mt-3">
+                            <form method="post" action="">
+                                {% csrf_token %}
+                                
+                                <div class="row g-4">
+                                    {% for field in form %}
+                                    <div class="col-12">
+                                        <label for="{{ field.id_for_label }}" class="form-label fw-bold text-dark">{{ field.label }}</label>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                        <div class="form-text text-muted">{{ field.help_text }}</div>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="d-flex justify-content-end mt-5 pt-3 border-top">
+                                    <a href="{% url 'membership_summary' %}" class="btn btn-light px-4 me-3 border">Cancel</a>
+                                    <button type="submit" class="btn text-white px-4" style="background: #1A1A1A;">
+                                        {% if is_update %}Save Changes{% else %}Add Record{% endif %}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='membership_summary' %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const issuedInput = document.getElementById("id_total_issued");
+        const returnedInput = document.getElementById("id_total_returned");
+        const outstandingInput = document.getElementById("id_total_outstanding");
+
+        function calculateOutstanding() {
+            const issued = parseInt(issuedInput.value) || 0;
+            const returned = parseInt(returnedInput.value) || 0;
+            // Outstanding cannot be negative
+            const outstanding = Math.max(0, issued - returned);
+            outstandingInput.value = outstanding;
+        }
+
+        if (issuedInput && returnedInput && outstandingInput) {
+            issuedInput.addEventListener("input", calculateOutstanding);
+            returnedInput.addEventListener("input", calculateOutstanding);
+            
+            // Optionally make outstanding readonly so users don't overwrite the auto-calculation manually
+            outstandingInput.setAttribute("readonly", true);
+            outstandingInput.style.backgroundColor = "#e9ecef";
+        }
+    });
+</script>
+{% endblock %}

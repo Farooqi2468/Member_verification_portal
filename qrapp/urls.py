@@ -53,4 +53,8 @@ urlpatterns = [
     path('dashboard/books/create/', views.book_create, name='book_create'),
     path('dashboard/books/update/<int:pk>/', views.book_update, name='book_update'),
     path('dashboard/books/delete/<int:pk>/', views.book_delete, name='book_delete'),
+    path('dashboard/books/membership-summary/', views.membership_summary_view, name='membership_summary'),
+    path('dashboard/books/membership-summary/create/', views.membership_summary_create, name='membership_summary_create'),
+    path('dashboard/books/membership-summary/update/<int:pk>/', views.membership_summary_update, name='membership_summary_update'),
+    path('dashboard/books/membership-summary/delete/<int:pk>/', views.membership_summary_delete, name='membership_summary_delete'),
 ]

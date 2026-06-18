@@ -19,8 +19,8 @@ from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 
-from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm, MemberForm
-from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member
+from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm, MemberForm, MembershipSummaryForm
+from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member, MembershipSummary
 from django.db.models import F
 
 
@@ -1098,3 +1098,52 @@ def delete_real_member(request, pk):
     messages.success(request, 'Member deleted successfully!')
     return redirect('all_real_members')
 
+
+@login_required
+@admin_only
+def membership_summary_view(request):
+    summaries = MembershipSummary.objects.all().order_by('name')
+    context = {
+        'summaries': summaries,
+        'active_page': 'membership_summary'
+    }
+    return render(request, 'membership_summary.html', context)
+
+
+@login_required
+@admin_only
+def membership_summary_create(request):
+    if request.method == 'POST':
+        form = MembershipSummaryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Membership Summary created successfully!')
+            return redirect('membership_summary')
+    else:
+        form = MembershipSummaryForm()
+    return render(request, 'membership_summary_form.html', {'form': form, 'active_page': 'membership_summary'})
+
+
+@login_required
+@admin_only
+def membership_summary_update(request, pk):
+    summary = get_object_or_404(MembershipSummary, pk=pk)
+    if request.method == 'POST':
+        form = MembershipSummaryForm(request.POST, instance=summary)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Membership Summary updated successfully!')
+            return redirect('membership_summary')
+    else:
+        form = MembershipSummaryForm(instance=summary)
+    return render(request, 'membership_summary_form.html', {'form': form, 'is_update': True, 'summary': summary, 'active_page': 'membership_summary'})
+
+
+@require_POST
+@login_required
+@admin_only
+def membership_summary_delete(request, pk):
+    summary = get_object_or_404(MembershipSummary, pk=pk)
+    summary.delete()
+    messages.success(request, 'Membership Summary deleted successfully!')
+    return redirect('membership_summary')
