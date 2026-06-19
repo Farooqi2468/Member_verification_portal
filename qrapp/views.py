@@ -1184,6 +1184,34 @@ def membership_summary_delete(request, pk):
     return redirect('membership_summary')
 
 
+
+
+
+@login_required
+def ajax_get_member_info(request):
+    member_id = request.GET.get('member_id')
+    if member_id:
+        try:
+            member = Member.objects.get(member_id=member_id)
+            return JsonResponse({
+                'success': True,
+                'member_name': member.member_name,
+                'member_phone': member.member_phone,
+                'member_cnic': member.member_cnic,
+            })
+        except Member.DoesNotExist:
+            try:
+                person = Person.objects.get(membership_number=member_id)
+                return JsonResponse({
+                    'success': True,
+                    'member_name': person.name,
+                    'member_phone': person.phone,
+                    'member_cnic': person.cnic,
+                })
+            except Person.DoesNotExist:
+                return JsonResponse({'success': False})
+    return JsonResponse({'success': False})
+
 @login_required
 def ajax_get_registered_persons(request):
     member_id = request.GET.get('member_id')
