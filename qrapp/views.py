@@ -502,6 +502,41 @@ def update_person(request, pk):
                         ward, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc, defaults={'name': ward_name})
                         person.ward = ward
 
+            member_id = form.cleaned_data.get('member_id')
+            member_name = form.cleaned_data.get('member_name')
+            member_phone = form.cleaned_data.get('member_phone')
+            member_cnic = form.cleaned_data.get('member_cnic')
+            
+            if member_id or member_cnic:
+                member = None
+                
+                if member_cnic:
+                    member = Member.objects.filter(member_cnic=member_cnic).first()
+                    
+                if not member and member_id:
+                    member = Member.objects.filter(member_id=member_id).first()
+                    
+                if not member and member_id:
+                    member = Member.objects.create(
+                        member_id=member_id,
+                        member_name=member_name,
+                        member_phone=member_phone,
+                        member_cnic=member_cnic,
+                        no_of_registrations=0
+                    )
+                    
+                if person.made_by != member:
+                    if person.made_by:
+                        old_member = person.made_by
+                        old_member.no_of_registrations = F('no_of_registrations') - 1
+                        old_member.save()
+                    if member:
+                        member.no_of_registrations = F('no_of_registrations') + 1
+                        member.save()
+                        member.refresh_from_db()
+                        
+                person.made_by = member
+
             url = request.build_absolute_uri(f"/person/{person.membership_number}/")
             img = qrcode.make(url)
             
@@ -1161,11 +1196,11 @@ def ajax_get_registered_persons(request):
     data = []
     for p in persons:
         data.append({
+            'membership_number': p.membership_number,
             'name': p.name,
             'father_name': p.father_name,
             'phone': p.phone,
             'cnic': p.cnic,
-            'date': p.created_at.strftime("%b %d, %Y")
         })
         
     return JsonResponse({'status': 'success', 'data': data})

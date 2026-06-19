@@ -279,11 +279,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
+                            <th>Membership number (ID Number) / پارٹی ممبرشپ نمبر</th>
                             <th>Name</th>
                             <th>Father Name</th>
                             <th>Phone</th>
                             <th>CNIC</th>
-                            <th>Date</th>
                         </tr>
                     </thead>
                     <tbody id="modalTableBody">
@@ -332,11 +332,11 @@ function showMemberRegistrations(memberId) {
                         tbody.innerHTML += `
                             <tr>
                                 <td>${index + 1}</td>
+                                <td>${person.membership_number || '--'}</td>
                                 <td class="fw-bold">${person.name}</td>
                                 <td>${person.father_name || '--'}</td>
                                 <td>${person.phone || '--'}</td>
                                 <td>${person.cnic || '--'}</td>
-                                <td><small class="text-muted">${person.date}</small></td>
                             </tr>
                         `;
                     });
