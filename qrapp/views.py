@@ -858,8 +858,11 @@ def reports_view(request):
         'missing_phone': Person.objects.filter(Q(phone__isnull=True) | Q(phone='')).count(),
         'missing_cnic': Person.objects.filter(Q(cnic__isnull=True) | Q(cnic='')).count(),
         'missing_address': Person.objects.filter(Q(address__isnull=True) | Q(address='')).count(),
+        'missing_name': Person.objects.filter(Q(name__isnull=True) | Q(name='')).count(),
+        'missing_town': Person.objects.filter(town__isnull=True).count(),
         'total': total_count
     }
+
     
     # 4. Growth Stats (Last 6 Months)
     growth_stats = []
