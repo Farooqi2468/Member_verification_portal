@@ -415,7 +415,7 @@ def import_members_csv(request):
             # Clean keys to make it more resilient to trailing spaces or case differences
             cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
             
-            membership_number = cleaned_row.get('membership_number')
+            membership_number = cleaned_row.get('membership_number') or cleaned_row.get('member id')
             if not membership_number:
                 error_count += 1
                 continue
