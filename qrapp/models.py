@@ -122,3 +122,18 @@ class MembershipSummary(models.Model):
 
     def __str__(self):
         return f"Summary for {self.name}"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Member)
+def create_person_for_member(sender, instance, created, **kwargs):
+    if created:
+        Person.objects.get_or_create(
+            membership_number=instance.member_id,
+            defaults={
+                'name': instance.member_name,
+                'phone': instance.member_phone,
+                'cnic': instance.member_cnic,
+            }
+        )
