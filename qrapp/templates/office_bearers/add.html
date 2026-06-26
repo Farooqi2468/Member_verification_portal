@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block layout %}
+<div class="dash-wrap">
+    {% include 'includes/sidebar.html' with active_page='office_bearers' %}
+    <div class="dash-main">
+        <div class="container mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Add Office Bearer</h2>
+                <a href="{% url 'office_bearers_index' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Office Bearers</a>
+            </div>
+            <p class="text-muted">Category: <span class="badge bg-secondary">{{ category|title }}</span></p>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                {% if structural_field %}
+                    <!-- Hierarchical Structural Selectors / Datalists -->
+                    <div class="row mb-3 bg-light p-3 rounded border">
+                        <h5 class="mb-3">Location Details (Type to Add New)</h5>
+                        
+                        {% if structural_field == 'town' or structural_field == 'zone' or structural_field == 'union_council' or structural_field == 'ward' %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-primary fw-bold">Town</label>
+                            <input class="form-control border-primary" list="town_list" name="town_name" required placeholder="Type or select town">
+                            <datalist id="town_list">
+                                {% for town in towns %}<option value="{{ town.name }}">{% endfor %}
+                            </datalist>
+                        </div>
+                        {% endif %}
+
+                        {% if structural_field == 'zone' or structural_field == 'union_council' or structural_field == 'ward' %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-primary fw-bold">Zone</label>
+                            <input class="form-control border-primary" list="zone_list" name="zone_name" required placeholder="Type or select zone">
+                            <datalist id="zone_list">
+                                {% for zone in zones %}<option value="{{ zone.name }}">{% endfor %}
+                            </datalist>
+                        </div>
+                        {% endif %}
+
+                        {% if structural_field == 'union_council' or structural_field == 'ward' %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-primary fw-bold">Union Council</label>
+                            <input class="form-control border-primary" list="uc_list" name="uc_name" required placeholder="Type or select UC">
+                            <datalist id="uc_list">
+                                {% for uc in ucs %}<option value="{{ uc.name }}">{% endfor %}
+                            </datalist>
+                        </div>
+                        {% endif %}
+
+                        {% if structural_field == 'ward' %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-primary fw-bold">Ward</label>
+                            <input class="form-control border-primary" list="ward_list" name="ward_name" required placeholder="Type or select ward">
+                            <datalist id="ward_list">
+                                {% for ward in wards %}<option value="{{ ward.name }}">{% endfor %}
+                            </datalist>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    {% for field in form %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">Save Record</button>
+                    <a href="{% url 'office_bearers_index' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('input, select, textarea').forEach(function(element) {
+        if (!element.classList.contains('form-control') && element.type !== 'file') {
+            element.classList.add('form-control');
+        } else if (element.type === 'file') {
+            element.classList.add('form-control');
+        }
+    });
+</script>
+    </div>
+</div>
+{% endblock %}

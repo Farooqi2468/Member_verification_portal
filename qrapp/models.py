@@ -137,3 +137,168 @@ def create_person_for_member(sender, instance, created, **kwargs):
                 'cnic': instance.member_cnic,
             }
         )
+
+# --- Office Bearers Models ---
+
+class CentralCabinet(models.Model):
+    central_cabinet_name = models.CharField(max_length=100)
+    central_cabinet_designation = models.CharField(max_length=100, null=True, blank=True)
+    central_cabinet_phone = models.CharField(max_length=20, null=True, blank=True)
+    central_cabinet_cnic = models.CharField(max_length=20, null=True, blank=True)
+    central_cabinet_address = models.TextField(null=True, blank=True)
+    central_cabinet_photo = models.ImageField(upload_to='office_bearers/central_cabinet/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.central_cabinet_name} - {self.central_cabinet_designation}"
+
+class TownOrganization(models.Model):
+    town = models.ForeignKey(Town, on_delete=models.CASCADE, related_name='town_office_bearers')
+    town_org_name = models.CharField(max_length=100)
+    town_org_designation = models.CharField(max_length=100, null=True, blank=True)
+    town_org_phone = models.CharField(max_length=20, null=True, blank=True)
+    town_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    town_org_address = models.TextField(null=True, blank=True)
+    town_org_photo = models.ImageField(upload_to='office_bearers/town_org/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.town_org_name} - {self.town.name}"
+
+class ZonalOrganization(models.Model):
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zonal_office_bearers')
+    zonal_org_name = models.CharField(max_length=100)
+    zonal_org_designation = models.CharField(max_length=100, null=True, blank=True)
+    zonal_org_phone = models.CharField(max_length=20, null=True, blank=True)
+    zonal_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    zonal_org_address = models.TextField(null=True, blank=True)
+    zonal_org_photo = models.ImageField(upload_to='office_bearers/zonal_org/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.zonal_org_name} - {self.zone.name}"
+
+class UnionCouncilOrganization(models.Model):
+    union_council = models.ForeignKey(UnionCouncil, on_delete=models.CASCADE, related_name='uc_office_bearers')
+    uc_org_name = models.CharField(max_length=100)
+    uc_org_designation = models.CharField(max_length=100, null=True, blank=True)
+    uc_org_phone = models.CharField(max_length=20, null=True, blank=True)
+    uc_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    uc_org_address = models.TextField(null=True, blank=True)
+    uc_org_photo = models.ImageField(upload_to='office_bearers/uc_org/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.uc_org_name} - {self.union_council.name}"
+
+class WardOrganization(models.Model):
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE, related_name='ward_office_bearers')
+    ward_org_name = models.CharField(max_length=100)
+    ward_org_designation = models.CharField(max_length=100, null=True, blank=True)
+    ward_org_phone = models.CharField(max_length=20, null=True, blank=True)
+    ward_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    ward_org_address = models.TextField(null=True, blank=True)
+    ward_org_photo = models.ImageField(upload_to='office_bearers/ward_org/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.ward_org_name} - {self.ward.name}"
+
+class PeoplesYouthOrganization(models.Model):
+    pyo_name = models.CharField(max_length=100)
+    pyo_designation = models.CharField(max_length=100, null=True, blank=True)
+    pyo_phone = models.CharField(max_length=20, null=True, blank=True)
+    pyo_cnic = models.CharField(max_length=20, null=True, blank=True)
+    pyo_address = models.TextField(null=True, blank=True)
+    pyo_photo = models.ImageField(upload_to='office_bearers/pyo/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class WomenWing(models.Model):
+    women_wing_name = models.CharField(max_length=100)
+    women_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    women_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    women_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    women_wing_address = models.TextField(null=True, blank=True)
+    women_wing_photo = models.ImageField(upload_to='office_bearers/women_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class MinorityWing(models.Model):
+    minority_wing_name = models.CharField(max_length=100)
+    minority_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    minority_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    minority_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    minority_wing_address = models.TextField(null=True, blank=True)
+    minority_wing_photo = models.ImageField(upload_to='office_bearers/minority_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class LabourWing(models.Model):
+    labour_wing_name = models.CharField(max_length=100)
+    labour_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    labour_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    labour_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    labour_wing_address = models.TextField(null=True, blank=True)
+    labour_wing_photo = models.ImageField(upload_to='office_bearers/labour_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class CulturalWing(models.Model):
+    cultural_wing_name = models.CharField(max_length=100)
+    cultural_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    cultural_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    cultural_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    cultural_wing_address = models.TextField(null=True, blank=True)
+    cultural_wing_photo = models.ImageField(upload_to='office_bearers/cultural_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class HumanRightsWing(models.Model):
+    human_rights_wing_name = models.CharField(max_length=100)
+    human_rights_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    human_rights_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    human_rights_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    human_rights_wing_address = models.TextField(null=True, blank=True)
+    human_rights_wing_photo = models.ImageField(upload_to='office_bearers/human_rights_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class TradersWing(models.Model):
+    traders_wing_name = models.CharField(max_length=100)
+    traders_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    traders_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    traders_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    traders_wing_address = models.TextField(null=True, blank=True)
+    traders_wing_photo = models.ImageField(upload_to='office_bearers/traders_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class SportsWing(models.Model):
+    sports_wing_name = models.CharField(max_length=100)
+    sports_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    sports_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    sports_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    sports_wing_address = models.TextField(null=True, blank=True)
+    sports_wing_photo = models.ImageField(upload_to='office_bearers/sports_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class PeoplesStudyCircle(models.Model):
+    study_circle_name = models.CharField(max_length=100)
+    study_circle_designation = models.CharField(max_length=100, null=True, blank=True)
+    study_circle_phone = models.CharField(max_length=20, null=True, blank=True)
+    study_circle_cnic = models.CharField(max_length=20, null=True, blank=True)
+    study_circle_address = models.TextField(null=True, blank=True)
+    study_circle_photo = models.ImageField(upload_to='office_bearers/study_circle/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class DoctorsForum(models.Model):
+    doctors_forum_name = models.CharField(max_length=100)
+    doctors_forum_designation = models.CharField(max_length=100, null=True, blank=True)
+    doctors_forum_phone = models.CharField(max_length=20, null=True, blank=True)
+    doctors_forum_cnic = models.CharField(max_length=20, null=True, blank=True)
+    doctors_forum_address = models.TextField(null=True, blank=True)
+    doctors_forum_photo = models.ImageField(upload_to='office_bearers/doctors_forum/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class UlemaWing(models.Model):
+    ulema_wing_name = models.CharField(max_length=100)
+    ulema_wing_designation = models.CharField(max_length=100, null=True, blank=True)
+    ulema_wing_phone = models.CharField(max_length=20, null=True, blank=True)
+    ulema_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    ulema_wing_address = models.TextField(null=True, blank=True)
+    ulema_wing_photo = models.ImageField(upload_to='office_bearers/ulema_wing/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)

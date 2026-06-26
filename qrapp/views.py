@@ -20,7 +20,13 @@ from django.contrib.auth.models import User, Group
 from django.contrib import messages
 
 from .forms import PersonForm, TownForm, ZoneForm, UnionCouncilForm, WardForm, RoleUserCreationForm, RoleUserChangeForm, ProfileUpdateForm, PasswordUpdateForm, BookForm, MemberForm, MembershipSummaryForm
-from .models import Person, Town, Zone, UnionCouncil, Ward, Book, Member, MembershipSummary
+from .models import (
+    Person, Town, Zone, UnionCouncil, Ward, Book, Member, MembershipSummary,
+    CentralCabinet, TownOrganization, ZonalOrganization, UnionCouncilOrganization,
+    WardOrganization, PeoplesYouthOrganization, WomenWing, MinorityWing, LabourWing,
+    CulturalWing, HumanRightsWing, TradersWing, SportsWing, PeoplesStudyCircle,
+    DoctorsForum, UlemaWing
+)
 from django.db.models import F
 
 
@@ -1235,3 +1241,96 @@ def ajax_get_registered_persons(request):
         })
         
     return JsonResponse({'status': 'success', 'data': data})
+from django.forms import modelform_factory
+
+@login_required
+def office_bearers_index(request):
+    categories = [
+        {'id': 'central_cabinet', 'name': 'Central Cabinet', 'icon': 'bi-person-badge'},
+        {'id': 'town_org', 'name': 'Town Organizations', 'icon': 'bi-building'},
+        {'id': 'zonal_org', 'name': 'Zonal Organizations', 'icon': 'bi-map'},
+        {'id': 'uc_org', 'name': 'Union Council Organizations', 'icon': 'bi-diagram-3'},
+        {'id': 'ward_org', 'name': 'Ward Organizations', 'icon': 'bi-house'},
+        {'id': 'pyo', 'name': 'People\'s Youth Organization', 'icon': 'bi-people-fill'},
+        {'id': 'women_wing', 'name': 'Women Wing', 'icon': 'bi-gender-female'},
+        {'id': 'minority_wing', 'name': 'Minority Wing', 'icon': 'bi-globe'},
+        {'id': 'labour_wing', 'name': 'Labour Wing', 'icon': 'bi-tools'},
+        {'id': 'cultural_wing', 'name': 'Cultural Wing', 'icon': 'bi-palette'},
+        {'id': 'human_rights_wing', 'name': 'Human Rights Wing', 'icon': 'bi-shield-check'},
+        {'id': 'traders_wing', 'name': 'Traders Wing', 'icon': 'bi-shop'},
+        {'id': 'sports_wing', 'name': 'Sports Wing', 'icon': 'bi-trophy'},
+        {'id': 'study_circle', 'name': 'People\'s Study Circle', 'icon': 'bi-book'},
+        {'id': 'doctors_forum', 'name': 'Doctors Forum', 'icon': 'bi-heart-pulse'},
+        {'id': 'ulema_wing', 'name': 'Ulema Wing', 'icon': 'bi-book-half'},
+    ]
+    return render(request, 'office_bearers/index.html', {'categories': categories})
+
+@login_required
+def add_office_bearer(request, category):
+    mapping = {
+        'central_cabinet': (CentralCabinet, None, None),
+        'town_org': (TownOrganization, 'town', Town),
+        'zonal_org': (ZonalOrganization, 'zone', Zone),
+        'uc_org': (UnionCouncilOrganization, 'union_council', UnionCouncil),
+        'ward_org': (WardOrganization, 'ward', Ward),
+        'pyo': (PeoplesYouthOrganization, None, None),
+        'women_wing': (WomenWing, None, None),
+        'minority_wing': (MinorityWing, None, None),
+        'labour_wing': (LabourWing, None, None),
+        'cultural_wing': (CulturalWing, None, None),
+        'human_rights_wing': (HumanRightsWing, None, None),
+        'traders_wing': (TradersWing, None, None),
+        'sports_wing': (SportsWing, None, None),
+        'study_circle': (PeoplesStudyCircle, None, None),
+        'doctors_forum': (DoctorsForum, None, None),
+        'ulema_wing': (UlemaWing, None, None),
+    }
+
+    if category not in mapping:
+        messages.error(request, 'Invalid category.')
+        return redirect('dashboard')
+
+    ModelClass, structural_field, StructuralModel = mapping[category]
+    exclude_fields = [structural_field, 'created_at'] if structural_field else ['created_at']
+    FormClass = modelform_factory(ModelClass, exclude=exclude_fields)
+
+    if request.method == 'POST':
+        form = FormClass(request.POST, request.FILES)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            
+            if structural_field and StructuralModel:
+                structural_name = request.POST.get(structural_field + '_name')
+                
+                if structural_field == 'town':
+                    obj, _ = Town.objects.get_or_create(name=structural_name)
+                elif structural_field == 'zone':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    obj, _ = Zone.objects.get_or_create(name=structural_name, town=t_obj)
+                elif structural_field == 'union_council':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    z_obj, _ = Zone.objects.get_or_create(name=request.POST.get('zone_name'), town=t_obj)
+                    obj, _ = UnionCouncil.objects.get_or_create(name=structural_name, zone=z_obj)
+                elif structural_field == 'ward':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    z_obj, _ = Zone.objects.get_or_create(name=request.POST.get('zone_name'), town=t_obj)
+                    uc_obj, _ = UnionCouncil.objects.get_or_create(name=request.POST.get('uc_name'), zone=z_obj)
+                    obj, _ = Ward.objects.get_or_create(name=structural_name, union_council=uc_obj)
+                    
+                setattr(instance, structural_field, obj)
+            
+            instance.save()
+            messages.success(request, 'Office bearer added successfully!')
+            return redirect('office_bearers_index')
+    else:
+        form = FormClass()
+        
+    return render(request, 'office_bearers/add.html', {
+        'form': form,
+        'category': category,
+        'structural_field': structural_field,
+        'towns': Town.objects.all(),
+        'zones': Zone.objects.all(),
+        'ucs': UnionCouncil.objects.all(),
+        'wards': Ward.objects.all(),
+    })

@@ -58,4 +58,8 @@ urlpatterns = [
     path('dashboard/books/membership-summary/create/', views.membership_summary_create, name='membership_summary_create'),
     path('dashboard/books/membership-summary/update/<int:pk>/', views.membership_summary_update, name='membership_summary_update'),
     path('dashboard/books/membership-summary/delete/<int:pk>/', views.membership_summary_delete, name='membership_summary_delete'),
+
+    # Office Bearers
+    path('dashboard/office-bearers/', views.office_bearers_index, name='office_bearers_index'),
+    path('dashboard/office-bearers/add/<str:category>/', views.add_office_bearer, name='add_office_bearer'),
 ]
