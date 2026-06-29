@@ -4,6 +4,7 @@ import base64
 import urllib.request
 import qrcode
 import csv
+import json
 from datetime import timedelta, datetime
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -309,6 +310,26 @@ def admin_person_detail(request, pk):
 @login_required
 @admin_only
 def all_members(request):
+    import_success = request.GET.get('import_success')
+    import_duplicates = request.GET.get('import_duplicates')
+    import_errors = request.GET.get('import_errors')
+    if import_success is not None:
+        try:
+            suc = int(import_success)
+            dup = int(import_duplicates or 0)
+            err = int(import_errors or 0)
+            if suc > 0:
+                messages.success(request, f"Successfully imported {suc} members.")
+            if dup > 0:
+                messages.warning(request, f"Skipped {dup} duplicate members.")
+            if err > 0:
+                messages.error(request, f"Failed to import {err} rows due to errors.")
+            if suc == 0 and dup == 0 and err == 0:
+                messages.info(request, "No new members were imported.")
+        except ValueError:
+            pass
+        return redirect('all_members')
+
     members_list = Person.objects.all().order_by('-created_at')
 
     # Filtering logic
@@ -421,31 +442,56 @@ def import_members_csv(request):
             # Clean keys to make it more resilient to trailing spaces or case differences
             cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
             
-            membership_number = cleaned_row.get('membership_number') or cleaned_row.get('member id')
+            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
             if not membership_number:
                 error_count += 1
                 continue
             
-            # Map location names to existing objects. Do not auto-create as per user request.
             town_name = cleaned_row.get('town', '')
             zone_name = cleaned_row.get('zone', '')
-            uc_name = cleaned_row.get('union_council', '')
+            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
             ward_name = cleaned_row.get('ward', '')
 
-            town_obj = Town.objects.filter(name__iexact=town_name).first() if town_name else None
-            zone_obj = Zone.objects.filter(name__iexact=zone_name).first() if zone_name else None
-            uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first() if uc_name else None
-            ward_obj = Ward.objects.filter(name__iexact=ward_name).first() if ward_name else None
+            town_obj = None
+            if town_name:
+                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
+
+            zone_obj = None
+            if zone_name and town_obj:
+                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
+            elif zone_name:
+                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
+
+            uc_obj = None
+            if uc_name and zone_obj:
+                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
+            elif uc_name:
+                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+                
+            ward_obj = None
+            if ward_name and uc_obj:
+                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
+
+            registered_by_name = cleaned_row.get('registered by', '')
+            member_obj = None
+            if registered_by_name:
+                member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
+                if not member_obj:
+                    member_obj = Member.objects.create(
+                        member_id=registered_by_name,
+                        member_name=registered_by_name,
+                        no_of_registrations=0
+                    )
 
             # Handle CNIC carefully to avoid unique constraint issues if empty
             cnic_val = cleaned_row.get('cnic', '') or None
 
             # Create or update the person
-            person, created = Person.objects.update_or_create(
+            person, created = Person.objects.get_or_create(
                 membership_number=membership_number,
                 defaults={
                     'name': cleaned_row.get('name', ''),
-                    'father_name': cleaned_row.get('father_name', ''),
+                    'father_name': cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
                     'cnic': cnic_val,
                     'phone': cleaned_row.get('phone', ''),
                     'address': cleaned_row.get('address', ''),
@@ -453,9 +499,46 @@ def import_members_csv(request):
                     'zone': zone_obj,
                     'union_council': uc_obj,
                     'ward': ward_obj,
-                    'made_by': None,
+                    'made_by': member_obj,
                 }
             )
+
+            if not created:
+                person.name = cleaned_row.get('name', '')
+                person.father_name = cleaned_row.get('father name', '') or cleaned_row.get('father_name', '')
+                person.cnic = cnic_val
+                person.phone = cleaned_row.get('phone', '')
+                person.address = cleaned_row.get('address', '')
+                person.town = town_obj
+                person.zone = zone_obj
+                person.union_council = uc_obj
+                person.ward = ward_obj
+                
+                if person.made_by != member_obj:
+                    if person.made_by:
+                        old_member = person.made_by
+                        old_member.no_of_registrations = F('no_of_registrations') - 1
+                        old_member.save()
+                    if member_obj:
+                        member_obj.no_of_registrations = F('no_of_registrations') + 1
+                        member_obj.save()
+                        member_obj.refresh_from_db()
+                
+                person.made_by = member_obj
+                person.save()
+            else:
+                if member_obj:
+                    member_obj.no_of_registrations = F('no_of_registrations') + 1
+                    member_obj.save()
+                    member_obj.refresh_from_db()
+
+            date_str = cleaned_row.get('date', '')
+            if date_str:
+                try:
+                    parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                    Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                except ValueError:
+                    pass
 
             # Generate QR code if newly created or if missing
             if created or not person.qr_code:
@@ -480,6 +563,126 @@ def import_members_csv(request):
         messages.error(request, f"Error processing CSV file: {str(e)}")
 
     return redirect('all_members')
+
+
+@require_POST
+@login_required
+@admin_only
+def import_members_ajax(request):
+    try:
+        data = json.loads(request.body)
+        rows = data.get('rows', [])
+        
+        success_count = 0
+        duplicate_count = 0
+        error_count = 0
+
+        for row in rows:
+            # Clean keys
+            cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
+            
+            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+            if not membership_number:
+                error_count += 1
+                continue
+                
+            # Skip duplicates
+            if Person.objects.filter(membership_number=membership_number).exists():
+                duplicate_count += 1
+                continue
+                
+            town_name = cleaned_row.get('town', '')
+            zone_name = cleaned_row.get('zone', '')
+            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
+            ward_name = cleaned_row.get('ward', '')
+
+            town_obj = None
+            if town_name:
+                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
+
+            zone_obj = None
+            if zone_name and town_obj:
+                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
+            elif zone_name:
+                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
+
+            uc_obj = None
+            if uc_name and zone_obj:
+                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
+            elif uc_name:
+                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+                
+            ward_obj = None
+            if ward_name and uc_obj:
+                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
+
+            registered_by_name = cleaned_row.get('registered by', '')
+            member_obj = None
+            if registered_by_name:
+                member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
+                if not member_obj:
+                    member_obj = Member.objects.create(
+                        member_id=registered_by_name,
+                        member_name=registered_by_name,
+                        no_of_registrations=0
+                    )
+
+            cnic_val = cleaned_row.get('cnic', '') or None
+            
+            # Since we skip duplicates above, we can just create
+            try:
+                person = Person.objects.create(
+                    membership_number=membership_number,
+                    name=cleaned_row.get('name', ''),
+                    father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
+                    cnic=cnic_val,
+                    phone=cleaned_row.get('phone', ''),
+                    address=cleaned_row.get('address', ''),
+                    town=town_obj,
+                    zone=zone_obj,
+                    union_council=uc_obj,
+                    ward=ward_obj,
+                    made_by=member_obj,
+                )
+                
+                if member_obj:
+                    member_obj.no_of_registrations = F('no_of_registrations') + 1
+                    member_obj.save()
+                    member_obj.refresh_from_db()
+
+                date_str = cleaned_row.get('date', '')
+                if date_str:
+                    try:
+                        parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                    except ValueError:
+                        pass
+
+                # Generate QR code
+                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+                img = qrcode.make(url)
+                
+                buffer = io.BytesIO()
+                img.save(buffer, format='PNG')
+                file_name = f"qr_{person.membership_number}.png"
+                
+                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
+                person.save()
+
+                success_count += 1
+            except Exception as e:
+                # E.g. unique constraint failed on CNIC
+                error_count += 1
+                
+        return JsonResponse({
+            'status': 'success',
+            'imported': success_count,
+            'duplicates': duplicate_count,
+            'errors': error_count
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
 
 @login_required
@@ -564,6 +767,14 @@ def update_person(request, pk):
 @admin_only
 def delete_person(request, pk):
     person = get_object_or_404(Person, membership_number=pk)
+    
+    # Decrement the member's registration count before deleting the person
+    if person.made_by:
+        member = person.made_by
+        if member.no_of_registrations > 0:
+            member.no_of_registrations = F('no_of_registrations') - 1
+            member.save()
+            
     person.delete()
     return redirect('all_members')
 
@@ -1062,7 +1273,7 @@ def book_delete(request, pk):
 @login_required
 @admin_only
 def all_real_members(request):
-    members_list = Member.objects.all().order_by('-member_name')
+    members_list = Member.objects.annotate(actual_registrations=Count('persons_created')).order_by('-member_name')
     q = request.GET.get('q', '')
 
     if q:
@@ -1081,7 +1292,7 @@ def all_real_members(request):
         writer.writerow(['Member ID', 'Name', 'Phone', 'CNIC', 'No of Registrations'])
         
         for m in members_list:
-            writer.writerow([m.member_id, m.member_name, m.member_phone, m.member_cnic, m.no_of_registrations])
+            writer.writerow([m.member_id, m.member_name, m.member_phone, m.member_cnic, m.actual_registrations])
         return response
 
     paginator = Paginator(members_list, 15)

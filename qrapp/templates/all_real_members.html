@@ -206,7 +206,7 @@
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
                             <td>{{ member.member_cnic|default:"--" }}</td>
-                            <td style="text-align: right; font-weight: 600;">{{ member.no_of_registrations }}</td>
+                            <td style="text-align: right; font-weight: 600;">{{ member.actual_registrations }}</td>
                             <td class="no-print" style="text-align: right;">
                                 <div class="d-flex gap-2 justify-content-end">
                                     <a href="{% url 'update_real_member' member.member_id %}" class="btn btn-sm btn-outline-primary" style="font-size: 12px; font-weight: 500;">

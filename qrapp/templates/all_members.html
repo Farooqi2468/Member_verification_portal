@@ -537,11 +537,39 @@
     </div>
 </div>
 
+<!-- Full Screen Overlay -->
+<div id="importOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:var(--font-sans, sans-serif);">
+    <h2 style="margin-bottom: 20px; font-weight: 600;">Importing Members...</h2>
+    <div style="width: 300px; background: #333; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+        <div id="importProgressBar" style="width: 0%; height: 10px; background: var(--ppp-green, #006B3F); transition: width 0.2s;"></div>
+    </div>
+    <div style="display: flex; gap: 20px; text-align: center;">
+        <div>
+            <div style="font-size: 24px; font-weight: bold;" id="importTotal">0</div>
+            <div style="font-size: 12px; color: #aaa;">Total</div>
+        </div>
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: var(--ppp-green, #006B3F);" id="importSuccess">0</div>
+            <div style="font-size: 12px; color: #aaa;">Imported</div>
+        </div>
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: #ffc107;" id="importDuplicates">0</div>
+            <div style="font-size: 12px; color: #aaa;">Duplicates (Skipped)</div>
+        </div>
+        <div>
+            <div style="font-size: 24px; font-weight: bold; color: var(--ppp-red, #C41E3A);" id="importErrors">0</div>
+            <div style="font-size: 12px; color: #aaa;">Errors</div>
+        </div>
+    </div>
+    <div style="margin-top: 20px; font-size: 14px; color: #aaa;" id="importStatusText">Reading CSV file...</div>
+</div>
+
 {% include 'includes/mobile_nav.html' with active_page='members' %}
 
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const jumpInput = document.getElementById('jumpPageInput');
@@ -569,6 +597,101 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const importForm = document.querySelector('#importCsvModal form');
+    if (importForm) {
+        importForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('csv_file');
+            if (!fileInput.files.length) return;
+
+            const file = fileInput.files[0];
+            const overlay = document.getElementById('importOverlay');
+            overlay.style.display = 'flex';
+            
+            // Close the modal
+            const modalEl = document.getElementById('importCsvModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const rows = results.data;
+                    const totalRows = rows.length;
+                    document.getElementById('importTotal').innerText = totalRows;
+                    
+                    if (totalRows === 0) {
+                        document.getElementById('importStatusText').innerText = "No data found in CSV.";
+                        setTimeout(() => window.location.reload(), 2000);
+                        return;
+                    }
+
+                    const chunkSize = 1;
+                    let currentChunkIndex = 0;
+                    
+                    let totalSuccess = 0;
+                    let totalDuplicates = 0;
+                    let totalErrors = 0;
+
+                    function processNextChunk() {
+                        if (currentChunkIndex >= totalRows) {
+                            document.getElementById('importStatusText').innerText = "Import Complete! Reloading...";
+                            setTimeout(() => {
+                                window.location.href = "?import_success=" + totalSuccess + "&import_duplicates=" + totalDuplicates + "&import_errors=" + totalErrors;
+                            }, 1500);
+                            return;
+                        }
+
+                        const chunk = rows.slice(currentChunkIndex, currentChunkIndex + chunkSize);
+                        document.getElementById('importStatusText').innerText = `Processing rows ${currentChunkIndex + 1} to ${Math.min(currentChunkIndex + chunkSize, totalRows)}...`;
+
+                        fetch("{% url 'import_members_ajax' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            },
+                            body: JSON.stringify({ rows: chunk })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                totalSuccess += data.imported;
+                                totalDuplicates += data.duplicates;
+                                totalErrors += data.errors;
+                                
+                                document.getElementById('importSuccess').innerText = totalSuccess;
+                                document.getElementById('importDuplicates').innerText = totalDuplicates;
+                                document.getElementById('importErrors').innerText = totalErrors;
+                            } else {
+                                console.error(data.message);
+                            }
+                            
+                            currentChunkIndex += chunkSize;
+                            
+                            const percent = Math.min(100, Math.round((currentChunkIndex / totalRows) * 100));
+                            document.getElementById('importProgressBar').style.width = percent + '%';
+                            
+                            processNextChunk();
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            document.getElementById('importStatusText').innerText = "Error occurred. Check console.";
+                        });
+                    }
+
+                    processNextChunk();
+                },
+                error: function(err) {
+                    alert('Error parsing CSV');
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 </script>
 {% endblock %}
