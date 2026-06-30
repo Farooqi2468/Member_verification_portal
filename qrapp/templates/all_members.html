@@ -347,6 +347,7 @@
                             <label class="form-label">Registered By</label>
                             <select name="registrar" class="form-select">
                                 <option value="">— All Members —</option>
+                                <option value="system" {% if current_filters.registrar == 'system' %}selected{% endif %}>System</option>
                                 {% for u in registrars %}
                                 <option value="{{ u.member_id }}" {% if current_filters.registrar == u.member_id %}selected{% endif %}>{{ u.member_name }}</option>
                                 {% endfor %}

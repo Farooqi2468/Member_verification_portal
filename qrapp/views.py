@@ -349,7 +349,10 @@ def all_members(request):
     if town_id:
         members_list = members_list.filter(town_id=town_id)
     if registrar_id:
-        members_list = members_list.filter(made_by_id=registrar_id)
+        if registrar_id == 'system':
+            members_list = members_list.filter(made_by__isnull=True)
+        else:
+            members_list = members_list.filter(made_by_id=registrar_id)
     if start_date:
         try:
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -407,7 +410,7 @@ def all_members(request):
         'current_filters': {
             'q': q,
             'town': int(town_id) if town_id else '',
-            'registrar': int(registrar_id) if registrar_id else '',
+            'registrar': registrar_id if registrar_id else '',
             'start_date': start_date or '',
             'end_date': end_date or ''
         },
