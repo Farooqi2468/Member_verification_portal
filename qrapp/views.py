@@ -579,19 +579,24 @@ def import_members_ajax(request):
         success_count = 0
         duplicate_count = 0
         error_count = 0
+        logs = []
 
         for row in rows:
             # Clean keys
             cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
             
             membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+            log_id = membership_number if membership_number else "Unknown"
+
             if not membership_number:
                 error_count += 1
+                logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Member ID'})
                 continue
                 
             # Skip duplicates
             if Person.objects.filter(membership_number=membership_number).exists():
                 duplicate_count += 1
+                logs.append({'serial_number': log_id, 'type': 'warning', 'message': f'Skipped duplicate'})
                 continue
                 
             town_name = cleaned_row.get('town', '')
@@ -673,15 +678,18 @@ def import_members_ajax(request):
                 person.save()
 
                 success_count += 1
+                logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
             except Exception as e:
                 # E.g. unique constraint failed on CNIC
                 error_count += 1
+                logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Error importing: {str(e)}'})
                 
         return JsonResponse({
             'status': 'success',
             'imported': success_count,
             'duplicates': duplicate_count,
-            'errors': error_count
+            'errors': error_count,
+            'logs': logs
         })
 
     except Exception as e:
