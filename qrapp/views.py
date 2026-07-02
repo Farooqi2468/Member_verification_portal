@@ -1356,10 +1356,51 @@ def create_real_member(request):
 def update_real_member(request, pk):
     member = get_object_or_404(Member, pk=pk)
     if request.method == 'POST':
+        # ── Read the new member_id directly from POST BEFORE binding to form ─
+        # pk (from the URL) is always the reliable OLD member_id.
+        # request.POST['member_id'] is what the user typed as the new value.
+        old_member_id  = pk                              # comes from the URL — always reliable
+        new_member_id  = request.POST.get('member_id', pk).strip()
+        id_is_changing = (old_member_id != new_member_id)
+
         form = MemberForm(request.POST, instance=member)
         if form.is_valid():
+            # form.save() → if member_id changed, Django INSERTs a new row
             form.save()
-            messages.success(request, 'Member updated successfully!')
+
+            if id_is_changing:
+                # 1. Re-point the FK: Person.made_by → new Member row
+                Person.objects.filter(made_by_id=old_member_id).update(
+                    made_by_id=new_member_id
+                )
+
+                # 2. Update the denormalised CharField that stores the member id
+                Person.objects.filter(member_membership_id=old_member_id).update(
+                    member_membership_id=new_member_id
+                )
+
+                # 3. Migrate the mirror Person whose membership_number == old_member_id
+                mirror_person = Person.objects.filter(
+                    membership_number=old_member_id
+                ).first()
+                if mirror_person:
+                    # PK cannot be updated in-place: delete old row then re-save with new PK
+                    mirror_person.membership_number = new_member_id
+                    mirror_person.made_by_id = new_member_id
+                    Person.objects.filter(membership_number=old_member_id).delete()
+                    mirror_person.save()
+
+                # 4. Delete the now-orphaned old Member row (left behind by Django INSERT)
+                Member.objects.filter(member_id=old_member_id).delete()
+
+                messages.success(
+                    request,
+                    f'Member ID updated from "{old_member_id}" to '
+                    f'"{new_member_id}" and all associated records have been migrated.'
+                )
+            else:
+                messages.success(request, 'Member updated successfully!')
+
             return redirect('all_real_members')
     else:
         form = MemberForm(instance=member)
