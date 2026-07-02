@@ -56,6 +56,14 @@ class PersonForm(forms.ModelForm):
                 self.fields['union_council_name'].initial = instance.union_council.name
             if instance.ward:
                 self.fields['ward_name'].initial = instance.ward.name
+            
+            if instance.made_by:
+                self.fields['member_id'].initial = instance.made_by.member_id
+                self.fields['member_name'].initial = instance.made_by.member_name
+                self.fields['member_phone'].initial = instance.made_by.member_phone
+                self.fields['member_cnic'].initial = instance.made_by.member_cnic
+            else:
+                self.fields['member_id'].initial = instance.member_membership_id
 
         self.fields['town'].queryset = Town.objects.all()
         self.fields['town'].empty_label = "— Select Town —"
