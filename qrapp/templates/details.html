@@ -2,149 +2,152 @@
 
 {% block layout %}
 <style>
-:root {
-  --ppp-red: #C41E3A;
-  --ppp-red-dark: #8B1528;
-  --ppp-green: #006B3F;
-  --ppp-green-dark: #004D2C;
-}
-
-.detail-av {
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.1);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 16px;
-}
-
-.detail-badge {
-    padding: 4px 16px;
-    border-radius: 20px;
-    background: rgba(0, 107, 63, 0.2);
-    color: #66D9A0;
-    font-size: 11px;
-    font-weight: 600;
-    margin-bottom: 24px;
-}
-
-.qr-display-box {
-    background: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-}
-
-.detail-section {
-    margin-bottom: 32px;
-}
-
-.detail-section-title {
-    font-size: 11px;
-    color: #999;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0;
-    padding-bottom: 8px;
-}
-
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.detail-row {
-    margin-bottom: 4px;
-}
-
-.detail-row .label {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 2px;
-}
-
-.detail-row .value {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-}
-
-/* Modal Styles */
-.qr-modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(5px);
-    z-index: 1050;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.qr-modal-card {
-    background: linear-gradient(180deg, #1A1A1A, var(--ppp-green-dark));
-    width: 90%;
-    max-width: 360px;
-    max-height: 90vh; /* Extremely important for responsive height */
-    overflow-y: auto; /* Enable scrolling on tiny screens */
-    border-radius: 20px;
-    padding: 32px 20px 24px;
-    text-align: center;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.qr-close-btn {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #fff;
-    font-size: 24px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    line-height: 1;
-}
-
-.qr-close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-/* Responsive */
-@media (max-width: 767.98px) {
-    .dash-main {
-        padding: 20px 16px;
-        padding-bottom: 80px;
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
     }
+
+    .detail-av {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .detail-badge {
+        padding: 4px 16px;
+        border-radius: 20px;
+        background: rgba(0, 107, 63, 0.2);
+        color: #66D9A0;
+        font-size: 11px;
+        font-weight: 600;
+        margin-bottom: 24px;
+    }
+
+    .qr-display-box {
+        background: #fff;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+    }
+
+    .detail-section {
+        margin-bottom: 32px;
+    }
+
+    .detail-section-title {
+        font-size: 11px;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 8px;
+    }
+
     .detail-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
     }
-    .qr-modal-card {
-        padding: 24px 16px 20px;
-        width: 95%;
-    }
-}
 
+    .detail-row {
+        margin-bottom: 4px;
+    }
+
+    .detail-row .label {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 2px;
+    }
+
+    .detail-row .value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Modal Styles */
+    .qr-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(5px);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .qr-modal-card {
+        background: linear-gradient(180deg, #1A1A1A, var(--ppp-green-dark));
+        width: 90%;
+        max-width: 360px;
+        max-height: 90vh;
+        /* Extremely important for responsive height */
+        overflow-y: auto;
+        /* Enable scrolling on tiny screens */
+        border-radius: 20px;
+        padding: 32px 20px 24px;
+        text-align: center;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .qr-close-btn {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        line-height: 1;
+    }
+
+    .qr-close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 16px;
+            padding-bottom: 80px;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .qr-modal-card {
+            padding: 24px 16px 20px;
+            width: 95%;
+        }
+    }
 </style>
 
 <div class="dash-wrap">
@@ -154,33 +157,46 @@
     <!-- Main Content -->
     <div class="dash-main">
         <div class="mb-3">
-            <a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+            <a href="{% url 'dashboard' %}"
+                class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 12px;">
+        <div
+            style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 12px;">
             <div>
                 <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">Member Profile</h2>
                 <div style="font-size: 13px; color: #888; margin-top: 4px;">{{ person.name }}</div>
             </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <button onclick="document.getElementById('qrModal').style.display='flex'" class="btn" style="background: var(--ppp-green); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-qr-code-scan me-1" viewBox="0 0 16 16" style="vertical-align: text-bottom;">
-                        <path d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z"/>
-                        <path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z"/>
-                        <path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z"/>
-                        <path d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z"/>
-                        <path d="M12 9h2V8h-2z"/>
+                <button onclick="document.getElementById('qrModal').style.display='flex'" class="btn"
+                    style="background: var(--ppp-green); color: #fff; border-radius: 8px; font-size: 12px; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-qr-code-scan me-1" viewBox="0 0 16 16" style="vertical-align: text-bottom;">
+                        <path
+                            d="M0 .5A.5.5 0 0 1 .5 0h3a.5.5 0 0 1 0 1H1v2.5a.5.5 0 0 1-1 0zm12 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V1h-2.5a.5.5 0 0 1-.5-.5M.5 12a.5.5 0 0 1 .5.5V15h2.5a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H15v-2.5a.5.5 0 0 1 .5-.5M4 4h1v1H4z" />
+                        <path d="M7 2H2v5h5zM3 3h3v3H3zm2 8H4v1h1z" />
+                        <path d="M7 9H2v5h5zm-4 1h3v3H3zm8-6h1v1h-1z" />
+                        <path
+                            d="M9 2h5v5H9zm1 1v3h3V3zM8 8v2h1v1H8v1h2v-2h1v2h1v-1h2v-1h-3V8zm2 2H9V9h1zm4 2h-1v1h-2v1h3zm-4 2v-1H8v1z" />
+                        <path d="M12 9h2V8h-2z" />
                     </svg>
                     View QR Card
                 </button>
-                <a href="{% url 'create_person' %}" class="btn" style="background: #f0f0f0; border-radius: 8px; font-size: 12px; font-weight: 600;">+ New Registration</a>
+                <a href="{% url 'create_person' %}" class="btn"
+                    style="background: #f0f0f0; border-radius: 8px; font-size: 12px; font-weight: 600;">+ New
+                    Registration</a>
             </div>
         </div>
 
         <div class="detail-section">
             <div class="detail-section-title">Personal Information</div>
             <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="label">Member ID</div>
+                    <div class="value" style="font-family: monospace; font-size: 24px;">#{{ person.membership_number }}
+                    </div>
+                </div>
                 <div class="detail-row">
                     <div class="label">Father's Name</div>
                     <div class="value">{{ person.father_name }}</div>
@@ -229,7 +245,8 @@
                 <div class="detail-row">
                     <div class="label">Registered By</div>
                     <div class="value" style="display: flex; align-items: center; gap: 8px;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #1A1A1A; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;">
+                        <span
+                            style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: #1A1A1A; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;">
                             {{ person.made_by.member_name|first|upper }}
                         </span>
                         {{ person.made_by.member_name }}
@@ -239,19 +256,18 @@
                     <div class="label">Date of Registration</div>
                     <div class="value">{{ person.created_at|date:"d M Y" }}</div>
                 </div>
-                <div class="detail-row">
-                    <div class="label">Member ID</div>
-                    <div class="value" style="font-family: monospace; font-size: 13px;">#{{ person.membership_number }}</div>
-                </div>
             </div>
         </div>
 
         {% if is_admin %}
-        <div style="padding: 20px; background: #fffcf0; border: 1px solid #f9f2d0; border-radius: 8px; display: flex; align-items: flex-start; gap: 12px;">
+        <div
+            style="padding: 20px; background: #fffcf0; border: 1px solid #f9f2d0; border-radius: 8px; display: flex; align-items: flex-start; gap: 12px;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="#8B7024" style="flex-shrink: 0;">
-                <path d="M12 2L1 21h22L12 2zm0 3.45l8.15 14.1H3.85L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+                <path d="M12 2L1 21h22L12 2zm0 3.45l8.15 14.1H3.85L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
             </svg>
-            <div style="font-size: 12px; color: #6B5820;">This membership record was verified by <strong>{{ person.made_by.member_name }}</strong> on {{ person.created_at|date:"M d, Y" }}. All data is secured via QR encryption.</div>
+            <div style="font-size: 12px; color: #6B5820;">This membership record was verified by <strong>{{
+                    person.made_by.member_name }}</strong> on {{ person.created_at|date:"M d, Y" }}. All data is secured
+                via QR encryption.</div>
         </div>
         {% endif %}
     </div>
@@ -260,67 +276,96 @@
 <!-- QR Card Modal Overlay -->
 <div id="qrModal" class="qr-modal" style="display: none;">
     <div class="qr-modal-card" style="background: transparent; box-shadow: none; padding: 0;">
-        <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn" style="top: -40px; right: 0;">&times;</button>
-        
+        <button onclick="document.getElementById('qrModal').style.display='none'" class="qr-close-btn"
+            style="top: -40px; right: 0;">&times;</button>
+
         <!-- Member Card -->
-        <div id="qrMemberCard" style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 15%, #1A1A1A 85%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); text-align: left; position: relative; overflow: hidden;">
+        <div id="qrMemberCard"
+            style="background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 15%, #1A1A1A 85%, var(--ppp-green) 100%); width: 100%; border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); text-align: left; position: relative; overflow: hidden;">
             <!-- Header section with Name and QR -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
                 <div style="flex: 1; padding-right: 12px;">
-                    <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 4px; word-break: break-word; line-height: 1.2;">{{ person.name }}</h3>
-                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">S/O, D/O, W/O: <span style="color: #fff;">{{ person.father_name }}</span></div>
-                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">CNIC: <span style="color: #fff;">{{ person.cnic }}</span></div>
-                    <div style="font-size: 12px; color: #bbb;">Mobile: <span style="color: #fff;">{{ person.phone }}</span></div>
+                    <h3
+                        style="font-size: 20px; font-weight: 700; margin: 0 0 4px; word-break: break-word; line-height: 1.2;">
+                        {{ person.name }}</h3>
+                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">S/O, D/O, W/O: <span
+                            style="color: #fff;">{{ person.father_name }}</span></div>
+                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">CNIC: <span style="color: #fff;">{{
+                            person.cnic }}</span></div>
+                    <div style="font-size: 12px; color: #bbb;">Mobile: <span style="color: #fff;">{{ person.phone
+                            }}</span></div>
                 </div>
                 <div style="text-align: center; flex-shrink: 0;">
                     <div class="qr-display-box" style="padding: 6px; margin: 0; background: #fff; border-radius: 8px;">
-                        <img id="qrCodeImg" src="{% if qr_base64 %}{{ qr_base64 }}{% elif person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.membership_number }}.png{% endif %}" width="70" alt="QR Code" style="display: block;">
+                        <img id="qrCodeImg"
+                            src="{% if qr_base64 %}{{ qr_base64 }}{% elif person.qr_code %}{{ person.qr_code.url }}{% else %}/media/qr_{{ person.membership_number }}.png{% endif %}"
+                            width="70" alt="QR Code" style="display: block;">
                     </div>
-                    <div style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">#{{ person.membership_number }}</div>
+                    <div
+                        style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">
+                        #{{ person.membership_number }}</div>
                 </div>
             </div>
 
             <!-- Details Grid -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px 8px; margin-bottom: 16px;">
                 <div>
-                    <div style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Town</div>
+                    <div
+                        style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        Town</div>
                     <div style="font-size: 13px; font-weight: 500;">{{ person.town.name|default:"-" }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Zone</div>
+                    <div
+                        style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        Zone</div>
                     <div style="font-size: 13px; font-weight: 500;">{{ person.zone.name|default:"-" }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Union Council</div>
+                    <div
+                        style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        Union Council</div>
                     <div style="font-size: 13px; font-weight: 500;">{{ person.union_council.name|default:"-" }}</div>
                 </div>
                 <div>
-                    <div style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Ward</div>
+                    <div
+                        style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        Ward</div>
                     <div style="font-size: 13px; font-weight: 500;">{{ person.ward.name|default:"-" }}</div>
                 </div>
             </div>
 
             <div style="margin-bottom: 16px;">
-                <div style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Residential Address</div>
+                <div
+                    style="font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                    Residential Address</div>
                 <div style="font-size: 13px; font-weight: 500; line-height: 1.4;">{{ person.address }}</div>
             </div>
 
             <!-- Footer -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
                 <div style="font-size: 11px; color: #aaa; line-height: 1.4;">
                     Joined: <span style="color: #fff;">{{ person.created_at|date:"d M Y" }}</span><br>
                     Reg by: <span style="color: #fff;">{{ person.made_by.member_name }}</span>
                 </div>
-                <div style="text-align: right; font-family: 'Georgia', serif; font-weight: 700; font-size: 14px; color: #fff; line-height: 1.2;">
+                <div
+                    style="text-align: right; font-family: 'Georgia', serif; font-weight: 700; font-size: 14px; color: #fff; line-height: 1.2;">
                     PPP Lahore<br>
-                    <span style="font-size: 11px; font-weight: 400; font-family: system-ui, -apple-system, sans-serif; opacity: 0.8;">Urban Member</span>
+                    <span
+                        style="font-size: 11px; font-weight: 400; font-family: system-ui, -apple-system, sans-serif; opacity: 0.8;">Urban
+                        Member</span>
                 </div>
             </div>
         </div>
 
         <div style="width: 100%;">
-            <button id="downloadCardBtn" class="btn w-100 mb-2" onclick="downloadCard()" style="background: var(--ppp-red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px;">Download Card</button>
-            <button class="btn btn-outline-light w-100" onclick="printCard()" style="font-size: 13px; padding: 10px; border-radius: 8px;">Print Card</button>
+            <button id="downloadCardBtn" class="btn w-100 mb-2" onclick="downloadCard()"
+                style="background: var(--ppp-red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 8px;">Download
+                Card</button>
+            <button class="btn btn-outline-light w-100" onclick="printCard()"
+                style="font-size: 13px; padding: 10px; border-radius: 8px;">Print Card</button>
         </div>
     </div>
 </div>
@@ -328,7 +373,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
     // Close modal if user clicks outside the card
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         var modal = document.getElementById("qrModal");
         if (event.target == modal) {
             modal.style.display = "none";
@@ -349,14 +394,14 @@
             scale: 2,
             backgroundColor: null,
             logging: false
-        }).then(function(canvas) {
+        }).then(function (canvas) {
             var link = document.createElement('a');
             link.download = 'member-card-{{ person.membership_number }}.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
             btn.disabled = false;
             btn.textContent = 'Download Card';
-        }).catch(function(err) {
+        }).catch(function (err) {
             console.error('Download failed:', err);
             btn.disabled = false;
             btn.textContent = 'Download Card';
@@ -373,7 +418,7 @@
             scale: 2,
             backgroundColor: null,
             logging: false
-        }).then(function(canvas) {
+        }).then(function (canvas) {
             var imgData = canvas.toDataURL('image/png');
             var printWin = window.open('', '_blank', 'width=600,height=500');
             printWin.document.write(
@@ -394,11 +439,11 @@
             printWin.document.close();
             printWin.focus();
             // Small delay to ensure image is rendered before print dialog opens
-            setTimeout(function() {
+            setTimeout(function () {
                 printWin.print();
                 printWin.close();
             }, 400);
-        }).catch(function(err) {
+        }).catch(function (err) {
             console.error('Print failed:', err);
             alert('Print failed. Please try again.');
         });
