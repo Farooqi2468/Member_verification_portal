@@ -17,14 +17,9 @@ class PersonForm(forms.ModelForm):
             'membership_number', 'name', 'father_name',
             'cnic', 'phone', 'address',
             'town', 'zone', 
-            'member_name', 'member_membership_id', 'member_phone', 'member_cnic'
         ]
         widgets = {
             'membership_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 100011'}),
-            'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
-            'member_membership_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Membership ID'}),
-            'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}),
-            'member_cnic': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member CNIC'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Father's Name"}),
             'cnic': forms.TextInput(attrs={
@@ -58,12 +53,16 @@ class PersonForm(forms.ModelForm):
                 self.fields['ward_name'].initial = instance.ward.name
             
             if instance.made_by:
-                self.fields['member_id'].initial = instance.made_by.member_id
-                self.fields['member_name'].initial = instance.made_by.member_name
-                self.fields['member_phone'].initial = instance.made_by.member_phone
-                self.fields['member_cnic'].initial = instance.made_by.member_cnic
+                self.fields['member_id'].initial    = instance.made_by.member_id
+                self.fields['member_name'].initial  = instance.made_by.member_name  or instance.member_name
+                self.fields['member_phone'].initial = instance.made_by.member_phone or instance.member_phone
+                self.fields['member_cnic'].initial  = instance.made_by.member_cnic  or instance.member_cnic
             else:
-                self.fields['member_id'].initial = instance.member_membership_id
+                # No linked Member — fall back to denormalised fields stored on Person
+                self.fields['member_id'].initial    = instance.member_membership_id
+                self.fields['member_name'].initial  = instance.member_name
+                self.fields['member_phone'].initial = instance.member_phone
+                self.fields['member_cnic'].initial  = instance.member_cnic
 
         self.fields['town'].queryset = Town.objects.all()
         self.fields['town'].empty_label = "— Select Town —"
