@@ -372,7 +372,7 @@ def all_members(request):
         response['Content-Disposition'] = 'attachment; filename="members_export.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Date'])
+        writer.writerow(['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Registrar Membership ID', 'Date'])
         
         for p in members_list:
             writer.writerow([
@@ -382,6 +382,7 @@ def all_members(request):
                 p.union_council.name if p.union_council else '',
                 p.ward.name if p.ward else '',
                 p.made_by.member_name if p.made_by else '',
+                p.made_by.member_id if p.made_by else '',
                 p.created_at.strftime('%Y-%m-%d %H:%M:%S')
             ])
         return response
@@ -476,12 +477,17 @@ def import_members_csv(request):
                 ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
 
             registered_by_name = cleaned_row.get('registered by', '')
+            registrar_membership_id = cleaned_row.get('registrar membership id', '')
             member_obj = None
-            if registered_by_name:
-                member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
+            if registered_by_name or registrar_membership_id:
+                # Try to find by member_id (PK) first, then fall back to name
+                if registrar_membership_id:
+                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
+                if not member_obj and registered_by_name:
+                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
                 if not member_obj:
                     member_obj = Member.objects.create(
-                        member_id=registered_by_name,
+                        member_id=registrar_membership_id or registered_by_name,
                         member_name=registered_by_name,
                         no_of_registrations=0
                     )
@@ -625,12 +631,17 @@ def import_members_ajax(request):
                 ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
 
             registered_by_name = cleaned_row.get('registered by', '')
+            registrar_membership_id = cleaned_row.get('registrar membership id', '')
             member_obj = None
-            if registered_by_name:
-                member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
+            if registered_by_name or registrar_membership_id:
+                # Try to find by member_id (PK) first, then fall back to name
+                if registrar_membership_id:
+                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
+                if not member_obj and registered_by_name:
+                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
                 if not member_obj:
                     member_obj = Member.objects.create(
-                        member_id=registered_by_name,
+                        member_id=registrar_membership_id or registered_by_name,
                         member_name=registered_by_name,
                         no_of_registrations=0
                     )
