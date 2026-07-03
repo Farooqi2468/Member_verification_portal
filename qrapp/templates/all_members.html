@@ -311,10 +311,10 @@
                         style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-upload"></i> Import CSV
                     </button>
-                    <a href="?export=csv{{ query_params }}" class="btn"
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#exportCsvModal"
                         style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-download"></i> Export CSV
-                    </a>
+                    </button>
                     <button onclick="window.print()" class="btn btn-outline-dark no-print"
                         style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
                         <i class="bi bi-printer-fill"></i> Print
@@ -532,6 +532,78 @@
                 <div class="modal-footer" style="border-top: 1px solid #eee;">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
                     <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Upload & Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Export CSV Modal -->
+<div class="modal fade" id="exportCsvModal" tabindex="-1" aria-labelledby="exportCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header" style="background: #1A1A1A; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="exportCsvModalLabel">Export Filtered Data</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'all_members' %}" method="GET">
+                <input type="hidden" name="export" value="csv">
+                <div class="modal-body p-4">
+                    <h6 style="font-weight: 600; margin-bottom: 15px;">1. Filter Records (Pre-filled)</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="q" class="form-control" placeholder="Name, ID, CNIC, Phone" value="{{ current_filters.q }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Town</label>
+                            <select name="town" class="form-select">
+                                <option value="">— All Towns —</option>
+                                {% for t in towns %}
+                                <option value="{{ t.id }}" {% if current_filters.town == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ current_filters.start_date }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ current_filters.end_date }}">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Registered By</label>
+                            <select name="registrar" class="form-select">
+                                <option value="">— All Members —</option>
+                                <option value="system" {% if current_filters.registrar == 'system' %}selected{% endif %}>System</option>
+                                {% for u in registrars %}
+                                <option value="{{ u.member_id }}" {% if current_filters.registrar == u.member_id %}selected{% endif %}>{{ u.member_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 style="font-weight: 600; margin-bottom: 15px;">2. Select Columns to Export</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Member ID" checked><label class="form-check-label">Member ID</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Name" checked><label class="form-check-label">Name</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Father Name" checked><label class="form-check-label">Father Name</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="CNIC" checked><label class="form-check-label">CNIC</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Phone" checked><label class="form-check-label">Phone</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Address" checked><label class="form-check-label">Address</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Town" checked><label class="form-check-label">Town</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Zone" checked><label class="form-check-label">Zone</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Union Council" checked><label class="form-check-label">Union Council</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Ward" checked><label class="form-check-label">Ward</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Registered By" checked><label class="form-check-label">Registered By</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Registrar Membership ID" checked><label class="form-check-label">Registrar Membership ID</label></div></div>
+                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Date" checked><label class="form-check-label">Date</label></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eee;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="submit" class="btn" style="background: #1A1A1A; color: white; border-radius: 8px; font-weight: 600;"><i class="bi bi-download"></i> Download CSV</button>
                 </div>
             </form>
         </div>

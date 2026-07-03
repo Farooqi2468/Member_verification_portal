@@ -368,23 +368,32 @@ def all_members(request):
 
     # CSV Export
     if request.GET.get('export') == 'csv':
+        export_columns = request.GET.getlist('export_columns')
+        default_cols = ['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Registrar Membership ID', 'Date']
+        cols = export_columns if export_columns else default_cols
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="members_export.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['Member ID', 'Name', 'Father Name', 'CNIC', 'Phone', 'Address', 'Town', 'Zone', 'Union Council', 'Ward', 'Registered By', 'Registrar Membership ID', 'Date'])
+        writer.writerow(cols)
         
         for p in members_list:
-            writer.writerow([
-                p.membership_number, p.name, p.father_name, p.cnic, p.phone, p.address,
-                p.town.name if p.town else '',
-                p.zone.name if p.zone else '',
-                p.union_council.name if p.union_council else '',
-                p.ward.name if p.ward else '',
-                p.made_by.member_name if p.made_by else '',
-                p.made_by.member_id if p.made_by else '',
-                p.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            ])
+            row = []
+            if 'Member ID' in cols: row.append(p.membership_number)
+            if 'Name' in cols: row.append(p.name)
+            if 'Father Name' in cols: row.append(p.father_name)
+            if 'CNIC' in cols: row.append(p.cnic)
+            if 'Phone' in cols: row.append(p.phone)
+            if 'Address' in cols: row.append(p.address)
+            if 'Town' in cols: row.append(p.town.name if p.town else '')
+            if 'Zone' in cols: row.append(p.zone.name if p.zone else '')
+            if 'Union Council' in cols: row.append(p.union_council.name if p.union_council else '')
+            if 'Ward' in cols: row.append(p.ward.name if p.ward else '')
+            if 'Registered By' in cols: row.append(p.made_by.member_name if p.made_by else '')
+            if 'Registrar Membership ID' in cols: row.append(p.made_by.member_id if p.made_by else '')
+            if 'Date' in cols: row.append(p.created_at.strftime('%Y-%m-%d %H:%M:%S'))
+            writer.writerow(row)
         return response
 
     # Pagination
@@ -821,26 +830,52 @@ def manage_locations(request):
     active_tab = request.GET.get('tab', 'town')
 
     if request.GET.get('export') == 'csv':
+        export_columns = request.GET.getlist('export_columns')
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{active_tab}s_export.csv"'
         writer = csv.writer(response)
         
         if active_tab == 'town':
-            writer.writerow(['Town Name', 'Number of Zones'])
+            default_cols = ['Town Name', 'Number of Zones']
+            cols = export_columns if export_columns else default_cols
+            writer.writerow(cols)
             for t in towns:
-                writer.writerow([t.name, t.zones.count()])
+                row = []
+                if 'Town Name' in cols: row.append(t.name)
+                if 'Number of Zones' in cols: row.append(t.zones.count())
+                writer.writerow(row)
         elif active_tab == 'zone':
-            writer.writerow(['Zone Name', 'Town', 'Number of UCs'])
+            default_cols = ['Zone Name', 'Town', 'Number of UCs']
+            cols = export_columns if export_columns else default_cols
+            writer.writerow(cols)
             for z in zones:
-                writer.writerow([z.name, z.town.name, z.union_councils.count()])
+                row = []
+                if 'Zone Name' in cols: row.append(z.name)
+                if 'Town' in cols: row.append(z.town.name)
+                if 'Number of UCs' in cols: row.append(z.union_councils.count())
+                writer.writerow(row)
         elif active_tab == 'uc':
-            writer.writerow(['UC Name', 'Zone', 'Town', 'Number of Wards'])
+            default_cols = ['UC Name', 'Zone', 'Town', 'Number of Wards']
+            cols = export_columns if export_columns else default_cols
+            writer.writerow(cols)
             for u in ucs:
-                writer.writerow([u.name, u.zone.name, u.zone.town.name, u.wards.count()])
+                row = []
+                if 'UC Name' in cols: row.append(u.name)
+                if 'Zone' in cols: row.append(u.zone.name)
+                if 'Town' in cols: row.append(u.zone.town.name)
+                if 'Number of Wards' in cols: row.append(u.wards.count())
+                writer.writerow(row)
         elif active_tab == 'ward':
-            writer.writerow(['Ward Name', 'Union Council', 'Zone', 'Town'])
+            default_cols = ['Ward Name', 'Union Council', 'Zone', 'Town']
+            cols = export_columns if export_columns else default_cols
+            writer.writerow(cols)
             for w in wards:
-                writer.writerow([w.name, w.union_council.name, w.union_council.zone.name, w.union_council.zone.town.name])
+                row = []
+                if 'Ward Name' in cols: row.append(w.name)
+                if 'Union Council' in cols: row.append(w.union_council.name)
+                if 'Zone' in cols: row.append(w.union_council.zone.name)
+                if 'Town' in cols: row.append(w.union_council.zone.town.name)
+                writer.writerow(row)
                 
         return response
 
@@ -1307,14 +1342,24 @@ def all_real_members(request):
 
     # CSV Export
     if request.GET.get('export') == 'csv':
+        export_columns = request.GET.getlist('export_columns')
+        default_cols = ['Member ID', 'Name', 'Phone', 'CNIC', 'No of Registrations']
+        cols = export_columns if export_columns else default_cols
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="real_members_export.csv"'
         
         writer = csv.writer(response)
-        writer.writerow(['Member ID', 'Name', 'Phone', 'CNIC', 'No of Registrations'])
+        writer.writerow(cols)
         
         for m in members_list:
-            writer.writerow([m.member_id, m.member_name, m.member_phone, m.member_cnic, m.actual_registrations])
+            row = []
+            if 'Member ID' in cols: row.append(m.member_id)
+            if 'Name' in cols: row.append(m.member_name)
+            if 'Phone' in cols: row.append(m.member_phone)
+            if 'CNIC' in cols: row.append(m.member_cnic)
+            if 'No of Registrations' in cols: row.append(m.actual_registrations)
+            writer.writerow(row)
         return response
 
     paginator = Paginator(members_list, 15)
