@@ -300,6 +300,17 @@
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
+        
+        <!-- ── Success / Error Messages ── -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="settings-alert alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="margin-bottom: 20px; border-radius: 8px;">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         <div class="table-card shadow-sm">
             <div class="table-title-area">
                 <h2 class="table-title">All Members Directory</h2>
