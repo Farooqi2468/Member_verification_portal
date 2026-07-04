@@ -807,6 +807,7 @@ def delete_person(request, pk):
             member.save()
             
     person.delete()
+    messages.success(request, 'Member deleted successfully!')
     return redirect('all_members')
 
 
