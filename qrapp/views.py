@@ -927,7 +927,8 @@ def update_town(request, pk):
         form.save()
         messages.success(request, f"Town '{town.name}' updated successfully.")
     else:
-        messages.error(request, "Failed to update town. Please check the inputs.")
+        error_msg = " ".join([f"{', '.join(errors)}" for field, errors in form.errors.items()])
+        messages.error(request, f"Failed to update town. {error_msg}")
     return redirect(f"/dashboard/locations/?tab=town")
 
 
@@ -960,7 +961,8 @@ def update_zone(request, pk):
         form.save()
         messages.success(request, f"Zone '{zone.name}' updated successfully.")
     else:
-        messages.error(request, "Failed to update zone. Please check the inputs.")
+        error_msg = " ".join([f"{', '.join(errors)}" for field, errors in form.errors.items()])
+        messages.error(request, f"Failed to update zone. {error_msg}")
     return redirect('/dashboard/locations/?tab=zone')
 
 
@@ -993,7 +995,8 @@ def update_uc(request, pk):
         form.save()
         messages.success(request, f"Union Council '{uc.name}' updated successfully.")
     else:
-        messages.error(request, "Failed to update union council. Please check the inputs.")
+        error_msg = " ".join([f"{', '.join(errors)}" for field, errors in form.errors.items()])
+        messages.error(request, f"Failed to update union council. {error_msg}")
     return redirect('/dashboard/locations/?tab=uc')
 
 
@@ -1026,7 +1029,8 @@ def update_ward(request, pk):
         form.save()
         messages.success(request, f"Ward '{ward.name}' updated successfully.")
     else:
-        messages.error(request, "Failed to update ward. Please check the inputs.")
+        error_msg = " ".join([f"{', '.join(errors)}" for field, errors in form.errors.items()])
+        messages.error(request, f"Failed to update ward. {error_msg}")
     return redirect('/dashboard/locations/?tab=ward')
 
 
