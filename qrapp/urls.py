@@ -49,6 +49,7 @@ urlpatterns = [
     path('ajax/get-member-info/', views.ajax_get_member_info, name='ajax_get_member_info'),
     path('ajax/dashboard-charts/', views.ajax_dashboard_charts, name='ajax_dashboard_charts'),
     path('ajax/registered-persons/', views.ajax_get_registered_persons, name='ajax_get_registered_persons'),
+    path('ajax/location-members/', views.ajax_get_location_members, name='ajax_get_location_members'),
 
     # Books Module
     path('dashboard/books/', views.book_list, name='book_list'),

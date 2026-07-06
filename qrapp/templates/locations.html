@@ -274,7 +274,7 @@
                             {% for town in towns %}
                             <tr>
                                 <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
-                                <td><strong>{{ town.name }}</strong></td>
+                                <td><strong><a href="javascript:void(0);" onclick="showLocationMembers('town', {{ town.id }}, '{{ town.name|escapejs }}')" style="text-decoration: none; color: var(--ppp-red);">{{ town.name }}</a></strong></td>
                                 <td><span class="loc-badge">{{ town.zones.count }}</span></td>
                                 <td class="no-print">
                                     <div style="display: flex; gap: 6px;">
@@ -349,7 +349,7 @@
                             {% for zone in zones %}
                             <tr>
                                 <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
-                                <td><strong>{{ zone.name }}</strong></td>
+                                <td><strong><a href="javascript:void(0);" onclick="showLocationMembers('zone', {{ zone.id }}, '{{ zone.name|escapejs }}')" style="text-decoration: none; color: var(--ppp-red);">{{ zone.name }}</a></strong></td>
                                 <td><span class="loc-badge">{{ zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ zone.union_councils.count }}</span></td>
                                 <td class="no-print">
@@ -432,7 +432,7 @@
                             {% for uc in ucs %}
                             <tr>
                                 <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
-                                <td><strong>{{ uc.name }}</strong></td>
+                                <td><strong><a href="javascript:void(0);" onclick="showLocationMembers('uc', {{ uc.id }}, '{{ uc.name|escapejs }}')" style="text-decoration: none; color: var(--ppp-red);">{{ uc.name }}</a></strong></td>
                                 <td><span class="loc-badge">{{ uc.zone.name }}</span></td>
                                 <td><span class="loc-badge">{{ uc.zone.town.name }}</span></td>
                                 <td><span class="loc-badge">{{ uc.wards.count }}</span></td>
@@ -516,7 +516,7 @@
                             {% for ward in wards %}
                             <tr>
                                 <td style="color:#bbb; font-size:12px;">{{ forloop.counter }}</td>
-                                <td><strong>{{ ward.name }}</strong></td>
+                                <td><strong><a href="javascript:void(0);" onclick="showLocationMembers('ward', {{ ward.id }}, '{{ ward.name|escapejs }}')" style="text-decoration: none; color: var(--ppp-red);">{{ ward.name }}</a></strong></td>
                                 <td><span class="loc-badge">{{ ward.union_council.name }}</span></td>
                                 <td><span class="loc-badge">{{ ward.union_council.zone.name }}</span></td>
                                 <td><span class="loc-badge">{{ ward.union_council.zone.town.name }}</span></td>
@@ -624,6 +624,139 @@
         </div>
     </div>
 </div>
+
+<!-- Modal for Location Members -->
+<div class="modal fade" id="locationMembersModal" tabindex="-1" aria-labelledby="locationMembersModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 bg-light">
+        <h5 class="modal-title fw-bold" id="locationMembersModalLabel" style="font-family: 'Georgia', serif; color: #1A1A1A;">
+            <i class="bi bi-people-fill me-2"></i> Members in <span id="modalLocationName"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="modalLoading" class="text-center py-5">
+            <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Fetching members...</p>
+        </div>
+        
+        <div id="modalContent" style="display: none;">
+            <div class="px-3 py-2 bg-white border-bottom no-print-modal">
+                <input type="text" id="modalSearchInput" class="form-control form-control-sm" placeholder="Search members by name, phone, or CNIC..." onkeyup="filterModalTable()">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 table-modal" style="font-size: 13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Membership number (ID Number) / پارٹی ممبرشپ نمبر</th>
+                            <th>Name</th>
+                            <th>Father Name</th>
+                            <th>Phone</th>
+                            <th>CNIC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody">
+                        <!-- Content loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary no-print-modal" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn text-white no-print-modal" style="background: #1A1A1A;" onclick="window.print()">
+            <i class="bi bi-printer-fill me-1"></i> Print Table
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showLocationMembers(type, id, name) {
+    var modalEl = document.getElementById('locationMembersModal');
+    var modal = new bootstrap.Modal(modalEl);
+    
+    document.getElementById('modalLocationName').innerText = name;
+    document.getElementById('modalLoading').style.display = 'block';
+    document.getElementById('modalContent').style.display = 'none';
+    
+    modal.show();
+    
+    fetch(`/ajax/location-members/?type=${type}&id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('modalLoading').style.display = 'none';
+            var tbody = document.getElementById('modalTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.status === 'success') {
+                if (data.data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found in this location.</td></tr>`;
+                } else {
+                    data.data.forEach((person, index) => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${person.membership_number || '--'}</td>
+                                <td class="fw-bold">${person.name}</td>
+                                <td>${person.father_name || '--'}</td>
+                                <td>${person.phone || '--'}</td>
+                                <td>${person.cnic || '--'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                document.getElementById('modalContent').style.display = 'block';
+                document.getElementById('modalSearchInput').value = '';
+                filterModalTable();
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
+                document.getElementById('modalContent').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('modalLoading').style.display = 'none';
+            document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
+            document.getElementById('modalContent').style.display = 'block';
+        });
+}
+
+function filterModalTable() {
+    var input, filter, tbody, tr, td, i, txtValue;
+    input = document.getElementById("modalSearchInput");
+    filter = input.value.toUpperCase();
+    tbody = document.getElementById("modalTableBody");
+    tr = tbody.getElementsByTagName("tr");
+
+    for (i = 0; i < tr.length; i++) {
+        if (tr[i].getElementsByTagName("td").length === 1) continue;
+        
+        var match = false;
+        var tds = tr[i].getElementsByTagName("td");
+        for (var j = 1; j < tds.length; j++) { 
+            if (tds[j]) {
+                txtValue = tds[j].textContent || tds[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+        }
+        
+        if (match) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
+</script>
 
 {% include 'includes/mobile_nav.html' with active_page='locations' %}
 

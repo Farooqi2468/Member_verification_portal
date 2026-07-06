@@ -335,6 +335,9 @@ def all_members(request):
     # Filtering logic
     q = request.GET.get('q', '')
     town_id = request.GET.get('town')
+    zone_id = request.GET.get('zone')
+    uc_id = request.GET.get('union_council')
+    ward_id = request.GET.get('ward')
     registrar_id = request.GET.get('registrar')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -348,6 +351,12 @@ def all_members(request):
         )
     if town_id:
         members_list = members_list.filter(town_id=town_id)
+    if zone_id:
+        members_list = members_list.filter(zone_id=zone_id)
+    if uc_id:
+        members_list = members_list.filter(union_council_id=uc_id)
+    if ward_id:
+        members_list = members_list.filter(ward_id=ward_id)
     if registrar_id:
         if registrar_id == 'system':
             members_list = members_list.filter(made_by__isnull=True)
@@ -420,6 +429,9 @@ def all_members(request):
         'current_filters': {
             'q': q,
             'town': int(town_id) if town_id else '',
+            'zone': int(zone_id) if zone_id else '',
+            'union_council': int(uc_id) if uc_id else '',
+            'ward': int(ward_id) if ward_id else '',
             'registrar': registrar_id if registrar_id else '',
             'start_date': start_date or '',
             'end_date': end_date or ''
@@ -1549,6 +1561,38 @@ def ajax_get_registered_persons(request):
     
     # Fetch persons whose made_by_id matches
     persons = Person.objects.filter(made_by_id=member_id).order_by('-created_at')
+    
+    data = []
+    for p in persons:
+        data.append({
+            'membership_number': p.membership_number,
+            'name': p.name,
+            'father_name': p.father_name,
+            'phone': p.phone,
+            'cnic': p.cnic,
+        })
+        
+    return JsonResponse({'status': 'success', 'data': data})
+
+
+def ajax_get_location_members(request):
+    loc_type = request.GET.get('type')
+    loc_id = request.GET.get('id')
+    
+    if not loc_type or not loc_id:
+        return JsonResponse({'status': 'error', 'message': 'Missing parameters'}, status=400)
+    
+    persons = Person.objects.all().order_by('-created_at')
+    if loc_type == 'town':
+        persons = persons.filter(town_id=loc_id)
+    elif loc_type == 'zone':
+        persons = persons.filter(zone_id=loc_id)
+    elif loc_type == 'uc':
+        persons = persons.filter(union_council_id=loc_id)
+    elif loc_type == 'ward':
+        persons = persons.filter(ward_id=loc_id)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid location type'}, status=400)
     
     data = []
     for p in persons:
