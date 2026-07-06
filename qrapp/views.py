@@ -341,6 +341,10 @@ def all_members(request):
     registrar_id = request.GET.get('registrar')
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    missing_cnic = request.GET.get('missing_cnic')
+    missing_phone = request.GET.get('missing_phone')
+    missing_town = request.GET.get('missing_town')
+    missing_zone = request.GET.get('missing_zone')
 
     if q:
         members_list = members_list.filter(
@@ -374,6 +378,15 @@ def all_members(request):
             members_list = members_list.filter(created_at__date__lte=end_date_obj)
         except ValueError:
             pass
+
+    if missing_cnic == '1':
+        members_list = members_list.filter(Q(cnic__isnull=True) | Q(cnic__exact=''))
+    if missing_phone == '1':
+        members_list = members_list.filter(Q(phone__isnull=True) | Q(phone__exact=''))
+    if missing_town == '1':
+        members_list = members_list.filter(town__isnull=True)
+    if missing_zone == '1':
+        members_list = members_list.filter(zone__isnull=True)
 
     # CSV Export
     if request.GET.get('export') == 'csv':
@@ -434,7 +447,11 @@ def all_members(request):
             'ward': int(ward_id) if ward_id else '',
             'registrar': registrar_id if registrar_id else '',
             'start_date': start_date or '',
-            'end_date': end_date or ''
+            'end_date': end_date or '',
+            'missing_cnic': missing_cnic,
+            'missing_phone': missing_phone,
+            'missing_town': missing_town,
+            'missing_zone': missing_zone,
         },
         'query_params': query_params
     }

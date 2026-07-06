@@ -366,20 +366,50 @@
                         </div>
                     </div>
                     <div class="row g-3 mt-1">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Start Date</label>
                             <input type="date" name="start_date" class="form-control" value="{{ current_filters.start_date }}">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">End Date</label>
                             <input type="date" name="end_date" class="form-control" value="{{ current_filters.end_date }}">
                         </div>
-                        <div class="col-md-4 d-flex justify-content-end align-items-end gap-2">
+                        <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="additionalFiltersDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: #ffffff; color: #333333; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 12px; border: 1px solid #ccc;">
+                                    More Filters
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="additionalFiltersDropdown" style="font-size: 13px;">
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_cnic == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingCnicInput')">Missing CNIC</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_phone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingPhoneInput')">Missing Phone</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_town == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingTownInput')">Missing Town</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_zone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingZoneInput')">Missing Zone</button></li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Hidden inputs for additional filters -->
+                            <input type="hidden" name="missing_cnic" id="missingCnicInput" value="{{ current_filters.missing_cnic|default:'' }}">
+                            <input type="hidden" name="missing_phone" id="missingPhoneInput" value="{{ current_filters.missing_phone|default:'' }}">
+                            <input type="hidden" name="missing_town" id="missingTownInput" value="{{ current_filters.missing_town|default:'' }}">
+                            <input type="hidden" name="missing_zone" id="missingZoneInput" value="{{ current_filters.missing_zone|default:'' }}">
+
                             <a href="{% url 'all_members' %}" class="btn-clear text-decoration-none">Clear Filters</a>
                             <button type="submit" class="btn-filter">Apply Filters</button>
                         </div>
                     </div>
                 </form>
+
+                <script>
+                function toggleMissingFilter(inputId) {
+                    var input = document.getElementById(inputId);
+                    if (input.value === '1') {
+                        input.value = '';
+                    } else {
+                        input.value = '1';
+                    }
+                    input.form.submit();
+                }
+                </script>
                 </div>
             </div>
 
@@ -595,21 +625,32 @@
                         </div>
                     </div>
 
-                    <h6 style="font-weight: 600; margin-bottom: 15px;">2. Select Columns to Export</h6>
+                    <h6 style="font-weight: 600; margin-bottom: 15px;">2. Additional Filters (Missing Data)</h6>
                     <div class="row g-2">
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Member ID" checked><label class="form-check-label">Member ID</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Name" checked><label class="form-check-label">Name</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Father Name" checked><label class="form-check-label">Father Name</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="CNIC" checked><label class="form-check-label">CNIC</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Phone" checked><label class="form-check-label">Phone</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Address" checked><label class="form-check-label">Address</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Town" checked><label class="form-check-label">Town</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Zone" checked><label class="form-check-label">Zone</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Union Council" checked><label class="form-check-label">Union Council</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Ward" checked><label class="form-check-label">Ward</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Registered By" checked><label class="form-check-label">Registered By</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Registrar Membership ID" checked><label class="form-check-label">Registrar Membership ID</label></div></div>
-                        <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="export_columns" value="Date" checked><label class="form-check-label">Date</label></div></div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_cnic" id="exportMissingCnic" value="1" {% if current_filters.missing_cnic == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingCnic">Missing CNIC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_phone" id="exportMissingPhone" value="1" {% if current_filters.missing_phone == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingPhone">Missing Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_town" id="exportMissingTown" value="1" {% if current_filters.missing_town == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingTown">Missing Town</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_zone" id="exportMissingZone" value="1" {% if current_filters.missing_zone == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingZone">Missing Zone</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #eee;">
