@@ -15,6 +15,18 @@
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 
+                <!-- Autofill Section -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Autofill from Existing Person</label>
+                        <div class="input-group">
+                            <input type="text" id="autofillMemberId" class="form-control" placeholder="Enter Member ID" value="{{ member_id_autofill|default:'' }}">
+                            <button type="button" id="btnAutofill" class="btn btn-outline-secondary">Fetch Data</button>
+                        </div>
+                        <div id="autofillStatus" class="form-text"></div>
+                    </div>
+                </div>
+
                 {% if structural_field %}
                     <!-- Hierarchical Structural Selectors / Datalists -->
                     <div class="row mb-3 bg-light p-3 rounded border">
@@ -94,6 +106,129 @@
             element.classList.add('form-control');
         }
     });
+
+    document.getElementById('btnAutofill').addEventListener('click', function() {
+        const memberId = document.getElementById('autofillMemberId').value.trim();
+        const statusEl = document.getElementById('autofillStatus');
+        if (!memberId) {
+            statusEl.textContent = 'Please enter a Member ID.';
+            statusEl.className = 'form-text text-danger';
+            return;
+        }
+
+        statusEl.textContent = 'Fetching data...';
+        statusEl.className = 'form-text text-info';
+
+        fetch(`/dashboard/api/get-person/${memberId}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    statusEl.textContent = 'Successfully fetched Person data!';
+                    statusEl.className = 'form-text text-success';
+                    
+                    // The Django forms have inputs named something like "pyo_name", "women_wing_phone", etc.
+                    // We look for inputs ending with specific strings to populate them generically.
+                    const inputs = document.querySelectorAll('form input, form textarea');
+                    inputs.forEach(input => {
+                        const name = input.name;
+                        if (!name) return;
+                        if (name.endsWith('_name') && !name.endsWith('town_name') && !name.endsWith('zone_name') && !name.endsWith('uc_name') && !name.endsWith('ward_name')) {
+                            input.value = data.name;
+                        }
+                        if (name.endsWith('_father_name')) {
+                            input.value = data.father_name;
+                        }
+                        if (name.endsWith('_cnic')) {
+                            input.value = data.cnic;
+                        }
+                        if (name.endsWith('_phone')) {
+                            input.value = data.phone;
+                        }
+                        if (name.endsWith('_address')) {
+                            input.value = data.address;
+                        }
+                    });
+                } else {
+                    statusEl.textContent = data.message || 'Person not found.';
+                    statusEl.className = 'form-text text-danger';
+                }
+            })
+            .catch(err => {
+                statusEl.textContent = 'Error fetching data.';
+                statusEl.className = 'form-text text-danger';
+            });
+    });
+
+    // Name Autocomplete Logic
+    const nameInput = Array.from(document.querySelectorAll('form input')).find(i => 
+        i.name && i.name.endsWith('_name') && !i.name.includes('town') && !i.name.includes('zone') && !i.name.includes('uc_') && !i.name.includes('ward_')
+    );
+
+    if (nameInput) {
+        nameInput.parentElement.style.position = 'relative';
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'list-group position-absolute w-100 shadow-sm';
+        dropdown.style.zIndex = '1000';
+        dropdown.style.display = 'none';
+        dropdown.style.maxHeight = '250px';
+        dropdown.style.overflowY = 'auto';
+        dropdown.style.top = '100%';
+        nameInput.parentElement.appendChild(dropdown);
+
+        let debounceTimer;
+
+        nameInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            debounceTimer = setTimeout(() => {
+                fetch(`/dashboard/api/search-person/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        dropdown.innerHTML = '';
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(person => {
+                                const item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action py-2';
+                                item.innerHTML = `<strong>${person.name}</strong> <small class="text-muted d-block">ID: ${person.membership_number} | CNIC: ${person.cnic || 'N/A'}</small>`;
+                                
+                                item.addEventListener('click', () => {
+                                    // Set member ID input and trigger fetch
+                                    const autofillInput = document.getElementById('autofillMemberId');
+                                    if (autofillInput) {
+                                        autofillInput.value = person.membership_number;
+                                        document.getElementById('btnAutofill').click();
+                                    }
+                                    dropdown.style.display = 'none';
+                                });
+                                
+                                dropdown.appendChild(item);
+                            });
+                            dropdown.style.display = 'block';
+                        } else {
+                            dropdown.style.display = 'none';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error fetching name suggestions:', err);
+                    });
+            }, 300);
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target !== nameInput && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    }
 </script>
     </div>
 </div>

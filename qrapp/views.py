@@ -1678,6 +1678,178 @@ def office_bearers_index(request):
     return render(request, 'office_bearers/index.html', {'categories': categories})
 
 @login_required
+def office_bearers_list(request, category):
+    categories_meta = {
+        'central_cabinet': 'Central Cabinet',
+        'town_org': 'Town Organizations',
+        'zonal_org': 'Zonal Organizations',
+        'uc_org': 'Union Council Organizations',
+        'ward_org': 'Ward Organizations',
+        'pyo': 'People\'s Youth Organization',
+        'women_wing': 'Women Wing',
+        'minority_wing': 'Minority Wing',
+        'labour_wing': 'Labour Wing',
+        'cultural_wing': 'Cultural Wing',
+        'human_rights_wing': 'Human Rights Wing',
+        'traders_wing': 'Traders Wing',
+        'sports_wing': 'Sports Wing',
+        'study_circle': 'People\'s Study Circle',
+        'doctors_forum': 'Doctors Forum',
+        'ulema_wing': 'Ulema Wing',
+    }
+    
+    mapping = {
+        'central_cabinet': (CentralCabinet, None, None),
+        'town_org': (TownOrganization, 'town', Town),
+        'zonal_org': (ZonalOrganization, 'zone', Zone),
+        'uc_org': (UnionCouncilOrganization, 'union_council', UnionCouncil),
+        'ward_org': (WardOrganization, 'ward', Ward),
+        'pyo': (PeoplesYouthOrganization, None, None),
+        'women_wing': (WomenWing, None, None),
+        'minority_wing': (MinorityWing, None, None),
+        'labour_wing': (LabourWing, None, None),
+        'cultural_wing': (CulturalWing, None, None),
+        'human_rights_wing': (HumanRightsWing, None, None),
+        'traders_wing': (TradersWing, None, None),
+        'sports_wing': (SportsWing, None, None),
+        'study_circle': (PeoplesStudyCircle, None, None),
+        'doctors_forum': (DoctorsForum, None, None),
+        'ulema_wing': (UlemaWing, None, None),
+    }
+
+    if category not in mapping:
+        messages.error(request, 'Invalid category.')
+        return redirect('office_bearers_index')
+
+    ModelClass, structural_field, _ = mapping[category]
+    records = ModelClass.objects.all().order_by('-created_at')
+
+    q = request.GET.get('q', '').strip()
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    missing_cnic = request.GET.get('missing_cnic')
+    missing_phone = request.GET.get('missing_phone')
+    missing_location = request.GET.get('missing_location')
+    export_csv = request.GET.get('export')
+
+    if q:
+        from django.db.models import Q
+        q_filter = Q(**{f"{category}_name__icontains": q}) | Q(**{f"{category}_cnic__icontains": q}) | Q(**{f"{category}_phone__icontains": q})
+        records = records.filter(q_filter)
+        
+    if start_date:
+        records = records.filter(created_at__gte=start_date)
+    if end_date:
+        records = records.filter(created_at__lte=f"{end_date} 23:59:59")
+        
+    if missing_cnic == '1':
+        from django.db.models import Q
+        records = records.filter(Q(**{f"{category}_cnic__isnull": True}) | Q(**{f"{category}_cnic__exact": ''}))
+    if missing_phone == '1':
+        from django.db.models import Q
+        records = records.filter(Q(**{f"{category}_phone__isnull": True}) | Q(**{f"{category}_phone__exact": ''}))
+    if missing_location == '1' and structural_field:
+        records = records.filter(Q(**{f"{structural_field}__isnull": True}))
+
+    # Generate data list
+    data = []
+    for record in records:
+        data.append({
+            'id': record.id,
+            'name': getattr(record, f'{category}_name', ''),
+            'designation': getattr(record, f'{category}_designation', ''),
+            'phone': getattr(record, f'{category}_phone', ''),
+            'cnic': getattr(record, f'{category}_cnic', ''),
+            'location': getattr(record, structural_field).name if structural_field and getattr(record, structural_field) else '',
+        })
+
+    # CSV Export
+    if export_csv == 'csv':
+        import csv
+        from django.http import HttpResponse
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="office_bearers_{category}.csv"'
+        writer = csv.writer(response)
+        
+        headers = ['Name', 'Designation', 'Phone', 'CNIC']
+        if structural_field:
+            headers.append('Location')
+        writer.writerow(headers)
+        
+        for d in data:
+            row = [d['name'], d['designation'], d['phone'], d['cnic']]
+            if structural_field:
+                row.append(d['location'])
+            writer.writerow(row)
+            
+        return response
+
+    current_filters = {
+        'q': q,
+        'start_date': start_date,
+        'end_date': end_date,
+        'missing_cnic': missing_cnic,
+        'missing_phone': missing_phone,
+        'missing_location': missing_location
+    }
+
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(data, 15)  # 15 records per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Build query params string for pagination links
+    query_params_dict = request.GET.copy()
+    if 'page' in query_params_dict:
+        del query_params_dict['page']
+    query_params = '&' + query_params_dict.urlencode() if query_params_dict else ''
+
+    context = {
+        'category_id': category,
+        'category_name': categories_meta[category],
+        'page_obj': page_obj,
+        'query_params': query_params,
+        'has_location': bool(structural_field),
+        'current_filters': current_filters
+    }
+    return render(request, 'office_bearers/list.html', context)
+
+@login_required
+def get_person_data(request, member_id):
+    try:
+        person = Person.objects.get(membership_number=member_id)
+        data = {
+            'success': True,
+            'name': person.name or '',
+            'father_name': person.father_name or '',
+            'cnic': person.cnic or '',
+            'phone': person.phone or '',
+            'address': person.address or ''
+        }
+    except Person.DoesNotExist:
+        data = {'success': False, 'message': 'Person not found'}
+    
+    return JsonResponse(data)
+
+@login_required
+def search_person_by_name(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+    
+    persons = Person.objects.filter(name__icontains=query)[:15]
+    results = [
+        {
+            'membership_number': p.membership_number,
+            'name': p.name or '',
+            'cnic': p.cnic or '',
+            'phone': p.phone or ''
+        } for p in persons
+    ]
+    return JsonResponse({'results': results})
+
+@login_required
 def add_office_bearer(request, category):
     mapping = {
         'central_cabinet': (CentralCabinet, None, None),
@@ -1733,7 +1905,7 @@ def add_office_bearer(request, category):
             
             instance.save()
             messages.success(request, 'Office bearer added successfully!')
-            return redirect('office_bearers_index')
+            return redirect('office_bearers_list', category=category)
     else:
         form = FormClass()
         
@@ -1746,3 +1918,246 @@ def add_office_bearer(request, category):
         'ucs': UnionCouncil.objects.all(),
         'wards': Ward.objects.all(),
     })
+
+@login_required
+def update_office_bearer(request, category, pk):
+    mapping = {
+        'central_cabinet': (CentralCabinet, None, None),
+        'town_org': (TownOrganization, 'town', Town),
+        'zonal_org': (ZonalOrganization, 'zone', Zone),
+        'uc_org': (UnionCouncilOrganization, 'union_council', UnionCouncil),
+        'ward_org': (WardOrganization, 'ward', Ward),
+        'pyo': (PeoplesYouthOrganization, None, None),
+        'women_wing': (WomenWing, None, None),
+        'minority_wing': (MinorityWing, None, None),
+        'labour_wing': (LabourWing, None, None),
+        'cultural_wing': (CulturalWing, None, None),
+        'human_rights_wing': (HumanRightsWing, None, None),
+        'traders_wing': (TradersWing, None, None),
+        'sports_wing': (SportsWing, None, None),
+        'study_circle': (PeoplesStudyCircle, None, None),
+        'doctors_forum': (DoctorsForum, None, None),
+        'ulema_wing': (UlemaWing, None, None),
+    }
+
+    if category not in mapping:
+        messages.error(request, 'Invalid category.')
+        return redirect('dashboard')
+
+    ModelClass, structural_field, StructuralModel = mapping[category]
+    exclude_fields = [structural_field, 'created_at'] if structural_field else ['created_at']
+    FormClass = modelform_factory(ModelClass, exclude=exclude_fields)
+
+    instance = get_object_or_404(ModelClass, pk=pk)
+
+    if request.method == 'POST':
+        form = FormClass(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            updated_instance = form.save(commit=False)
+            
+            if structural_field and StructuralModel:
+                structural_name = request.POST.get(structural_field + '_name')
+                
+                if structural_field == 'town':
+                    obj, _ = Town.objects.get_or_create(name=structural_name)
+                elif structural_field == 'zone':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    obj, _ = Zone.objects.get_or_create(name=structural_name, town=t_obj)
+                elif structural_field == 'union_council':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    z_obj, _ = Zone.objects.get_or_create(name=request.POST.get('zone_name'), town=t_obj)
+                    obj, _ = UnionCouncil.objects.get_or_create(name=structural_name, zone=z_obj)
+                elif structural_field == 'ward':
+                    t_obj, _ = Town.objects.get_or_create(name=request.POST.get('town_name'))
+                    z_obj, _ = Zone.objects.get_or_create(name=request.POST.get('zone_name'), town=t_obj)
+                    uc_obj, _ = UnionCouncil.objects.get_or_create(name=request.POST.get('uc_name'), zone=z_obj)
+                    obj, _ = Ward.objects.get_or_create(name=structural_name, union_council=uc_obj)
+                    
+                setattr(updated_instance, structural_field, obj)
+            
+            updated_instance.save()
+            messages.success(request, 'Office bearer updated successfully!')
+            return redirect('office_bearers_list', category=category)
+    else:
+        form = FormClass(instance=instance)
+        
+    member_id_autofill = ''
+    cnic = getattr(instance, f'{category}_cnic', None)
+    if cnic:
+        from .models import Person
+        person = Person.objects.filter(cnic=cnic).first()
+        if person:
+            member_id_autofill = person.membership_number
+        
+    # We can reuse the add template for updating since it has the same fields
+    return render(request, 'office_bearers/add.html', {
+        'form': form,
+        'category': category,
+        'instance': instance,
+        'structural_field': structural_field,
+        'towns': Town.objects.all(),
+        'zones': Zone.objects.all(),
+        'ucs': UnionCouncil.objects.all(),
+        'wards': Ward.objects.all(),
+        'member_id_autofill': member_id_autofill,
+    })
+
+@login_required
+def delete_office_bearer(request, category, pk):
+    if request.method == 'POST':
+        mapping = {
+            'central_cabinet': (CentralCabinet, None, None),
+            'town_org': (TownOrganization, 'town', Town),
+            'zonal_org': (ZonalOrganization, 'zone', Zone),
+            'uc_org': (UnionCouncilOrganization, 'union_council', UnionCouncil),
+            'ward_org': (WardOrganization, 'ward', Ward),
+            'pyo': (PeoplesYouthOrganization, None, None),
+            'women_wing': (WomenWing, None, None),
+            'minority_wing': (MinorityWing, None, None),
+            'labour_wing': (LabourWing, None, None),
+            'cultural_wing': (CulturalWing, None, None),
+            'human_rights_wing': (HumanRightsWing, None, None),
+            'traders_wing': (TradersWing, None, None),
+            'sports_wing': (SportsWing, None, None),
+            'study_circle': (PeoplesStudyCircle, None, None),
+            'doctors_forum': (DoctorsForum, None, None),
+            'ulema_wing': (UlemaWing, None, None),
+        }
+
+        if category not in mapping:
+            messages.error(request, 'Invalid category.')
+            return redirect('office_bearers_index')
+
+        ModelClass, _, _ = mapping[category]
+        try:
+            record = ModelClass.objects.get(pk=pk)
+            record.delete()
+            messages.success(request, 'Office bearer deleted successfully.')
+        except ModelClass.DoesNotExist:
+            messages.error(request, 'Record not found.')
+
+    return redirect('office_bearers_list', category=category)
+
+@login_required
+def import_office_bearers_ajax(request, category):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+    try:
+        data = json.loads(request.body)
+        rows = data.get('rows', [])
+        
+        mapping = {
+            'central_cabinet': (CentralCabinet, None, None),
+            'town_org': (TownOrganization, 'town', Town),
+            'zonal_org': (ZonalOrganization, 'zone', Zone),
+            'uc_org': (UnionCouncilOrganization, 'union_council', UnionCouncil),
+            'ward_org': (WardOrganization, 'ward', Ward),
+            'pyo': (PeoplesYouthOrganization, None, None),
+            'women_wing': (WomenWing, None, None),
+            'minority_wing': (MinorityWing, None, None),
+            'labour_wing': (LabourWing, None, None),
+            'cultural_wing': (CulturalWing, None, None),
+            'human_rights_wing': (HumanRightsWing, None, None),
+            'traders_wing': (TradersWing, None, None),
+            'sports_wing': (SportsWing, None, None),
+            'study_circle': (PeoplesStudyCircle, None, None),
+            'doctors_forum': (DoctorsForum, None, None),
+            'ulema_wing': (UlemaWing, None, None),
+        }
+
+        if category not in mapping:
+            return JsonResponse({'status': 'error', 'message': 'Invalid category.'})
+
+        ModelClass, structural_field, StructuralModel = mapping[category]
+
+        success_count = 0
+        duplicate_count = 0
+        error_count = 0
+        logs = []
+
+        for row in rows:
+            cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
+            
+            name = cleaned_row.get('name')
+            designation = cleaned_row.get('designation', '')
+            cnic = cleaned_row.get('cnic', '')
+            phone = cleaned_row.get('phone', '')
+
+            log_id = name if name else "Unknown"
+
+            if not name:
+                error_count += 1
+                logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Name'})
+                continue
+
+            # Handle location logic if applicable
+            structural_obj = None
+            if structural_field:
+                location_name = cleaned_row.get('location') or cleaned_row.get(structural_field)
+                if not location_name:
+                    error_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Missing {structural_field} name for location'})
+                    continue
+                
+                # Retrieve or create nested structures if provided
+                if structural_field == 'town':
+                    structural_obj, _ = Town.objects.get_or_create(name=location_name)
+                elif structural_field == 'zone':
+                    town_name = cleaned_row.get('town', 'Default Town')
+                    t_obj, _ = Town.objects.get_or_create(name=town_name)
+                    structural_obj, _ = Zone.objects.get_or_create(name=location_name, town=t_obj)
+                elif structural_field == 'union_council':
+                    town_name = cleaned_row.get('town', 'Default Town')
+                    zone_name = cleaned_row.get('zone', 'Default Zone')
+                    t_obj, _ = Town.objects.get_or_create(name=town_name)
+                    z_obj, _ = Zone.objects.get_or_create(name=zone_name, town=t_obj)
+                    structural_obj, _ = UnionCouncil.objects.get_or_create(name=location_name, zone=z_obj)
+                elif structural_field == 'ward':
+                    town_name = cleaned_row.get('town', 'Default Town')
+                    zone_name = cleaned_row.get('zone', 'Default Zone')
+                    uc_name = cleaned_row.get('union_council') or cleaned_row.get('uc', 'Default UC')
+                    t_obj, _ = Town.objects.get_or_create(name=town_name)
+                    z_obj, _ = Zone.objects.get_or_create(name=zone_name, town=t_obj)
+                    uc_obj, _ = UnionCouncil.objects.get_or_create(name=uc_name, zone=z_obj)
+                    structural_obj, _ = Ward.objects.get_or_create(name=location_name, union_council=uc_obj)
+
+            # Avoid pure duplicates if exactly matching CNIC or Name & Designation
+            existing = None
+            if cnic:
+                existing = ModelClass.objects.filter(**{f"{category}_cnic": cnic}).first()
+            if not existing:
+                existing = ModelClass.objects.filter(**{f"{category}_name": name, f"{category}_designation": designation}).first()
+
+            if existing:
+                duplicate_count += 1
+                logs.append({'serial_number': log_id, 'type': 'warning', 'message': 'Record already exists'})
+                continue
+
+            # Create Record
+            try:
+                kwargs = {
+                    f"{category}_name": name,
+                    f"{category}_designation": designation,
+                    f"{category}_phone": phone,
+                    f"{category}_cnic": cnic,
+                }
+                if structural_field and structural_obj:
+                    kwargs[structural_field] = structural_obj
+                
+                ModelClass.objects.create(**kwargs)
+                success_count += 1
+                logs.append({'serial_number': log_id, 'type': 'success', 'message': 'Successfully imported'})
+            except Exception as e:
+                error_count += 1
+                logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Creation failed: {str(e)}'})
+
+        return JsonResponse({
+            'status': 'success',
+            'imported': success_count,
+            'duplicates': duplicate_count,
+            'errors': error_count,
+            'logs': logs
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})

@@ -1,0 +1,838 @@
+{% extends 'base.html' %}
+
+{% block layout %}
+<style>
+    :root {
+        --ppp-red: #C41E3A;
+        --ppp-red-dark: #8B1528;
+        --ppp-green: #006B3F;
+        --ppp-green-dark: #004D2C;
+    }
+
+    .table-card {
+        background: #fff;
+        border: 1px solid #E5E5E5;
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .table-title-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .table-title {
+        font-family: 'Georgia', serif;
+        font-weight: 600;
+        font-size: 20px;
+        margin: 0;
+        color: #1A1A1A;
+    }
+
+    .d-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .d-table th {
+        text-align: left;
+        font-weight: 600;
+        font-size: 11px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #E5E5E5;
+        background: #fafafa;
+    }
+
+    .d-table th:first-child {
+        border-top-left-radius: 8px;
+    }
+
+    .d-table th:last-child {
+        border-top-right-radius: 8px;
+    }
+
+    .d-table td {
+        padding: 16px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .d-table tr:hover {
+        background: #fdfdfd;
+    }
+
+    .loc-hierarchy {
+        font-size: 12px;
+    }
+
+    .loc-town {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .loc-sub {
+        font-size: 11px;
+        color: #888;
+        margin-top: 2px;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 12px;
+        gap: 6px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        text-decoration: none;
+        transition: transform 0.1s;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-details {
+        background: var(--ppp-green);
+        /* Green */
+    }
+
+    .btn-update {
+        background: #ffc107;
+        /* Yellow */
+        color: #1a1a1a;
+    }
+    
+    .btn-update:hover {
+        color: #000;
+    }
+
+    .btn-delete {
+        background: var(--ppp-red);
+        /* PPP Red */
+    }
+
+    .action-buttons-wrap {
+        display: flex;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .filter-section {
+        background: linear-gradient(to right, var(--ppp-red) 0%, #1A1A1A 25%, #1A1A1A 75%, var(--ppp-green) 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .filter-section .form-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #fff;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        letter-spacing: 0.5px;
+    }
+    .filter-section .form-control, .filter-section .form-select {
+        font-size: 13px;
+        border-radius: 6px;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+    }
+    .filter-section .form-control:focus, .filter-section .form-select:focus {
+        border-color: var(--ppp-red);
+        box-shadow: 0 0 0 2px rgba(196, 30, 58, 0.1);
+    }
+    .filter-section .btn-filter {
+        background: var(--ppp-red);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: none;
+    }
+    .filter-section .btn-clear {
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 8px 16px;
+        border: 1px solid #ccc;
+    }
+
+    /* Responsive */
+    @media (max-width: 767.98px) {
+        .dash-main {
+            padding: 20px 12px;
+            padding-bottom: 80px;
+        }
+        .table-card {
+            padding: 16px 12px;
+        }
+        .table-title-area {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .d-table {
+            font-size: 12px;
+        }
+        .d-table th, .d-table td {
+            padding: 10px 8px;
+        }
+        .jump-to-page {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .action-buttons-wrap {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .action-buttons-wrap form,
+        .action-buttons-wrap .btn-action {
+            width: 100%;
+        }
+    }
+
+
+
+    /* ── Pagination Styles ── */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 15px 0;
+        border-top: 1px solid #eee;
+    }
+    .pagination-nav {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    .page-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .page-btn:hover:not(.disabled) {
+        border-color: var(--ppp-red);
+        color: var(--ppp-red);
+        background: #fff;
+    }
+    .page-btn.active {
+        background: var(--ppp-red);
+        border-color: var(--ppp-red);
+        color: #fff;
+    }
+    .page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f5f5f5;
+    }
+    .jump-to-page {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    .jump-to-page input {
+        width: 60px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+        outline: none;
+    }
+    .jump-to-page input:focus {
+        border-color: var(--ppp-red);
+    }
+    .jump-btn {
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 8px;
+        background: #1A1A1A;
+        color: #fff;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .jump-btn:hover {
+        background: #333;
+    }
+</style>
+
+<div class="dash-wrap">
+    <!-- Sidebar -->
+    {% include 'includes/sidebar.html' with active_page='office_bearers' %}
+
+    <!-- Main Content -->
+    <div class="dash-main">
+        <div class="mb-3">
+            <a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <!-- ── Success / Error Messages ── -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="settings-alert alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert" style="margin-bottom: 20px; border-radius: 8px;">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-info-circle-fill{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="table-card shadow-sm">
+            <div class="table-title-area">
+                <h2 class="table-title">{{ category_name }} Office Bearers</h2>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-funnel-fill"></i> Filters
+                    </button>
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#importCsvModal"
+                        style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-upload"></i> Import CSV
+                    </button>
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#exportCsvModal"
+                        style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
+                        <i class="bi bi-download"></i> Export CSV
+                    </button>
+                    <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                        style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
+                        <i class="bi bi-printer-fill"></i> Print
+                    </button>
+                    <a href="{% url 'add_office_bearer' category_id %}" class="btn"
+                        style="background: var(--ppp-red); color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">+
+                        New Office Bearer</a>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="collapse d-md-block" id="mobileFilterCollapse">
+                <div class="filter-section">
+                <form method="GET" action="{% url 'office_bearers_list' category_id %}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="q" class="form-control" placeholder="Name, ID, CNIC, Phone" value="{{ current_filters.q }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Town</label>
+                            <select name="town" class="form-select">
+                                <option value="">— All Towns —</option>
+                                {% for t in towns %}
+                                <option value="{{ t.id }}" {% if current_filters.town == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Registered By</label>
+                            <select name="registrar" class="form-select">
+                                <option value="">— All Members —</option>
+                                <option value="system" {% if current_filters.registrar == 'system' %}selected{% endif %}>System</option>
+                                {% for u in registrars %}
+                                <option value="{{ u.member_id }}" {% if current_filters.registrar == u.member_id %}selected{% endif %}>{{ u.member_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ current_filters.start_date }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ current_filters.end_date }}">
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
+                            <div class="dropdown">
+                                <button class="btn dropdown-toggle" type="button" id="additionalFiltersDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background: #ffffff; color: #333333; font-size: 12px; font-weight: 600; border-radius: 6px; padding: 8px 12px; border: 1px solid #ccc;">
+                                    More Filters
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="additionalFiltersDropdown" style="font-size: 13px;">
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_cnic == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingCnicInput')">Missing CNIC</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_phone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingPhoneInput')">Missing Phone</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_town == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingTownInput')">Missing Town</button></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.missing_zone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingZoneInput')">Missing Zone</button></li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Hidden inputs for additional filters -->
+                            <input type="hidden" name="missing_cnic" id="missingCnicInput" value="{{ current_filters.missing_cnic|default:'' }}">
+                            <input type="hidden" name="missing_phone" id="missingPhoneInput" value="{{ current_filters.missing_phone|default:'' }}">
+                            <input type="hidden" name="missing_town" id="missingTownInput" value="{{ current_filters.missing_town|default:'' }}">
+                            <input type="hidden" name="missing_zone" id="missingZoneInput" value="{{ current_filters.missing_zone|default:'' }}">
+
+                            <a href="{% url 'all_members' %}" class="btn-clear text-decoration-none">Clear Filters</a>
+                            <button type="submit" class="btn-filter">Apply Filters</button>
+                        </div>
+                    </div>
+                </form>
+
+                <script>
+                function toggleMissingFilter(inputId) {
+                    var input = document.getElementById(inputId);
+                    if (input.value === '1') {
+                        input.value = '';
+                    } else {
+                        input.value = '1';
+                    }
+                    input.form.submit();
+                }
+                </script>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="d-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Phone</th>
+            <th>CNIC</th>
+            {% if has_location %}
+            <th>Location</th>
+            {% endif %}
+            <th class="no-print" style="text-align: right;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in page_obj %}
+        <tr>
+            <td style="font-weight: 600; color: #1A1A1A;">{{ record.name|default:"--" }}</td>
+            <td>{{ record.designation|default:"--" }}</td>
+            <td>{{ record.phone|default:"--" }}</td>
+            <td>{{ record.cnic|default:"--" }}</td>
+            {% if has_location %}
+            <td>{{ record.location|default:"--" }}</td>
+            {% endif %}
+            <td class="no-print" style="text-align: right;">
+                <div class="action-buttons-wrap d-flex justify-content-end align-items-center gap-2">
+                    <a href="{% url 'update_office_bearer' category_id record.id %}" class="btn-action btn-edit text-primary text-decoration-none" title="Update" style="font-size: 14px;">
+                        <i class="bi bi-pencil-square"></i> Update
+                    </a>
+                    <form method="POST" action="{% url 'delete_office_bearer' category_id record.id %}" style="display:inline; margin: 0;" onsubmit="return confirm('Are you sure you want to delete this office bearer?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action btn-delete text-danger" title="Delete" style="background: none; border: none; font-size: 14px; padding: 0;"><i class="bi bi-trash3-fill"></i> Delete</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="{% if has_location %}6{% else %}5{% endif %}" class="text-center py-5 text-muted">No office bearers found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+            </div>
+
+            <!-- ── Pagination ── -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination-container">
+                <div class="pagination-info text-muted small d-none d-md-block">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} members
+                </div>
+
+                <!-- Desktop Pagination -->
+                <div class="pagination-nav d-none d-md-flex">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{{ query_params }}" class="page-btn" title="First Page"><i class="bi bi-chevron-double-left"></i></a>
+                        <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="page-btn"><i class="bi bi-chevron-left"></i> Prev</a>
+                    {% else %}
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-left"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-left"></i> Prev</span>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{{ query_params }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="page-btn">Next <i class="bi bi-chevron-right"></i></a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{{ query_params }}" class="page-btn" title="Last Page"><i class="bi bi-chevron-double-right"></i></a>
+                    {% else %}
+                        <span class="page-btn disabled">Next <i class="bi bi-chevron-right"></i></span>
+                        <span class="page-btn disabled"><i class="bi bi-chevron-double-right"></i></span>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Pagination Stepper -->
+                <div class="mobile-pagination-nav d-flex d-md-none justify-content-between align-items-center w-100 mb-2 px-3">
+                    <div style="flex: 1; text-align: left;">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                <i class="bi bi-arrow-left"></i> {{ page_obj.previous_page_number }}
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"><i class="bi bi-arrow-left"></i> - </span>
+                        {% endif %}
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <span style="font-size: 20px; font-weight: 800; color: #1A1A1A;">{{ page_obj.number }}</span>
+                    </div>
+                    <div style="flex: 1; text-align: right;">
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{{ query_params }}" class="text-decoration-none" style="color: #888; font-size: 15px; font-weight: 600;">
+                                {{ page_obj.next_page_number }} <i class="bi bi-arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <span style="color: #ddd; font-size: 15px; font-weight: 600;"> - <i class="bi bi-arrow-right"></i></span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="jump-to-page">
+                    <span>Jump to</span>
+                    <input type="number" id="jumpPageInput" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}">
+                    <button type="button" class="jump-btn" id="jumpBtn" data-query="{{ query_params }}">Go</button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Import CSV Modal -->
+<div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header" style="background: var(--ppp-red); color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="importCsvModalLabel">Import Members from CSV</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'import_members_csv' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">Upload a CSV file to bulk import members. The system will match location names to existing locations.</p>
+                    <p class="text-muted small mb-3">Suggested columns: <strong>membership_number, name, father_name, cnic, phone, address, town, zone, union_council, ward</strong></p>
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label" style="font-weight: 600; font-size: 13px;">Select CSV File</label>
+                        <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eee;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="submit" class="btn" style="background: var(--ppp-green); color: white; border-radius: 8px; font-weight: 600;">Upload & Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Export CSV Modal -->
+<div class="modal fade" id="exportCsvModal" tabindex="-1" aria-labelledby="exportCsvModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header" style="background: #1A1A1A; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="exportCsvModalLabel">Export Filtered Data</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'office_bearers_list' category_id %}" method="GET">
+                <input type="hidden" name="export" value="csv">
+                <div class="modal-body p-4">
+                    <h6 style="font-weight: 600; margin-bottom: 15px;">1. Filter Records (Pre-filled)</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="q" class="form-control" placeholder="Name, ID, CNIC, Phone" value="{{ current_filters.q }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Town</label>
+                            <select name="town" class="form-select">
+                                <option value="">— All Towns —</option>
+                                {% for t in towns %}
+                                <option value="{{ t.id }}" {% if current_filters.town == t.id %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ current_filters.start_date }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ current_filters.end_date }}">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Registered By</label>
+                            <select name="registrar" class="form-select">
+                                <option value="">— All Members —</option>
+                                <option value="system" {% if current_filters.registrar == 'system' %}selected{% endif %}>System</option>
+                                {% for u in registrars %}
+                                <option value="{{ u.member_id }}" {% if current_filters.registrar == u.member_id %}selected{% endif %}>{{ u.member_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 style="font-weight: 600; margin-bottom: 15px;">2. Additional Filters (Missing Data)</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_cnic" id="exportMissingCnic" value="1" {% if current_filters.missing_cnic == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingCnic">Missing CNIC</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_phone" id="exportMissingPhone" value="1" {% if current_filters.missing_phone == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingPhone">Missing Phone</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_town" id="exportMissingTown" value="1" {% if current_filters.missing_town == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingTown">Missing Town</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="missing_zone" id="exportMissingZone" value="1" {% if current_filters.missing_zone == '1' %}checked{% endif %}>
+                                <label class="form-check-label" for="exportMissingZone">Missing Zone</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #eee;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="submit" class="btn" style="background: #1A1A1A; color: white; border-radius: 8px; font-weight: 600;"><i class="bi bi-download"></i> Download CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Full Screen Overlay -->
+<div id="importOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; flex-direction:row; align-items:stretch; color:white; font-family:var(--font-sans, sans-serif);">
+    
+    <!-- Left Column: Details -->
+    <div style="flex: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 40px; border-right: 1px solid #444;">
+        <h2 style="margin-bottom: 20px; font-weight: 600;">Importing Members...</h2>
+        <div style="width: 300px; background: #333; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+            <div id="importProgressBar" style="width: 0%; height: 10px; background: var(--ppp-green, #006B3F); transition: width 0.2s;"></div>
+        </div>
+        <div style="display: flex; gap: 20px; text-align: center;">
+            <div style="cursor: pointer;" onclick="filterImportLogs('all')">
+                <div style="font-size: 24px; font-weight: bold;" id="importTotal">0</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Total</div>
+            </div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('success')">
+                <div style="font-size: 24px; font-weight: bold; color: var(--ppp-green, #006B3F);" id="importSuccess">0</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Imported</div>
+            </div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('warning')">
+                <div style="font-size: 24px; font-weight: bold; color: #ffc107;" id="importDuplicates">0</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Duplicates (Skipped)</div>
+            </div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('error')">
+                <div style="font-size: 24px; font-weight: bold; color: var(--ppp-red, #C41E3A);" id="importErrors">0</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Errors</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; font-size: 14px; color: #aaa;" id="importStatusText">Reading CSV file...</div>
+    </div>
+
+    <!-- Right Column: Logs -->
+    <div style="flex: 1; display:flex; flex-direction:column; background: rgba(0,0,0,0.9); padding: 20px;">
+        <h4 style="margin-bottom: 15px; font-weight: 600; border-bottom: 1px solid #333; padding-bottom: 10px;">Import Logs</h4>
+        <div id="importLogsContainer" style="flex: 1; overflow-y: auto; font-family: monospace; font-size: 13px; padding-right: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Logs will be appended here dynamically -->
+        </div>
+    </div>
+</div>
+
+{% include 'includes/mobile_nav.html' with active_page='office_bearers' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+function filterImportLogs(type) {
+    const logs = document.querySelectorAll('.import-log-item');
+    logs.forEach(log => {
+        if (type === 'all' || log.dataset.type === type) {
+            log.style.display = 'block';
+        } else {
+            log.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const jumpInput = document.getElementById('jumpPageInput');
+    const jumpBtn = document.getElementById('jumpBtn');
+
+    if (jumpBtn) {
+        const performJump = () => {
+            const pageStr = jumpInput.value;
+            const page = parseInt(pageStr, 10);
+            const max = parseInt(jumpInput.getAttribute('max'), 10);
+            if (!isNaN(page) && page >= 1 && page <= max) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', page);
+                window.location.href = url.toString();
+            } else {
+                alert('Please enter a valid page number between 1 and ' + max);
+            }
+        };
+
+        jumpBtn.addEventListener('click', performJump);
+        jumpInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performJump();
+            }
+        });
+    }
+
+    const importForm = document.querySelector('#importCsvModal form');
+    if (importForm) {
+        importForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('csv_file');
+            if (!fileInput.files.length) return;
+
+            const file = fileInput.files[0];
+            const overlay = document.getElementById('importOverlay');
+            overlay.style.display = 'flex';
+            
+            // Close the modal
+            const modalEl = document.getElementById('importCsvModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            }
+
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const rows = results.data;
+                    const totalRows = rows.length;
+                    document.getElementById('importTotal').innerText = totalRows;
+                    
+                    if (totalRows === 0) {
+                        document.getElementById('importStatusText').innerText = "No data found in CSV.";
+                        setTimeout(() => window.location.reload(), 2000);
+                        return;
+                    }
+
+                    const chunkSize = 1;
+                    let currentChunkIndex = 0;
+                    
+                    let totalSuccess = 0;
+                    let totalDuplicates = 0;
+                    let totalErrors = 0;
+
+                    function processNextChunk() {
+                        if (currentChunkIndex >= totalRows) {
+                            document.getElementById('importStatusText').innerHTML = "Import Complete! <button onclick='window.location.reload()' style='margin-left: 10px; padding: 6px 12px; background: var(--ppp-red, #C41E3A); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;'>Close & Reload</button>";
+                            return;
+                        }
+
+                        const chunk = rows.slice(currentChunkIndex, currentChunkIndex + chunkSize);
+                        document.getElementById('importStatusText').innerText = `Processing rows ${currentChunkIndex + 1} to ${Math.min(currentChunkIndex + chunkSize, totalRows)}...`;
+
+                        fetch("{% url 'import_office_bearers_ajax' category_id %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                            },
+                            body: JSON.stringify({ rows: chunk })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                totalSuccess += data.imported;
+                                totalDuplicates += data.duplicates;
+                                totalErrors += data.errors;
+                                
+                                document.getElementById('importSuccess').innerText = totalSuccess;
+                                document.getElementById('importDuplicates').innerText = totalDuplicates;
+                                document.getElementById('importErrors').innerText = totalErrors;
+                                
+                                if (data.logs && data.logs.length > 0) {
+                                    const logsContainer = document.getElementById('importLogsContainer');
+                                    data.logs.forEach(log => {
+                                        const logEl = document.createElement('div');
+                                        let color = '#ccc';
+                                        if (log.type === 'success') color = 'var(--ppp-green, #006B3F)';
+                                        else if (log.type === 'warning') color = '#ffc107';
+                                        else if (log.type === 'error') color = 'var(--ppp-red, #C41E3A)';
+                                        
+                                        logEl.className = 'import-log-item';
+                                        logEl.dataset.type = log.type;
+                                        logEl.style.color = color;
+                                        logEl.style.padding = '6px 8px';
+                                        logEl.style.background = 'rgba(255,255,255,0.05)';
+                                        logEl.style.borderRadius = '4px';
+                                        logEl.innerHTML = `<strong>[ID: ${log.serial_number}]</strong> ${log.message}`;
+                                        
+                                        logsContainer.appendChild(logEl);
+                                        logsContainer.scrollTop = logsContainer.scrollHeight;
+                                    });
+                                }
+                            } else {
+                                console.error(data.message);
+                            }
+                            
+                            currentChunkIndex += chunkSize;
+                            
+                            const percent = Math.min(100, Math.round((currentChunkIndex / totalRows) * 100));
+                            document.getElementById('importProgressBar').style.width = percent + '%';
+                            
+                            processNextChunk();
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            document.getElementById('importStatusText').innerText = "Error occurred. Check console.";
+                        });
+                    }
+
+                    processNextChunk();
+                },
+                error: function(err) {
+                    alert('Error parsing CSV');
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

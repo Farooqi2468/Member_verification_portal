@@ -64,5 +64,11 @@ urlpatterns = [
 
     # Office Bearers
     path('dashboard/office-bearers/', views.office_bearers_index, name='office_bearers_index'),
+    path('dashboard/office-bearers/<str:category>/', views.office_bearers_list, name='office_bearers_list'),
     path('dashboard/office-bearers/add/<str:category>/', views.add_office_bearer, name='add_office_bearer'),
+    path('dashboard/office-bearers/update/<str:category>/<int:pk>/', views.update_office_bearer, name='update_office_bearer'),
+    path('dashboard/api/get-person/<str:member_id>/', views.get_person_data, name='get_person_data'),
+    path('dashboard/api/search-person/', views.search_person_by_name, name='search_person_by_name'),
+    path('dashboard/office-bearers/delete/<str:category>/<int:pk>/', views.delete_office_bearer, name='delete_office_bearer'),
+    path('dashboard/office-bearers/import-ajax/<str:category>/', views.import_office_bearers_ajax, name='import_office_bearers_ajax'),
 ]
