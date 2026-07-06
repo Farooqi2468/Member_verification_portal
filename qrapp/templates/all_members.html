@@ -631,21 +631,21 @@
             <div id="importProgressBar" style="width: 0%; height: 10px; background: var(--ppp-green, #006B3F); transition: width 0.2s;"></div>
         </div>
         <div style="display: flex; gap: 20px; text-align: center;">
-            <div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('all')">
                 <div style="font-size: 24px; font-weight: bold;" id="importTotal">0</div>
-                <div style="font-size: 12px; color: #aaa;">Total</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Total</div>
             </div>
-            <div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('success')">
                 <div style="font-size: 24px; font-weight: bold; color: var(--ppp-green, #006B3F);" id="importSuccess">0</div>
-                <div style="font-size: 12px; color: #aaa;">Imported</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Imported</div>
             </div>
-            <div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('warning')">
                 <div style="font-size: 24px; font-weight: bold; color: #ffc107;" id="importDuplicates">0</div>
-                <div style="font-size: 12px; color: #aaa;">Duplicates (Skipped)</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Duplicates (Skipped)</div>
             </div>
-            <div>
+            <div style="cursor: pointer;" onclick="filterImportLogs('error')">
                 <div style="font-size: 24px; font-weight: bold; color: var(--ppp-red, #C41E3A);" id="importErrors">0</div>
-                <div style="font-size: 12px; color: #aaa;">Errors</div>
+                <div style="font-size: 12px; color: #aaa; text-decoration: underline;">Errors</div>
             </div>
         </div>
         <div style="margin-top: 20px; font-size: 14px; color: #aaa;" id="importStatusText">Reading CSV file...</div>
@@ -667,6 +667,17 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
+function filterImportLogs(type) {
+    const logs = document.querySelectorAll('.import-log-item');
+    logs.forEach(log => {
+        if (type === 'all' || log.dataset.type === type) {
+            log.style.display = 'block';
+        } else {
+            log.style.display = 'none';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const jumpInput = document.getElementById('jumpPageInput');
     const jumpBtn = document.getElementById('jumpBtn');
@@ -734,10 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     function processNextChunk() {
                         if (currentChunkIndex >= totalRows) {
-                            document.getElementById('importStatusText').innerText = "Import Complete! Reloading...";
-                            setTimeout(() => {
-                                window.location.href = "?import_success=" + totalSuccess + "&import_duplicates=" + totalDuplicates + "&import_errors=" + totalErrors;
-                            }, 1500);
+                            document.getElementById('importStatusText').innerHTML = "Import Complete! <button onclick='window.location.reload()' style='margin-left: 10px; padding: 6px 12px; background: var(--ppp-red, #C41E3A); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;'>Close & Reload</button>";
                             return;
                         }
 
@@ -772,6 +780,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         else if (log.type === 'warning') color = '#ffc107';
                                         else if (log.type === 'error') color = 'var(--ppp-red, #C41E3A)';
                                         
+                                        logEl.className = 'import-log-item';
+                                        logEl.dataset.type = log.type;
                                         logEl.style.color = color;
                                         logEl.style.padding = '6px 8px';
                                         logEl.style.background = 'rgba(255,255,255,0.05)';
