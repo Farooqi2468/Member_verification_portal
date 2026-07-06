@@ -1753,13 +1753,26 @@ def office_bearers_list(request, category):
 
     # Generate data list
     data = []
+    
+    # Pre-fetch membership numbers based on CNIC to avoid N+1 queries
+    cnics = [getattr(record, f'{category}_cnic', '') for record in records]
+    from .models import Person
+    persons = Person.objects.filter(cnic__in=[c for c in cnics if c])
+    cnic_to_member_id = {p.cnic: p.membership_number for p in persons if p.cnic}
+    
     for record in records:
+        cnic = getattr(record, f'{category}_cnic', '')
+        photo_field = getattr(record, f'{category}_photo', None)
+        photo_url = photo_field.url if photo_field else 'https://upload.wikimedia.org/wikipedia/commons/c/c0/Pakistan_Peoples_Party_Flag.svg'
+        
         data.append({
             'id': record.id,
+            'member_id': cnic_to_member_id.get(cnic, '--'),
+            'photo_url': photo_url,
             'name': getattr(record, f'{category}_name', ''),
             'designation': getattr(record, f'{category}_designation', ''),
             'phone': getattr(record, f'{category}_phone', ''),
-            'cnic': getattr(record, f'{category}_cnic', ''),
+            'cnic': cnic,
             'location': getattr(record, structural_field).name if structural_field and getattr(record, structural_field) else '',
         })
 
