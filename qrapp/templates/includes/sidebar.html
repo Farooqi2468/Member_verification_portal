@@ -1,75 +1,97 @@
 <!-- Sidebar Component -->
 <div class="dash-sidebar" id="baseSidebar">
-    
+
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <div class="sidebar-header-text" style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px;">Menu</div>
+        <div class="sidebar-header-text"
+            style="font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 2px;">Menu
+        </div>
         <button type="button" id="sidebarToggleBtn" class="sidebar-toggle-btn text-white title" title="Toggle Sidebar">
             <i class="bi bi-list"></i>
         </button>
     </div>
 
     <nav class="nav flex-column mt-2">
-        <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}" title="Overview">
-            <i class="bi bi-speedometer2 text-white"></i> 
+        <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"
+            title="Overview">
+            <i class="bi bi-speedometer2 text-white"></i>
             <span class="sidebar-text">Overview</span>
         </a>
 
-        <div class="sidebar-header-text mt-3 mb-2 px-2" style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">Members Manager</div>
-        <a class="nav-link {% if active_page == 'members' %}active{% endif %}" href="{% url 'all_members' %}" title="All Members">
-            <i class="bi bi-people-fill text-white"></i> 
+        <div class="sidebar-header-text mt-3 mb-2 px-2"
+            style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">
+            Members Manager</div>
+        <a class="nav-link {% if active_page == 'members' %}active{% endif %}" href="{% url 'all_members' %}"
+            title="All Members">
+            <i class="bi bi-people-fill text-white"></i>
             <span class="sidebar-text">All Members</span>
         </a>
-        <a class="nav-link {% if active_page == 'register' %}active{% endif %}" href="{% url 'create_person' %}" title="Register Member">
-            <i class="bi bi-person-plus-fill text-white"></i> 
+        <a class="nav-link {% if active_page == 'register' %}active{% endif %}" href="{% url 'create_person' %}"
+            title="Register Member">
+            <i class="bi bi-person-plus-fill text-white"></i>
             <span class="sidebar-text">Register Member</span>
         </a>
 
-        <div class="sidebar-header-text mt-3 mb-2 px-2" style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">System & Setup</div>
-        <a class="nav-link {% if active_page == 'locations' %}active{% endif %}" href="{% url 'manage_locations' %}" title="Manage Locations">
-            <i class="bi bi-geo-alt-fill text-white"></i> 
+        <div class="sidebar-header-text mt-3 mb-2 px-2"
+            style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">
+            System & Setup</div>
+        <a class="nav-link {% if active_page == 'locations' %}active{% endif %}" href="{% url 'manage_locations' %}"
+            title="Manage Locations">
+            <i class="bi bi-geo-alt-fill text-white"></i>
             <span class="sidebar-text">Manage Locations</span>
         </a>
-        <a class="nav-link {% if active_page == 'reports' %}active{% endif %}" href="{% url 'reports_view' %}" title="Reports">
-            <i class="bi bi-bar-chart-fill text-white"></i> 
+        <a class="nav-link {% if active_page == 'reports' %}active{% endif %}" href="{% url 'reports_view' %}"
+            title="Reports">
+            <i class="bi bi-bar-chart-fill text-white"></i>
             <span class="sidebar-text">Reports</span>
         </a>
-        <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{% url 'settings' %}" title="Settings">
-            <i class="bi bi-gear-fill text-white"></i> 
+        <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{% url 'settings' %}"
+            title="Settings">
+            <i class="bi bi-gear-fill text-white"></i>
             <span class="sidebar-text">Settings</span>
         </a>
-        
+
         {% if request.user.groups.all.0.name == 'Admin' or request.user.is_superuser %}
-        <div class="sidebar-header-text mt-3 mb-2 px-2" style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">Books Module</div>
+        <div class="sidebar-header-text mt-3 mb-2 px-2"
+            style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">
+            Books Module</div>
         <a class="nav-link {% if active_page == 'books' %}active{% endif %}" href="{% url 'book_list' %}" title="Books">
-            <i class="bi bi-book-fill text-white"></i> 
+            <i class="bi bi-book-fill text-white"></i>
             <span class="sidebar-text">Books Records</span>
         </a>
-        <a class="nav-link {% if active_page == 'membership_summary' %}active{% endif %}" href="{% url 'membership_summary' %}" title="Who Is Doing Membership?">
-            <i class="bi bi-people-fill text-white"></i> 
+        <a class="nav-link {% if active_page == 'membership_summary' %}active{% endif %}"
+            href="{% url 'membership_summary' %}" title="Who Is Doing Membership?">
+            <i class="bi bi-people-fill text-white"></i>
             <span class="sidebar-text">Who Is Doing Membership?</span>
         </a>
-        
-        
-        <div class="sidebar-header-text mt-3 mb-2 px-2" style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">Users Manager</div>
-        <a class="nav-link {% if active_page == 'all_users' %}active{% endif %}" href="{% url 'all_system_users' %}" title="All Users">
-            <i class="bi bi-person-lines-fill text-white"></i> 
+
+
+        <div class="sidebar-header-text mt-3 mb-2 px-2"
+            style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">
+            Users Manager</div>
+        <a class="nav-link {% if active_page == 'all_users' %}active{% endif %}" href="{% url 'all_system_users' %}"
+            title="All Users">
+            <i class="bi bi-person-lines-fill text-white"></i>
             <span class="sidebar-text">All Users</span>
         </a>
-        <a class="nav-link {% if active_page == 'create_user' %}active{% endif %}" href="{% url 'create_system_user' %}" title="Create User">
-            <i class="bi bi-person-badge-fill text-white"></i> 
+        <a class="nav-link {% if active_page == 'create_user' %}active{% endif %}" href="{% url 'create_system_user' %}"
+            title="Create User">
+            <i class="bi bi-person-badge-fill text-white"></i>
             <span class="sidebar-text">Create User</span>
         </a>
-        <a class="nav-link {% if active_page == 'all_real_members' %}active{% endif %}" href="{% url 'all_real_members' %}" title="All Real Members">
-            <i class="bi bi-people text-white"></i> 
-            <span class="sidebar-text">Real Members List</span>
+        <a class="nav-link {% if active_page == 'all_real_members' %}active{% endif %}"
+            href="{% url 'all_real_members' %}" title="All Real Members">
+            <i class="bi bi-people text-white"></i>
+            <span class="sidebar-text">Who Is Doing Membership</span>
         </a>
 
-        <div class="sidebar-header-text mt-3 mb-2 px-2" style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">Head Office Bearers</div>
-        <a class="nav-link {% if active_page == 'office_bearers' %}active{% endif %}" href="{% url 'office_bearers_index' %}" title="PPP Lahore Office Bearers">
-            <i class="bi bi-person-badge-fill text-white"></i> 
+        <div class="sidebar-header-text mt-3 mb-2 px-2"
+            style="font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1.5px;">
+            Head Office Bearers</div>
+        <a class="nav-link {% if active_page == 'office_bearers' %}active{% endif %}"
+            href="{% url 'office_bearers_index' %}" title="PPP Lahore Office Bearers">
+            <i class="bi bi-person-badge-fill text-white"></i>
             <span class="sidebar-text">Office Bearers</span>
         </a>
         {% endif %}
     </nav>
 </div>
-
