@@ -1609,6 +1609,33 @@ def ajax_get_location_members(request):
         })
         
     return JsonResponse({'status': 'success', 'data': data})
+
+@require_POST
+@login_required
+@admin_only
+def ajax_delete_location_members(request):
+    loc_type = request.POST.get('type')
+    loc_id = request.POST.get('id')
+    
+    if not loc_type or not loc_id:
+        return JsonResponse({'status': 'error', 'message': 'Missing parameters'}, status=400)
+    
+    persons = Person.objects.all()
+    if loc_type == 'town':
+        persons = persons.filter(town_id=loc_id)
+    elif loc_type == 'zone':
+        persons = persons.filter(zone_id=loc_id)
+    elif loc_type == 'uc':
+        persons = persons.filter(union_council_id=loc_id)
+    elif loc_type == 'ward':
+        persons = persons.filter(ward_id=loc_id)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid location type'}, status=400)
+    
+    count = persons.count()
+    persons.delete()
+    
+    return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} members.'})
 from django.forms import modelform_factory
 
 @login_required
