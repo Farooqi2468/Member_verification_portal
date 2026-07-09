@@ -1774,6 +1774,7 @@ def office_bearers_list(request, category):
             'phone': getattr(record, f'{category}_phone', ''),
             'cnic': cnic,
             'location': getattr(record, structural_field).name if structural_field and getattr(record, structural_field) else '',
+            'town': record.zone.town.name if category == 'zonal_org' and getattr(record, 'zone', None) and getattr(record.zone, 'town', None) else '',
         })
 
     # CSV Export
@@ -1786,13 +1787,17 @@ def office_bearers_list(request, category):
         
         headers = ['Name', 'Designation', 'Phone', 'CNIC']
         if structural_field:
-            headers.append('Location')
+            headers.append(structural_field.replace('_', ' ').title())
+        if category == 'zonal_org':
+            headers.append('Town')
         writer.writerow(headers)
         
         for d in data:
             row = [d['name'], d['designation'], d['phone'], d['cnic']]
             if structural_field:
                 row.append(d['location'])
+            if category == 'zonal_org':
+                row.append(d['town'])
             writer.writerow(row)
             
         return response
@@ -3996,6 +4001,7 @@ def office_bearers_list(request, category):
             'phone': getattr(record, f'{category}_phone', ''),
             'cnic': cnic,
             'location': getattr(record, structural_field).name if structural_field and getattr(record, structural_field) else '',
+            'town': record.zone.town.name if category == 'zonal_org' and getattr(record, 'zone', None) and getattr(record.zone, 'town', None) else '',
         })
 
     # CSV Export
@@ -4008,13 +4014,17 @@ def office_bearers_list(request, category):
         
         headers = ['Name', 'Designation', 'Phone', 'CNIC']
         if structural_field:
-            headers.append('Location')
+            headers.append(structural_field.replace('_', ' ').title())
+        if category == 'zonal_org':
+            headers.append('Town')
         writer.writerow(headers)
         
         for d in data:
             row = [d['name'], d['designation'], d['phone'], d['cnic']]
             if structural_field:
                 row.append(d['location'])
+            if category == 'zonal_org':
+                row.append(d['town'])
             writer.writerow(row)
             
         return response

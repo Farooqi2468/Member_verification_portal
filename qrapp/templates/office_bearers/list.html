@@ -422,8 +422,8 @@
             <th>Designation</th>
             <th>Phone</th>
             <th>CNIC</th>
-            {% if has_location %}
-            <th>Location</th>
+            {% if category_id == 'zonal_org' %}
+            <th>Town</th>
             {% endif %}
             <th class="no-print" style="text-align: right;">Actions</th>
         </tr>
@@ -440,8 +440,8 @@
             <td>{{ record.designation|default:"--" }}</td>
             <td>{{ record.phone|default:"--" }}</td>
             <td>{{ record.cnic|default:"--" }}</td>
-            {% if has_location %}
-            <td>{{ record.location|default:"--" }}</td>
+            {% if category_id == 'zonal_org' %}
+            <td>{{ record.town|default:"--" }}</td>
             {% endif %}
             <td class="no-print" style="text-align: right;">
                 <div class="action-buttons-wrap d-flex justify-content-end align-items-center gap-2">
@@ -543,8 +543,8 @@
             <form action="{% url 'import_members_csv' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body p-4">
-                    <p class="text-muted small mb-3">Upload a CSV file to bulk import members. The system will match location names to existing locations.</p>
-                    <p class="text-muted small mb-3">Suggested columns: <strong>membership_number, name, father_name, cnic, phone, address, town, zone, union_council, ward</strong></p>
+                    <p class="text-muted small mb-3">Upload a CSV file to bulk import records. The system will match location names to existing locations.</p>
+                    <p class="text-muted small mb-3">Suggested columns: <strong>name, designation, phone, cnic, town, zone, union_council, ward</strong></p>
                     <div class="mb-3">
                         <label for="csv_file" class="form-label" style="font-weight: 600; font-size: 13px;">Select CSV File</label>
                         <input class="form-control" type="file" id="csv_file" name="csv_file" accept=".csv" required>

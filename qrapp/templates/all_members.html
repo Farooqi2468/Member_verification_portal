@@ -421,7 +421,6 @@
                             <th>Person Name</th>
                             <th>CNIC</th>
                             <th>Phone Number</th>
-                            <th>Location Assignment</th>
                             <th>Registered By</th>
                             <th>Date & Time</th>
                             <th class="no-print" style="text-align: right;">Actions</th>
@@ -435,14 +434,6 @@
                             <td style="font-weight: 600; color: #1A1A1A;">{{ person.name }}</td>
                             <td>{{ person.cnic|default:"--" }}</td>
                             <td>{{ person.phone|default:"--" }}</td>
-                            <td>
-                                <div class="loc-hierarchy">
-                                    <div class="loc-town">{{ person.town|default:"No Town Assigned" }}</div>
-                                    <div class="loc-sub">
-                                        Zone {{ person.zone|default:"-" }} &bull; Ward {{ person.ward|default:"-" }}
-                                    </div>
-                                </div>
-                            </td>
                             <td>{{ person.made_by.member_name|default:"System" }}</td>
                             <td style="font-size: 11px; white-space: nowrap;">{{ person.created_at|date:"M d, Y h:i A" }}</td>
                             <td class="no-print" style="text-align: right;">
