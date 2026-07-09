@@ -200,7 +200,7 @@
                 <table class="d-table">
                     <thead>
                         <tr>
-                            <th>Sr...</th>
+                            <th>Member ID</th>
                             <th>Member Name</th>
                             <th>Phone</th>
                             <th>CNIC</th>
@@ -212,7 +212,7 @@
                         {% for member in page_obj %}
                         <tr>
                             <td style="font-weight: 600;">
-                                {{ page_obj.start_index|add:forloop.counter0 }}
+                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ member.member_id }}</a>
                             </td>
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
