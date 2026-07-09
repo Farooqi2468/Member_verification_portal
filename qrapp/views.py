@@ -3314,8 +3314,8 @@ def ajax_dashboard_charts(request):
         datetime(2026, 7, 4).date(): 6000,
         datetime(2026, 7, 5).date(): 6500,
         datetime(2026, 7, 6).date(): 4500,
-        datetime(2026, 7, 7).date(): 891,
-        datetime(2026, 7, 8).date(): 4109,
+        datetime(2026, 7, 7).date(): 3000,
+        datetime(2026, 7, 8).date(): 4000,
         datetime(2026, 7, 9).date(): 1500,
     }
     
