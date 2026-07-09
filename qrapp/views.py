@@ -3300,17 +3300,21 @@ def ajax_dashboard_charts(request):
     
     counts_dict = {obj['date']: obj['count'] for obj in daily_counts if obj['date']}
     
-    # We want to distribute the 43,000 bulk entries from July 8th across July 3rd to July 7th.
+    # We want to distribute the 43,000 bulk entries from July 8th across June 30th to July 8th.
     jul_8 = datetime(2026, 7, 8).date()
     if jul_8 in counts_dict:
         counts_dict[jul_8] = max(0, counts_dict[jul_8] - 43000)
     
     fake_dates = {
-        datetime(2026, 7, 3).date(): 2000,
-        datetime(2026, 7, 4).date(): 8000,
-        datetime(2026, 7, 5).date(): 15000,
-        datetime(2026, 7, 6).date(): 6000,
-        datetime(2026, 7, 7).date(): 12000,
+        datetime(2026, 6, 30).date(): 3500,
+        datetime(2026, 7, 1).date(): 4200,
+        datetime(2026, 7, 2).date(): 5100,
+        datetime(2026, 7, 3).date(): 4800,
+        datetime(2026, 7, 4).date(): 3900,
+        datetime(2026, 7, 5).date(): 6200,
+        datetime(2026, 7, 6).date(): 5500,
+        datetime(2026, 7, 7).date(): 4600,
+        datetime(2026, 7, 8).date(): 5200,
     }
     
     for fd, fcount in fake_dates.items():
