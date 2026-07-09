@@ -3347,7 +3347,7 @@ def ajax_dashboard_charts(request):
         datetime(2026, 7, 5).date(): 1900,
         datetime(2026, 7, 6).date(): 2300,
         datetime(2026, 7, 7).date(): -1509,
-        datetime(2026, 7, 8).date(): 1200,
+        datetime(2026, 7, 8).date(): 5000,
         datetime(2026, 7, 9).date(): 1200,
     }
     
