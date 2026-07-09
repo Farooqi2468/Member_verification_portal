@@ -339,7 +339,9 @@
 
             if (sidebarBtn && sidebar) {
                 // Initialize collapse state from local storage
-                if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                if (localStorage.getItem('sidebar_collapsed') === 'false') {
+                    sidebar.classList.remove('collapsed');
+                } else if (localStorage.getItem('sidebar_collapsed') === 'true') {
                     sidebar.classList.add('collapsed');
                 }
 
