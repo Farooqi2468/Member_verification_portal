@@ -287,6 +287,10 @@
     .jump-btn:hover {
         background: #333;
     }
+    .blur-text {
+        filter: blur(4px);
+        user-select: none;
+    }
 </style>
 
 <div class="dash-wrap">
@@ -433,10 +437,10 @@
                         {% for person in page_obj %}
                         <tr>
                             <td style="font-family: var(--font-mono); font-weight: 500; font-size: 12px;">
-                                {{ person.membership_number }}</td>
-                            <td style="font-weight: 600; color: #1A1A1A;">{{ person.name }}</td>
-                            <td>{{ person.cnic|default:"--" }}</td>
-                            <td>{{ person.phone|default:"--" }}</td>
+                                {{ person.membership_number|slice:":4" }}<span class="blur-text">{{ person.membership_number|slice:"4:" }}</span></td>
+                            <td style="font-weight: 600; color: #1A1A1A;">{{ person.name|slice:":4" }}<span class="blur-text">{{ person.name|slice:"4:" }}</span></td>
+                            <td>{% if person.cnic %}{{ person.cnic|slice:":4" }}<span class="blur-text">{{ person.cnic|slice:"4:" }}</span>{% else %}--{% endif %}</td>
+                            <td>{% if person.phone %}{{ person.phone|slice:":4" }}<span class="blur-text">{{ person.phone|slice:"4:" }}</span>{% else %}--{% endif %}</td>
                             <td>{{ person.made_by.member_name|default:"System" }}</td>
                             <td style="font-size: 11px; white-space: nowrap;">{{ person.created_at|date:"M d, Y h:i A" }}</td>
                             <td class="no-print" style="text-align: right;">
