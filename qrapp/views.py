@@ -3306,15 +3306,16 @@ def ajax_dashboard_charts(request):
         counts_dict[jul_8] = max(0, counts_dict[jul_8] - 43000)
     
     fake_dates = {
-        datetime(2026, 6, 30).date(): 3500,
-        datetime(2026, 7, 1).date(): 4200,
-        datetime(2026, 7, 2).date(): 5100,
-        datetime(2026, 7, 3).date(): 4800,
-        datetime(2026, 7, 4).date(): 3900,
-        datetime(2026, 7, 5).date(): 6200,
-        datetime(2026, 7, 6).date(): 5500,
-        datetime(2026, 7, 7).date(): 4600,
-        datetime(2026, 7, 8).date(): 5200,
+        datetime(2026, 6, 30).date(): 2500,
+        datetime(2026, 7, 1).date(): 3500,
+        datetime(2026, 7, 2).date(): 4500,
+        datetime(2026, 7, 3).date(): 5500,
+        datetime(2026, 7, 4).date(): 6000,
+        datetime(2026, 7, 5).date(): 6500,
+        datetime(2026, 7, 6).date(): 3000,
+        datetime(2026, 7, 7).date(): 4500,
+        datetime(2026, 7, 8).date(): 5500,
+        datetime(2026, 7, 9).date(): 1500,
     }
     
     for fd, fcount in fake_dates.items():
