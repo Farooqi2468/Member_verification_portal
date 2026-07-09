@@ -511,7 +511,7 @@
     let timelineChart, townsChart;
 
     const fetchChartData = (days) => {
-        fetch(`/dashboard/ajax/dashboard-charts/?days=${days}`)
+        fetch(`/dashboard/ajax/dashboard-charts/?days=${days}&t=${new Date().getTime()}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
@@ -597,7 +597,7 @@
             // Let's patch the fetch url to exactly match urls.py.
 
             const fetchDataFixed = (days) => {
-                fetch(`/ajax/dashboard-charts/?days=${days}`)
+                fetch(`/ajax/dashboard-charts/?days=${days}&t=${new Date().getTime()}`)
                     .then(r => r.json())
                     .then(d => { updateTimelineChart(d.timeline); updateTownsChart(d.towns); })
                     .catch(e => console.error(e));
