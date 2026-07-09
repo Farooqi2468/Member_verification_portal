@@ -420,7 +420,7 @@
                 <table class="d-table">
                     <thead>
                         <tr>
-                            <th>Member ID</th>
+                            <th>Sr...</th>
                             <th>Person Name</th>
                             <th>CNIC</th>
                             <th>Phone Number</th>
@@ -432,8 +432,8 @@
                     <tbody>
                         {% for person in page_obj %}
                         <tr>
-                            <td style="font-family: var(--font-mono); font-weight: 500; font-size: 12px;">
-                                {{ person.membership_number }}</td>
+                            <td style="font-weight: 500; font-size: 14px;">
+                                {{ page_obj.start_index|add:forloop.counter0 }}</td>
                             <td style="font-weight: 600; color: #1A1A1A;">{{ person.name }}</td>
                             <td>{{ person.cnic|default:"--" }}</td>
                             <td>{{ person.phone|default:"--" }}</td>
