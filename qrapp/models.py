@@ -71,10 +71,10 @@ class Person(models.Model):
     address = models.TextField(null=True, blank=True)
 
     # Location ForeignKeys (nullable for backward compatibility)
-    town = models.ForeignKey(Town, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
-    zone = models.ForeignKey(Zone, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
-    union_council = models.ForeignKey(UnionCouncil, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
-    ward = models.ForeignKey(Ward, on_delete=models.SET_NULL, null=True, blank=True, related_name='persons')
+    town = models.ForeignKey(Town, on_delete=models.CASCADE, null=True, blank=True, related_name='persons')
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=True, blank=True, related_name='persons')
+    union_council = models.ForeignKey(UnionCouncil, on_delete=models.CASCADE, null=True, blank=True, related_name='persons')
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE, null=True, blank=True, related_name='persons')
 
     # New fields
     member_name = models.CharField(max_length=100, null=True, blank=True)
