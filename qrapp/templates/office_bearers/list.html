@@ -417,7 +417,7 @@
                 <table class="d-table">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>Sr. #</th>
             <th>Name</th>
             <th>Designation</th>
             <th>Phone</th>
@@ -431,10 +431,9 @@
     <tbody>
         {% for record in page_obj %}
         <tr>
-            <td class="text-muted">{{ record.member_id }}</td>
+            <td class="text-muted">{{ forloop.counter0|add:page_obj.start_index }}</td>
             <td style="font-weight: 600; color: #1A1A1A;">
                 <div class="d-flex align-items-center">
-                    <img src="{{ record.photo_url }}" alt="Profile" class="rounded-circle me-2 border" style="width: 35px; height: 35px; object-fit: cover;">
                     <span>{{ record.name|default:"--" }}</span>
                 </div>
             </td>

@@ -200,7 +200,7 @@
                 <table class="d-table">
                     <thead>
                         <tr>
-                            <th>Member Serial Number</th>
+                            <th>Sr. #</th>
                             <th>Member Name</th>
                             <th>Phone</th>
                             <th>CNIC</th>
@@ -212,7 +212,7 @@
                         {% for member in page_obj %}
                         <tr>
                             <td style="font-weight: 600;">
-                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ member.member_id }}</a>
+                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ forloop.counter0|add:page_obj.start_index }}</a>
                             </td>
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
@@ -289,8 +289,7 @@
                 <table class="table table-hover table-striped mb-0 table-modal" style="font-size: 13px;">
                     <thead class="table-light">
                         <tr>
-                            <th>#</th>
-                            <th>Membership number (ID Number) / پارٹی ممبرشپ نمبر</th>
+                            <th>Sr. #</th>
                             <th>Name</th>
                             <th>Father Name</th>
                             <th>Phone</th>
@@ -380,7 +379,6 @@ function showMemberRegistrations(memberId) {
                         tbody.innerHTML += `
                             <tr>
                                 <td>${index + 1}</td>
-                                <td>${person.membership_number || '--'}</td>
                                 <td class="fw-bold">${person.name}</td>
                                 <td>${person.father_name || '--'}</td>
                                 <td>${person.phone || '--'}</td>
