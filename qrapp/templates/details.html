@@ -131,6 +131,11 @@
         background: rgba(255, 255, 255, 0.2);
     }
 
+    .blur-text {
+        filter: blur(4px);
+        user-select: none;
+    }
+
     /* Responsive */
     @media (max-width: 767.98px) {
         .dash-main {
@@ -165,7 +170,7 @@
         <div
             style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 12px;">
             <div>
-                <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">{{ person.name }}</h2>
+                <h2 style="font-family: 'Georgia', serif; font-weight: 600; margin: 0;">{{ person.name|slice:":4" }}<span class="blur-text">{{ person.name|slice:"4:" }}</span></h2>
                 <!-- <div style="font-size: 13px; color: #888; margin-top: 4px;">{{ person.name }}</div> -->
             </div>
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
@@ -194,7 +199,7 @@
             <div class="detail-grid">
                 <div class="detail-row">
                     <div class="label">Member ID</div>
-                    <div class="value" style="font-family: monospace; font-size: 24px;">#{{ person.membership_number }}
+                    <div class="value" style="font-family: monospace; font-size: 24px;">#{{ person.membership_number|slice:":4" }}<span class="blur-text">{{ person.membership_number|slice:"4:" }}</span>
                     </div>
                 </div>
                 <div class="detail-row">
@@ -203,11 +208,11 @@
                 </div>
                 <div class="detail-row">
                     <div class="label">Mobile Number</div>
-                    <div class="value">{{ person.phone }}</div>
+                    <div class="value">{% if person.phone %}{{ person.phone|slice:":4" }}<span class="blur-text">{{ person.phone|slice:"4:" }}</span>{% else %}--{% endif %}</div>
                 </div>
                 <div class="detail-row">
                     <div class="label">CNIC Number</div>
-                    <div class="value">{{ person.cnic }}</div>
+                    <div class="value">{% if person.cnic %}{{ person.cnic|slice:":4" }}<span class="blur-text">{{ person.cnic|slice:"4:" }}</span>{% else %}--{% endif %}</div>
                 </div>
             </div>
         </div>
@@ -288,13 +293,11 @@
                 <div style="flex: 1; padding-right: 12px;">
                     <h3
                         style="font-size: 20px; font-weight: 700; margin: 0 0 4px; word-break: break-word; line-height: 1.2;">
-                        {{ person.name }}</h3>
+                        {{ person.name|slice:":4" }}<span class="blur-text">{{ person.name|slice:"4:" }}</span></h3>
                     <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">S/O, D/O, W/O: <span
                             style="color: #fff;">{{ person.father_name }}</span></div>
-                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">CNIC: <span style="color: #fff;">{{
-                            person.cnic }}</span></div>
-                    <div style="font-size: 12px; color: #bbb;">Mobile: <span style="color: #fff;">{{ person.phone
-                            }}</span></div>
+                    <div style="font-size: 12px; color: #bbb; margin-bottom: 2px;">CNIC: <span style="color: #fff;">{% if person.cnic %}{{ person.cnic|slice:":4" }}<span class="blur-text">{{ person.cnic|slice:"4:" }}</span>{% else %}--{% endif %}</span></div>
+                    <div style="font-size: 12px; color: #bbb;">Mobile: <span style="color: #fff;">{% if person.phone %}{{ person.phone|slice:":4" }}<span class="blur-text">{{ person.phone|slice:"4:" }}</span>{% else %}--{% endif %}</span></div>
                 </div>
                 <div style="text-align: center; flex-shrink: 0;">
                     <div class="qr-display-box" style="padding: 6px; margin: 0; background: #fff; border-radius: 8px;">
@@ -304,7 +307,7 @@
                     </div>
                     <div
                         style="font-size: 11px; opacity: 0.8; margin-top: 6px; font-weight: 600; font-family: monospace;">
-                        #{{ person.membership_number }}</div>
+                        #{{ person.membership_number|slice:":4" }}<span class="blur-text">{{ person.membership_number|slice:"4:" }}</span></div>
                 </div>
             </div>
 
