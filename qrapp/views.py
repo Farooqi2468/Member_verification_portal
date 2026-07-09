@@ -2526,6 +2526,7 @@ def all_members(request):
     missing_phone = request.GET.get('missing_phone')
     missing_town = request.GET.get('missing_town')
     missing_zone = request.GET.get('missing_zone')
+    show_duplicates = request.GET.get('show_duplicates')
 
     if q:
         members_list = members_list.filter(
@@ -2568,6 +2569,19 @@ def all_members(request):
         members_list = members_list.filter(town__isnull=True)
     if missing_zone == '1':
         members_list = members_list.filter(zone__isnull=True)
+
+    if show_duplicates == '1':
+        duplicate_cnics = list(Person.objects.exclude(cnic__isnull=True).exclude(cnic='').values('cnic').annotate(c=Count('cnic')).filter(c__gt=1).values_list('cnic', flat=True))
+        duplicate_phones = list(Person.objects.exclude(phone__isnull=True).exclude(phone='').values('phone').annotate(c=Count('phone')).filter(c__gt=1).values_list('phone', flat=True))
+        duplicate_names = list(Person.objects.exclude(name__isnull=True).exclude(name='').values('name').annotate(c=Count('name')).filter(c__gt=1).values_list('name', flat=True))
+        duplicate_ids = list(Person.objects.exclude(membership_number__isnull=True).exclude(membership_number='').values('membership_number').annotate(c=Count('membership_number')).filter(c__gt=1).values_list('membership_number', flat=True))
+        
+        members_list = members_list.filter(
+            Q(cnic__in=duplicate_cnics) |
+            Q(phone__in=duplicate_phones) |
+            Q(name__in=duplicate_names) |
+            Q(membership_number__in=duplicate_ids)
+        )
 
     # CSV Export
     if request.GET.get('export') == 'csv':
@@ -2633,6 +2647,7 @@ def all_members(request):
             'missing_phone': missing_phone,
             'missing_town': missing_town,
             'missing_zone': missing_zone,
+            'show_duplicates': show_duplicates,
         },
         'query_params': query_params
     }
@@ -3957,6 +3972,7 @@ def office_bearers_list(request, category):
     missing_cnic = request.GET.get('missing_cnic')
     missing_phone = request.GET.get('missing_phone')
     missing_location = request.GET.get('missing_location')
+    show_duplicates = request.GET.get('show_duplicates')
     export_csv = request.GET.get('export')
 
     if q:
@@ -3977,6 +3993,21 @@ def office_bearers_list(request, category):
         records = records.filter(Q(**{f"{category}_phone__isnull": True}) | Q(**{f"{category}_phone__exact": ''}))
     if missing_location == '1' and structural_field:
         records = records.filter(Q(**{f"{structural_field}__isnull": True}))
+
+    if show_duplicates == '1':
+        from django.db.models import Count, Q
+        
+        duplicate_cnics = list(ModelClass.objects.exclude(**{f"{category}_cnic__isnull": True}).exclude(**{f"{category}_cnic": ''}).values(f"{category}_cnic").annotate(c=Count(f"{category}_cnic")).filter(c__gt=1).values_list(f"{category}_cnic", flat=True))
+        
+        duplicate_phones = list(ModelClass.objects.exclude(**{f"{category}_phone__isnull": True}).exclude(**{f"{category}_phone": ''}).values(f"{category}_phone").annotate(c=Count(f"{category}_phone")).filter(c__gt=1).values_list(f"{category}_phone", flat=True))
+        
+        duplicate_names = list(ModelClass.objects.exclude(**{f"{category}_name__isnull": True}).exclude(**{f"{category}_name": ''}).values(f"{category}_name").annotate(c=Count(f"{category}_name")).filter(c__gt=1).values_list(f"{category}_name", flat=True))
+        
+        records = records.filter(
+            Q(**{f"{category}_cnic__in": duplicate_cnics}) | 
+            Q(**{f"{category}_phone__in": duplicate_phones}) | 
+            Q(**{f"{category}_name__in": duplicate_names})
+        )
 
     # Generate data list
     data = []
@@ -4035,7 +4066,8 @@ def office_bearers_list(request, category):
         'end_date': end_date,
         'missing_cnic': missing_cnic,
         'missing_phone': missing_phone,
-        'missing_location': missing_location
+        'missing_location': missing_location,
+        'show_duplicates': show_duplicates
     }
 
     # Pagination

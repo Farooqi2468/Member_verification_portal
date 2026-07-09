@@ -384,6 +384,8 @@
                                     <li><button type="button" class="dropdown-item {% if current_filters.missing_phone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingPhoneInput')">Missing Phone</button></li>
                                     <li><button type="button" class="dropdown-item {% if current_filters.missing_town == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingTownInput')">Missing Town</button></li>
                                     <li><button type="button" class="dropdown-item {% if current_filters.missing_zone == '1' %}active{% endif %}" onclick="toggleMissingFilter('missingZoneInput')">Missing Zone</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button type="button" class="dropdown-item {% if current_filters.show_duplicates == '1' %}active{% endif %}" onclick="toggleMissingFilter('showDuplicatesInput')">Duplicates</button></li>
                                 </ul>
                             </div>
                             
@@ -392,6 +394,7 @@
                             <input type="hidden" name="missing_phone" id="missingPhoneInput" value="{{ current_filters.missing_phone|default:'' }}">
                             <input type="hidden" name="missing_town" id="missingTownInput" value="{{ current_filters.missing_town|default:'' }}">
                             <input type="hidden" name="missing_zone" id="missingZoneInput" value="{{ current_filters.missing_zone|default:'' }}">
+                            <input type="hidden" name="show_duplicates" id="showDuplicatesInput" value="{{ current_filters.show_duplicates|default:'' }}">
 
                             <a href="{% url 'all_members' %}" class="btn-clear text-decoration-none">Clear Filters</a>
                             <button type="submit" class="btn-filter">Apply Filters</button>
