@@ -102,18 +102,6 @@
 
 {% include 'includes/mobile_nav.html' with active_page='all_real_members' %}
 
-{% if is_update %}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const regInput = document.getElementById("id_no_of_registrations");
-        if (regInput) {
-            regInput.setAttribute("readonly", true);
-            regInput.style.backgroundColor = "#e9ecef";
-            regInput.style.cursor = "not-allowed";
-            regInput.style.color = "#6c757d";
-        }
-    });
-</script>
-{% endif %}
+
 
 {% endblock %}
