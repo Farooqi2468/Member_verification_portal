@@ -208,7 +208,6 @@
                     </div>
                     <div>
                         <div class="metric-value">+{{ members_today }}</div>
-                        <!-- <div class="metric-value">459 + </div> -->
                         <div class="metric-label">Today</div>
                     </div>
                 </div>
@@ -220,8 +219,7 @@
                         <i class="bi bi-calendar-check-fill" style="color: #3B82F6;"></i>
                     </div>
                     <div>
-                        <!-- <div class="metric-value">{{ members_month }}</div> -->
-                        <div class="metric-value">43782 </div>
+                        <div class="metric-value">{{ members_month }}</div>
                         <div class="metric-label">This Month</div>
                     </div>
                 </div>
@@ -347,42 +345,6 @@
                     </div>
                 </div>
             </div>
-            <!-- All System Users Card -->
-            <!-- <div class="col-md-6 col-lg-4">
-                <div class="dash-card h-100 p-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="flex-shrink-0" style="color: #6610f2;">
-                            <i class="bi bi-person-lines-fill" style="font-size: 36px;"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1" style="color: #1A1A1A;">System Users</h6>
-                            <p class="text-muted mb-2" style="font-size: 11.5px; line-height: 1.4;">Manage staff
-                                accounts, credentials, and organizational access roles.</p>
-                            <a href="{% url 'all_system_users' %}" class="btn btn-sm px-3"
-                                style="background: #1A1A1A; color: #fff; border-radius: 6px; font-size: 12px;">Manage
-                                Users</a>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <!-- Create System User Card -->
-            <!-- <div class="col-md-6 col-lg-4">
-                <div class="dash-card h-100 p-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="flex-shrink-0" style="color: #d63384;">
-                            <i class="bi bi-person-badge-fill" style="font-size: 36px;"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="fw-bold mb-1" style="color: #1A1A1A;">New System User</h6>
-                            <p class="text-muted mb-2" style="font-size: 11.5px; line-height: 1.4;">Register and
-                                authorize new administrative staff and operators.</p>
-                            <a href="{% url 'create_system_user' %}" class="btn btn-sm px-3"
-                                style="background: #1A1A1A; color: #fff; border-radius: 6px; font-size: 12px;">Add
-                                User</a>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
             {% elif role == "Town President" %}
             <div class="col-md-8 col-lg-6">
                 <div class="dash-card text-center h-100 p-5">
@@ -448,10 +410,10 @@
             <div class="d-flex align-items-center gap-3">
                 <h4 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A; margin: 0;">Analytics
                     Overview</h4>
-                <!-- <a href="{% url 'reports_view' %}" class="btn btn-sm text-primary p-0 fw-600"
+                <a href="{% url 'reports_view' %}" class="btn btn-sm text-primary p-0 fw-600"
                     style="font-size: 13px; text-decoration: none;">
                     See more analytics <i class="bi bi-arrow-right"></i>
-                </a> -->
+                </a>
             </div>
             <select id="chart-time-filter" class="form-select w-auto" style="border-radius: 8px; font-size: 14px;">
                 <option value="7">Last 7 Days</option>
