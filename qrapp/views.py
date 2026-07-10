@@ -579,14 +579,6 @@ def import_members_csv(request):
                     member_obj.save()
                     member_obj.refresh_from_db()
 
-            date_str = cleaned_row.get('date', '')
-            if date_str:
-                try:
-                    parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                    Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                except ValueError:
-                    pass
-
             # Generate QR code if newly created or if missing
             if created or not person.qr_code:
                 url = request.build_absolute_uri(f"/person/{person.membership_number}/")
@@ -598,6 +590,19 @@ def import_members_csv(request):
                 
                 person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
                 person.save()
+
+            date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+            if date_str:
+                try:
+                    from django.utils.dateparse import parse_datetime
+                    import datetime
+                    parsed_date = parse_datetime(date_str)
+                    if not parsed_date:
+                        parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                    if parsed_date:
+                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                except Exception:
+                    pass
 
             success_count += 1
             
@@ -707,14 +712,6 @@ def import_members_ajax(request):
                     member_obj.save()
                     member_obj.refresh_from_db()
 
-                date_str = cleaned_row.get('date', '')
-                if date_str:
-                    try:
-                        parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                    except ValueError:
-                        pass
-
                 # Generate QR code
                 url = request.build_absolute_uri(f"/person/{person.membership_number}/")
                 img = qrcode.make(url)
@@ -725,6 +722,19 @@ def import_members_ajax(request):
                 
                 person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
                 person.save()
+
+                date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+                if date_str:
+                    try:
+                        from django.utils.dateparse import parse_datetime
+                        import datetime
+                        parsed_date = parse_datetime(date_str)
+                        if not parsed_date:
+                            parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                        if parsed_date:
+                            Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                    except Exception:
+                        pass
 
                 success_count += 1
                 logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
@@ -2101,7 +2111,7 @@ def import_office_bearers_ajax(request, category):
             designation = cleaned_row.get('designation', '')
             cnic = cleaned_row.get('cnic', '')
             phone = cleaned_row.get('phone', '')
-            created_at = cleaned_row.get('created_at', '')
+            created_at = cleaned_row.get('created_at') or cleaned_row.get('created at', '')
 
             log_id = name if name else "Unknown"
 
@@ -2164,7 +2174,20 @@ def import_office_bearers_ajax(request, category):
                 if structural_field and structural_obj:
                     kwargs[structural_field] = structural_obj
                 
-                ModelClass.objects.create(**kwargs)
+                obj = ModelClass.objects.create(**kwargs)
+                
+                if created_at:
+                    try:
+                        from django.utils.dateparse import parse_datetime
+                        import datetime
+                        dt = parse_datetime(created_at)
+                        if not dt:
+                            dt = datetime.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                        if dt:
+                            ModelClass.objects.filter(pk=obj.pk).update(created_at=dt)
+                    except Exception:
+                        pass
+                
                 success_count += 1
                 logs.append({'serial_number': log_id, 'type': 'success', 'message': 'Successfully imported'})
             except Exception as e:
@@ -2904,14 +2927,6 @@ def import_members_ajax(request):
                     member_obj.save()
                     member_obj.refresh_from_db()
 
-                date_str = cleaned_row.get('date', '')
-                if date_str:
-                    try:
-                        parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                    except ValueError:
-                        pass
-
                 # Generate QR code
                 url = request.build_absolute_uri(f"/person/{person.membership_number}/")
                 img = qrcode.make(url)
@@ -2922,6 +2937,19 @@ def import_members_ajax(request):
                 
                 person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
                 person.save()
+
+                date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+                if date_str:
+                    try:
+                        from django.utils.dateparse import parse_datetime
+                        import datetime
+                        parsed_date = parse_datetime(date_str)
+                        if not parsed_date:
+                            parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                        if parsed_date:
+                            Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                    except Exception:
+                        pass
 
                 success_count += 1
                 logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
@@ -4324,7 +4352,7 @@ def import_office_bearers_ajax(request, category):
             designation = cleaned_row.get('designation', '')
             cnic = cleaned_row.get('cnic', '')
             phone = cleaned_row.get('phone', '')
-            created_at = cleaned_row.get('created_at', '')
+            created_at = cleaned_row.get('created_at') or cleaned_row.get('created at', '')
 
             log_id = name if name else "Unknown"
 
