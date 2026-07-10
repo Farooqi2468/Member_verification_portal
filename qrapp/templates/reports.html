@@ -8,10 +8,7 @@
         --ppp-black: #1A1A1A;
     }
 
-    .blur-text {
-        filter: blur(4px);
-        user-select: none;
-    }
+
 
     .report-card {
         background: #fff;
@@ -144,7 +141,7 @@
                                         {% for town in town_stats|slice:":5" %}
                                         <tr>
                                             <td>{{ town.name }}</td>
-                                            <td class="text-end fw-bold"><span class="blur-text">{{ town.member_count }}</span></td>
+                                            <td class="text-end fw-bold">{{ town.member_count }}</td>
                                         </tr>
                                         {% empty %}
                                         <tr><td colspan="2" class="text-center text-muted">No data available</td></tr>
@@ -167,37 +164,37 @@
                         <div class="col-4">
                             <div class="integrity-box">
                                 <div class="text-muted small mb-1">Missing Name</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_name > 0 %}text-danger{% endif %}"><span class="blur-text">{{ integrity_data.missing_name }}</span></h4>
+                                <h4 class="fw-bold {% if integrity_data.missing_name > 0 %}text-danger{% endif %}">{{ integrity_data.missing_name }}</h4>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="integrity-box">
                                 <div class="text-muted small mb-1">Missing Phone</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_phone > 0 %}text-danger{% endif %}"><span class="blur-text">{{ integrity_data.missing_phone }}</span></h4>
+                                <h4 class="fw-bold {% if integrity_data.missing_phone > 0 %}text-danger{% endif %}">{{ integrity_data.missing_phone }}</h4>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="integrity-box">
                                 <div class="text-muted small mb-1">Missing CNIC</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_cnic > 0 %}text-danger{% endif %}"><span class="blur-text">{{ integrity_data.missing_cnic }}</span></h4>
+                                <h4 class="fw-bold {% if integrity_data.missing_cnic > 0 %}text-danger{% endif %}">{{ integrity_data.missing_cnic }}</h4>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="integrity-box">
                                 <div class="text-muted small mb-1">Missing Address</div>
-                                <h4 class="fw-bold"><span class="blur-text">{{ integrity_data.missing_address }}</span></h4>
+                                <h4 class="fw-bold">{{ integrity_data.missing_address }}</h4>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="integrity-box">
                                 <div class="text-muted small mb-1">Missing Town</div>
-                                <h4 class="fw-bold"><span class="blur-text">{{ integrity_data.missing_town }}</span></h4>
+                                <h4 class="fw-bold">{{ integrity_data.missing_town }}</h4>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="integrity-box" style="background: #f0fdf4; border-color: #bbf7d0;">
                                 <div class="text-muted small mb-1">Total Members</div>
-                                <h4 class="fw-bold text-success"><span class="blur-text">{{ integrity_data.total }}</span></h4>
+                                <h4 class="fw-bold text-success">{{ integrity_data.total }}</h4>
                             </div>
                         </div>
                         <div class="col-12 mt-4 text-center">
