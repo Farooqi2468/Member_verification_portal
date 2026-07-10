@@ -3320,47 +3320,7 @@ def ajax_dashboard_charts(request):
     
     counts_dict = {obj['date']: obj['count'] for obj in daily_counts if obj['date']}
     
-    # We want to distribute the 43,000 bulk entries from July 8th across June 25th to July 8th.
-    jul_8 = datetime(2026, 7, 8).date()
-    if jul_8 in counts_dict:
-        counts_dict[jul_8] = max(0, counts_dict[jul_8] - 43000)
-    
-    fake_dates = {
-        datetime(2026, 6, 17).date(): 200,
-        datetime(2026, 6, 18).date(): 1500,
-        datetime(2026, 6, 19).date(): 500,
-        datetime(2026, 6, 20).date(): 2500,
-        datetime(2026, 6, 21).date(): 800,
-        datetime(2026, 6, 22).date(): 1200,
-        datetime(2026, 6, 23).date(): 3100,
-        datetime(2026, 6, 24).date(): 1600,
-        datetime(2026, 6, 25).date(): 400,
-        datetime(2026, 6, 26).date(): 2800,
-        datetime(2026, 6, 27).date(): 1500,
-        datetime(2026, 6, 28).date(): 3500,
-        datetime(2026, 6, 29).date(): 2200,
-        datetime(2026, 6, 30).date(): 1700,
-        datetime(2026, 7, 1).date(): 4100,
-        datetime(2026, 7, 2).date(): 1900,
-        datetime(2026, 7, 3).date(): 4100,
-        datetime(2026, 7, 4).date(): 4309,
-        datetime(2026, 7, 5).date(): 1900,
-        datetime(2026, 7, 6).date(): 2300,
-        datetime(2026, 7, 7).date(): -1509,
-        datetime(2026, 7, 8).date(): 5000,
-        datetime(2026, 7, 9).date(): 1200,
-    }
-    
-    for fd, fcount in fake_dates.items():
-        if days == 'all':
-            counts_dict[fd] = counts_dict.get(fd, 0) + fcount
-        else:
-            try:
-                sd = timezone.now().date() - timedelta(days=int(days))
-                if fd >= sd:
-                    counts_dict[fd] = counts_dict.get(fd, 0) + fcount
-            except ValueError:
-                counts_dict[fd] = counts_dict.get(fd, 0) + fcount
+
                 
     sorted_dates = sorted(counts_dict.keys())
     
