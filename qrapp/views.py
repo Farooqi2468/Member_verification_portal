@@ -2101,6 +2101,7 @@ def import_office_bearers_ajax(request, category):
             designation = cleaned_row.get('designation', '')
             cnic = cleaned_row.get('cnic', '')
             phone = cleaned_row.get('phone', '')
+            created_at = cleaned_row.get('created_at', '')
 
             log_id = name if name else "Unknown"
 
@@ -3993,6 +3994,7 @@ def office_bearers_list(request, category):
             'cnic': cnic,
             'location': getattr(record, structural_field).name if structural_field and getattr(record, structural_field) else '',
             'town': record.zone.town.name if category == 'zonal_org' and getattr(record, 'zone', None) and getattr(record.zone, 'town', None) else '',
+            'created_at': record.created_at.strftime('%Y-%m-%d %H:%M:%S') if record.created_at else '',
         })
 
     # CSV Export
@@ -4008,6 +4010,7 @@ def office_bearers_list(request, category):
             headers.append(structural_field.replace('_', ' ').title())
         if category == 'zonal_org':
             headers.append('Town')
+        headers.append('Created At')
         writer.writerow(headers)
         
         for d in data:
@@ -4016,6 +4019,7 @@ def office_bearers_list(request, category):
                 row.append(d['location'])
             if category == 'zonal_org':
                 row.append(d['town'])
+            row.append(d.get('created_at', ''))
             writer.writerow(row)
             
         return response
@@ -4320,6 +4324,7 @@ def import_office_bearers_ajax(request, category):
             designation = cleaned_row.get('designation', '')
             cnic = cleaned_row.get('cnic', '')
             phone = cleaned_row.get('phone', '')
+            created_at = cleaned_row.get('created_at', '')
 
             log_id = name if name else "Unknown"
 
@@ -4382,9 +4387,22 @@ def import_office_bearers_ajax(request, category):
                 if structural_field and structural_obj:
                     kwargs[structural_field] = structural_obj
                 
-                ModelClass.objects.create(**kwargs)
+                obj = ModelClass.objects.create(**kwargs)
+                
+                if created_at:
+                    try:
+                        from django.utils.dateparse import parse_datetime
+                        import datetime
+                        dt = parse_datetime(created_at)
+                        if not dt:
+                            dt = datetime.datetime.strptime(created_at, '%Y-%m-%d %H:%M:%S')
+                        if dt:
+                            ModelClass.objects.filter(pk=obj.pk).update(created_at=dt)
+                    except Exception:
+                        pass
+                
                 success_count += 1
-                logs.append({'serial_number': log_id, 'type': 'success', 'message': 'SuccAessfully imported'})
+                logs.append({'serial_number': log_id, 'type': 'success', 'message': 'Successfully imported'})
             except Exception as e:
                 error_count += 1
                 logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Creation failed: {str(e)}'})
