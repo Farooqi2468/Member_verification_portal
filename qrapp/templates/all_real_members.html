@@ -218,7 +218,7 @@
                         {% for member in page_obj %}
                         <tr>
                             <td style="font-weight: 600;">
-                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ member.member_id }}</a>
+                                <a href="javascript:void(0);" onclick="showMemberRegistrations('{{ member.member_id }}')" onmouseenter="preloadMemberRegistrations('{{ member.member_id }}')" class="member-link">{{ member.member_id }}</a>
                             </td>
                             <td>{{ member.member_name }}</td>
                             <td>{{ member.member_phone|default:"--" }}</td>
@@ -353,59 +353,87 @@
 </div>
 
 <script>
+const registrationCache = {};
+
+function preloadMemberRegistrations(memberId) {
+    if (registrationCache[memberId]) return;
+    registrationCache[memberId] = fetch(`/ajax/registered-persons/?member_id=${encodeURIComponent(memberId)}`)
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Preload error:', error);
+            delete registrationCache[memberId];
+        });
+}
+
 function showMemberRegistrations(memberId) {
-    // Show Modal
     var modalEl = document.getElementById('registeredMembersModal');
     var modal = new bootstrap.Modal(modalEl);
     
-    // Set Title and Loading State
     document.getElementById('modalSerialNo').innerText = memberId;
-    document.getElementById('modalLoading').style.display = 'block';
-    document.getElementById('modalContent').style.display = 'none';
     
-    modal.show();
-    
-    // Fetch Data
-    fetch(`/ajax/registered-persons/?member_id=${encodeURIComponent(memberId)}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('modalLoading').style.display = 'none';
-            var tbody = document.getElementById('modalTableBody');
-            tbody.innerHTML = '';
-            
-            if (data.status === 'success') {
-                if (data.data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
-                } else {
-                    let htmlContent = '';
-                    data.data.forEach((person, index) => {
-                        htmlContent += `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td class="fw-bold">${person.name || '--'}</td>
-                                <td>${person.father_name || '--'}</td>
-                                <td>${person.phone || '--'}</td>
-                                <td>${person.cnic || '--'}</td>
-                            </tr>
-                        `;
-                    });
-                    tbody.innerHTML = htmlContent;
-                }
-                document.getElementById('modalContent').style.display = 'block';
-                // Reset search when opening
-                document.getElementById('modalSearchInput').value = '';
-                filterModalTable();
+    const renderData = (data) => {
+        document.getElementById('modalLoading').style.display = 'none';
+        var tbody = document.getElementById('modalTableBody');
+        tbody.innerHTML = '';
+        
+        if (data && data.status === 'success') {
+            if (data.data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
-                document.getElementById('modalContent').style.display = 'block';
+                let htmlContent = '';
+                data.data.forEach((person, index) => {
+                    htmlContent += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td class="fw-bold">${person.name || '--'}</td>
+                            <td>${person.father_name || '--'}</td>
+                            <td>${person.phone || '--'}</td>
+                            <td>${person.cnic || '--'}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = htmlContent;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('modalLoading').style.display = 'none';
-            document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
             document.getElementById('modalContent').style.display = 'block';
-        });
+            document.getElementById('modalSearchInput').value = '';
+            filterModalTable();
+        } else {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
+            document.getElementById('modalContent').style.display = 'block';
+        }
+    };
+
+    if (registrationCache[memberId]) {
+        if (registrationCache[memberId] instanceof Promise) {
+            document.getElementById('modalLoading').style.display = 'block';
+            document.getElementById('modalContent').style.display = 'none';
+            modal.show();
+            registrationCache[memberId].then(data => {
+                registrationCache[memberId] = data;
+                renderData(data);
+            });
+        } else {
+            renderData(registrationCache[memberId]);
+            modal.show();
+        }
+    } else {
+        document.getElementById('modalLoading').style.display = 'block';
+        document.getElementById('modalContent').style.display = 'none';
+        modal.show();
+        
+        fetch(`/ajax/registered-persons/?member_id=${encodeURIComponent(memberId)}`)
+            .then(response => response.json())
+            .then(data => {
+                registrationCache[memberId] = data;
+                renderData(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('modalLoading').style.display = 'none';
+                document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
+                document.getElementById('modalContent').style.display = 'block';
+            });
+    }
 }
 
 function filterModalTable() {
