@@ -1590,19 +1590,12 @@ def ajax_get_registered_persons(request):
     if not member_id:
         return JsonResponse({'status': 'error', 'message': 'Missing member_id parameter'}, status=400)
     
-    # Fetch persons whose made_by_id matches
-    persons = Person.objects.filter(made_by_id=member_id).order_by('-created_at')
-    
-    data = []
-    for p in persons:
-        data.append({
-            'membership_number': p.membership_number,
-            'name': p.name,
-            'father_name': p.father_name,
-            'phone': p.phone,
-            'cnic': p.cnic,
-        })
-        
+    # Query database and retrieve values directly (very fast)
+    data = list(
+        Person.objects.filter(made_by_id=member_id)
+        .order_by('-created_at')
+        .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
+    )
     return JsonResponse({'status': 'success', 'data': data})
 
 
@@ -3811,19 +3804,12 @@ def ajax_get_registered_persons(request):
     if not member_id:
         return JsonResponse({'status': 'error', 'message': 'Missing member_id parameter'}, status=400)
     
-    # Fetch persons whose made_by_id matches
-    persons = Person.objects.filter(made_by_id=member_id).order_by('-created_at')
-    
-    data = []
-    for p in persons:
-        data.append({
-            'membership_number': p.membership_number,
-            'name': p.name,
-            'father_name': p.father_name,
-            'phone': p.phone,
-            'cnic': p.cnic,
-        })
-        
+    # Query database and retrieve values directly (very fast)
+    data = list(
+        Person.objects.filter(made_by_id=member_id)
+        .order_by('-created_at')
+        .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
+    )
     return JsonResponse({'status': 'success', 'data': data})
 
 

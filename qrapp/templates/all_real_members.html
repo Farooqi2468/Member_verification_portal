@@ -377,17 +377,19 @@ function showMemberRegistrations(memberId) {
                 if (data.data.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
                 } else {
+                    let htmlContent = '';
                     data.data.forEach((person, index) => {
-                        tbody.innerHTML += `
+                        htmlContent += `
                             <tr>
                                 <td>${index + 1}</td>
-                                <td class="fw-bold">${person.name}</td>
+                                <td class="fw-bold">${person.name || '--'}</td>
                                 <td>${person.father_name || '--'}</td>
                                 <td>${person.phone || '--'}</td>
                                 <td>${person.cnic || '--'}</td>
                             </tr>
                         `;
                     });
+                    tbody.innerHTML = htmlContent;
                 }
                 document.getElementById('modalContent').style.display = 'block';
                 // Reset search when opening
