@@ -87,7 +87,8 @@
     <!-- Main Content -->
     <div class="dash-main">
         <div class="mb-3">
-            <a href="{% url 'dashboard' %}" class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
+            <a href="{% url 'dashboard' %}"
+                class="text-secondary text-decoration-none small d-flex align-items-center gap-1">
                 <i class="bi bi-arrow-left"></i> Back to Dashboard
             </a>
         </div>
@@ -96,7 +97,8 @@
                 <h2 style="font-family: 'Georgia', serif; font-weight: 600; color: #1A1A1A;">Reports & Analytics</h2>
                 <div class="text-secondary">Comprehensive analysis of membership data across all dimensions.</div>
             </div>
-            <button onclick="window.print()" class="btn btn-outline-dark d-none d-md-flex align-items-center gap-2" style="border-radius: 8px;">
+            <button onclick="window.print()" class="btn btn-outline-dark d-none d-md-flex align-items-center gap-2"
+                style="border-radius: 8px;">
                 <i class="bi bi-printer"></i> Print Report
             </button>
         </div>
@@ -144,7 +146,9 @@
                                             <td class="text-end fw-bold">{{ town.member_count }}</td>
                                         </tr>
                                         {% empty %}
-                                        <tr><td colspan="2" class="text-center text-muted">No data available</td></tr>
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">No data available</td>
+                                        </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -199,12 +203,12 @@
                         </div>
                         <div class="col-12 mt-4 text-center">
                             <p class="text-muted small mb-0">
-                                <i class="bi bi-info-circle"></i> Integrity Score: 
+                                <i class="bi bi-info-circle"></i> Integrity Score:
                                 <span class="fw-bold text-dark">
                                     {% if integrity_data.total > 0 %}
-                                        {{ 100|add:"-10" }}% (Mock)
+                                    {{ 100|add:"-10" }}% (Mock)
                                     {% else %}
-                                        100%
+                                    100%
                                     {% endif %}
                                 </span>
                             </p>
@@ -215,7 +219,7 @@
         </div>
 
         <!-- ── Registrar Performance ────────────────────────────── -->
-        <!-- 
+
         <div class="row g-4">
             <div class="col-12">
                 <div class="report-card">
@@ -250,7 +254,9 @@
                                             </td>
                                         </tr>
                                         {% empty %}
-                                        <tr><td colspan="3" class="text-center text-muted">No data available</td></tr>
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                        </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
@@ -260,7 +266,7 @@
                 </div>
             </div>
         </div>
-        -->
+
     </div>
 </div>
 
@@ -268,7 +274,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Colors
         const colors = ['#C41E3A', '#006B3F', '#3B82F6', '#8B5CF6', '#F59E0B', '#14B8A6'];
 
@@ -277,71 +283,71 @@
             type: 'line',
             data: {
                 labels: [{% for stat in growth_stats %}'{{ stat.label|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-                datasets: [{
-                    label: 'New Members',
-                    data: [{% for stat in growth_stats %}{{ stat.count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-                    borderColor: '#C41E3A',
-                    backgroundColor: 'rgba(196, 30, 58, 0.05)',
-                    fill: true,
-                    tension: 0.4,
+        datasets: [{
+            label: 'New Members',
+            data: [{% for stat in growth_stats %}{{ stat.count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+    borderColor: '#C41E3A',
+        backgroundColor: 'rgba(196, 30, 58, 0.05)',
+            fill: true,
+                tension: 0.4,
                     borderWidth: 3,
-                    pointBackgroundColor: '#C41E3A',
-                    pointRadius: 5
+                        pointBackgroundColor: '#C41E3A',
+                            pointRadius: 5
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
-                    x: { grid: { display: false } }
-                }
-            }
+        scales: {
+            y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+            x: { grid: { display: false } }
+        }
+    }
         });
 
-        // 2. Geographic Chart (Donut)
-        new Chart(document.getElementById('geoChart'), {
-            type: 'doughnut',
-            data: {
-                labels: [{% for town in town_stats|slice:":5" %}'{{ town.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-                datasets: [{
-                    data: [{% for town in town_stats|slice:":5" %}{{ town.member_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-                    backgroundColor: colors,
-                    hoverOffset: 10
+    // 2. Geographic Chart (Donut)
+    new Chart(document.getElementById('geoChart'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for town in town_stats|slice:":5" %}'{{ town.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for town in town_stats|slice:":5" %}{{ town.member_count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+    backgroundColor: colors,
+        hoverOffset: 10
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
-                cutout: '70%'
-            }
+        cutout: '70%'
+    }
         });
 
-        // 3. Performance Chart (Bar)
-        new Chart(document.getElementById('performanceChart'), {
-            type: 'bar',
-            data: {
-                labels: [{% for user in registrar_stats %}'{{ user.member_name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-                datasets: [{
-                    label: 'Registrations',
-                    data: [{% for user in registrar_stats %}{{ user.member_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-                    backgroundColor: 'rgba(0, 107, 63, 0.8)',
-                    borderRadius: 8,
-                    maxBarThickness: 40
+    // 3. Performance Chart (Bar)
+    new Chart(document.getElementById('performanceChart'), {
+        type: 'bar',
+        data: {
+            labels: [{% for user in registrar_stats %}'{{ user.member_name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Registrations',
+            data: [{% for user in registrar_stats %}{{ user.member_count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+    backgroundColor: 'rgba(0, 107, 63, 0.8)',
+        borderRadius: 8,
+            maxBarThickness: 40
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+    options: {
+        responsive: true,
+            maintainAspectRatio: false,
                 indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, grid: { borderDash: [2, 4] } },
-                    y: { grid: { display: false } }
-                }
-            }
+                    plugins: { legend: { display: false } },
+        scales: {
+            x: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+            y: { grid: { display: false } }
+        }
+    }
         });
     });
 </script>
