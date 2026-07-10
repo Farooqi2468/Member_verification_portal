@@ -31,6 +31,28 @@ from .models import (
 from django.db.models import F
 
 
+def upload_qr_to_s3(task):
+    """
+    Helper function to upload generated QR code directly to S3.
+    """
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    import io
+    import qrcode
+
+    membership_number, url, file_name = task
+    try:
+        img = qrcode.make(url)
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        
+        saved_name = default_storage.save(file_name, ContentFile(buffer.getvalue()))
+        return membership_number, saved_name
+    except Exception as e:
+        print(f"Error uploading QR code for {membership_number}: {e}")
+        return membership_number, None
+
+
 def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -300,6 +322,30 @@ def admin_person_detail(request, pk):
         except Exception:
             qr_base64 = None
 
+    if not person.qr_code or not qr_base64:
+        # Lazy self-healing generation
+        try:
+            import io
+            import qrcode
+            from django.core.files.base import ContentFile
+            
+            url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+            img = qrcode.make(url)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.membership_number}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=True)
+            
+            # Read back newly created QR code
+            person.qr_code.open('rb')
+            qr_bytes = person.qr_code.read()
+            person.qr_code.close()
+            qr_base64 = 'data:image/png;base64,' + base64.b64encode(qr_bytes).decode('utf-8')
+        except Exception as e:
+            print(f"Error in lazy QR code generation: {e}")
+
     return render(request, 'details.html', {
         'person': person,
         'is_admin': is_admin,
@@ -330,7 +376,7 @@ def all_members(request):
             pass
         return redirect('all_members')
 
-    members_list = Person.objects.all().order_by('-created_at')
+    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by').order_by('-created_at')
 
     # Filtering logic
     q = request.GET.get('q', '')
@@ -479,132 +525,163 @@ def import_members_csv(request):
         
         success_count = 0
         error_count = 0
+        qr_tasks = []
 
-        for row in reader:
-            # Clean keys to make it more resilient to trailing spaces or case differences
-            cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
-            
-            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
-            if not membership_number:
-                error_count += 1
-                continue
-            
-            town_name = cleaned_row.get('town', '')
-            zone_name = cleaned_row.get('zone', '')
-            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
-            ward_name = cleaned_row.get('ward', '')
+        # Local cache to prevent N+1 queries during insertion
+        towns_cache = {t.name.lower(): t for t in Town.objects.all()}
+        zones_cache = {(z.name.lower(), z.town_id): z for z in Zone.objects.all()}
+        ucs_cache = {(u.name.lower(), u.zone_id): u for u in UnionCouncil.objects.all()}
+        wards_cache = {(w.name.lower(), w.union_council_id): w for w in Ward.objects.all()}
+        members_cache = {m.member_id: m for m in Member.objects.all()}
 
-            town_obj = None
-            if town_name:
-                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
-
-            zone_obj = None
-            if zone_name and town_obj:
-                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
-            elif zone_name:
-                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
-
-            uc_obj = None
-            if uc_name and zone_obj:
-                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
-            elif uc_name:
-                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+        from django.db import transaction
+        
+        with transaction.atomic():
+            for row in reader:
+                # Clean keys to make it more resilient to trailing spaces or case differences
+                cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
                 
-            ward_obj = None
-            if ward_name and uc_obj:
-                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
-
-            registered_by_name = cleaned_row.get('registered by', '')
-            registrar_membership_id = cleaned_row.get('registrar membership id', '')
-            member_obj = None
-            if registered_by_name or registrar_membership_id:
-                # Try to find by member_id (PK) first, then fall back to name
-                if registrar_membership_id:
-                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
-                if not member_obj and registered_by_name:
-                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
-                if not member_obj:
-                    member_obj = Member.objects.create(
-                        member_id=registrar_membership_id or registered_by_name,
-                        member_name=registered_by_name,
-                        no_of_registrations=0
-                    )
-
-            # Handle CNIC carefully to avoid unique constraint issues if empty
-            cnic_val = cleaned_row.get('cnic', '') or None
-
-            # Create or update the person
-            person, created = Person.objects.get_or_create(
-                membership_number=membership_number,
-                defaults={
-                    'name': cleaned_row.get('name', ''),
-                    'father_name': cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
-                    'cnic': cnic_val,
-                    'phone': cleaned_row.get('phone', ''),
-                    'address': cleaned_row.get('address', ''),
-                    'town': town_obj,
-                    'zone': zone_obj,
-                    'union_council': uc_obj,
-                    'ward': ward_obj,
-                    'made_by': member_obj,
-                }
-            )
-
-            if not created:
-                person.name = cleaned_row.get('name', '')
-                person.father_name = cleaned_row.get('father name', '') or cleaned_row.get('father_name', '')
-                person.cnic = cnic_val
-                person.phone = cleaned_row.get('phone', '')
-                person.address = cleaned_row.get('address', '')
-                person.town = town_obj
-                person.zone = zone_obj
-                person.union_council = uc_obj
-                person.ward = ward_obj
+                membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+                if not membership_number:
+                    error_count += 1
+                    continue
                 
-                if person.made_by != member_obj:
-                    if person.made_by:
-                        old_member = person.made_by
-                        old_member.no_of_registrations = F('no_of_registrations') - 1
-                        old_member.save()
+                town_name = cleaned_row.get('town', '')
+                zone_name = cleaned_row.get('zone', '')
+                uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
+                ward_name = cleaned_row.get('ward', '')
+
+                town_obj = None
+                if town_name:
+                    town_key = town_name.lower()
+                    if town_key in towns_cache:
+                        town_obj = towns_cache[town_key]
+                    else:
+                        town_obj = Town.objects.create(name=town_name)
+                        towns_cache[town_key] = town_obj
+
+                zone_obj = None
+                if zone_name and town_obj:
+                    zone_key = (zone_name.lower(), town_obj.id)
+                    if zone_key in zones_cache:
+                        zone_obj = zones_cache[zone_key]
+                    else:
+                        zone_obj = Zone.objects.create(name=zone_name, town=town_obj)
+                        zones_cache[zone_key] = zone_obj
+
+                uc_obj = None
+                if uc_name and zone_obj:
+                    uc_key = (uc_name.lower(), zone_obj.id)
+                    if uc_key in ucs_cache:
+                        uc_obj = ucs_cache[uc_key]
+                    else:
+                        uc_obj = UnionCouncil.objects.create(name=uc_name, zone=zone_obj)
+                        ucs_cache[uc_key] = uc_obj
+                    
+                ward_obj = None
+                if ward_name and uc_obj:
+                    ward_key = (ward_name.lower(), uc_obj.id)
+                    if ward_key in wards_cache:
+                        ward_obj = wards_cache[ward_key]
+                    else:
+                        ward_obj = Ward.objects.create(name=ward_name, union_council=uc_obj)
+                        wards_cache[ward_key] = ward_obj
+
+                registered_by_name = cleaned_row.get('registered by', '')
+                registrar_membership_id = cleaned_row.get('registrar membership id', '')
+                member_obj = None
+                if registered_by_name or registrar_membership_id:
+                    member_id = registrar_membership_id or registered_by_name
+                    if member_id in members_cache:
+                        member_obj = members_cache[member_id]
+                    else:
+                        member_obj = Member.objects.create(
+                            member_id=member_id,
+                            member_name=registered_by_name,
+                            no_of_registrations=0
+                        )
+                        members_cache[member_id] = member_obj
+
+                # Handle CNIC carefully to avoid unique constraint issues if empty
+                cnic_val = cleaned_row.get('cnic', '') or None
+
+                # Create or update the person
+                person, created = Person.objects.get_or_create(
+                    membership_number=membership_number,
+                    defaults={
+                        'name': cleaned_row.get('name', ''),
+                        'father_name': cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
+                        'cnic': cnic_val,
+                        'phone': cleaned_row.get('phone', ''),
+                        'address': cleaned_row.get('address', ''),
+                        'town': town_obj,
+                        'zone': zone_obj,
+                        'union_council': uc_obj,
+                        'ward': ward_obj,
+                        'made_by': member_obj,
+                    }
+                )
+
+                if not created:
+                    person.name = cleaned_row.get('name', '')
+                    person.father_name = cleaned_row.get('father name', '') or cleaned_row.get('father_name', '')
+                    person.cnic = cnic_val
+                    person.phone = cleaned_row.get('phone', '')
+                    person.address = cleaned_row.get('address', '')
+                    person.town = town_obj
+                    person.zone = zone_obj
+                    person.union_council = uc_obj
+                    person.ward = ward_obj
+                    
+                    if person.made_by != member_obj:
+                        if person.made_by:
+                            old_member = person.made_by
+                            old_member.no_of_registrations = F('no_of_registrations') - 1
+                            old_member.save()
+                        if member_obj:
+                            member_obj.no_of_registrations = F('no_of_registrations') + 1
+                            member_obj.save()
+                    
+                    person.made_by = member_obj
+                    person.save()
+                else:
                     if member_obj:
                         member_obj.no_of_registrations = F('no_of_registrations') + 1
                         member_obj.save()
-                        member_obj.refresh_from_db()
-                
-                person.made_by = member_obj
-                person.save()
-            else:
-                if member_obj:
-                    member_obj.no_of_registrations = F('no_of_registrations') + 1
-                    member_obj.save()
-                    member_obj.refresh_from_db()
 
-            # Generate QR code if newly created or if missing
-            if created or not person.qr_code:
-                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
-                img = qrcode.make(url)
-                
-                buffer = io.BytesIO()
-                img.save(buffer, format='PNG')
-                file_name = f"qr_{person.membership_number}.png"
-                
-                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
-                person.save()
+                # ONLY prepare parallel S3 upload if QR code is missing (prevents redundant uploads)
+                if created or not person.qr_code:
+                    url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+                    file_name = f"qrcodes/qr_{person.membership_number}.png"
+                    qr_tasks.append((person.membership_number, url, file_name))
 
-            date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
-            if date_str:
-                try:
-                    from django.utils.dateparse import parse_datetime
-                    import datetime
-                    parsed_date = parse_datetime(date_str)
-                    if not parsed_date:
-                        parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                    if parsed_date:
-                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                except Exception:
-                    pass
+                date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+                if date_str:
+                    try:
+                        from django.utils.dateparse import parse_datetime
+                        import datetime
+                        parsed_date = parse_datetime(date_str)
+                        if not parsed_date:
+                            parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                        if parsed_date:
+                            Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                    except Exception:
+                        pass
 
-            success_count += 1
+                success_count += 1
+
+        # Upload QR codes to S3 in parallel (up to 30 concurrent uploads)
+        if qr_tasks:
+            import concurrent.futures
+            
+            with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+                results = list(executor.map(upload_qr_to_s3, qr_tasks))
+                
+            # Perform single transaction update in the database to prevent write locks
+            with transaction.atomic():
+                for membership_number, saved_name in results:
+                    if saved_name:
+                        Person.objects.filter(membership_number=membership_number).update(qr_code=saved_name)
             
         if success_count > 0:
             messages.success(request, f"Successfully imported/updated {success_count} members.")
@@ -629,120 +706,152 @@ def import_members_ajax(request):
         duplicate_count = 0
         error_count = 0
         logs = []
+        qr_tasks = []
 
-        for row in rows:
-            # Clean keys
-            cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
-            
-            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
-            log_id = membership_number if membership_number else "Unknown"
+        # Local caches for quick lookups
+        towns_cache = {t.name.lower(): t for t in Town.objects.all()}
+        zones_cache = {(z.name.lower(), z.town_id): z for z in Zone.objects.all()}
+        ucs_cache = {(u.name.lower(), u.zone_id): u for u in UnionCouncil.objects.all()}
+        wards_cache = {(w.name.lower(), w.union_council_id): w for w in Ward.objects.all()}
+        members_cache = {m.member_id: m for m in Member.objects.all()}
 
-            if not membership_number:
-                error_count += 1
-                logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Member ID'})
-                continue
+        from django.db import transaction
+
+        with transaction.atomic():
+            for row in rows:
+                # Clean keys
+                cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
                 
-            # Skip duplicates
-            if Person.objects.filter(membership_number=membership_number).exists():
-                duplicate_count += 1
-                logs.append({'serial_number': log_id, 'type': 'warning', 'message': f'Skipped duplicate'})
-                continue
+                membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+                log_id = membership_number if membership_number else "Unknown"
+
+                if not membership_number:
+                    error_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Member ID'})
+                    continue
+                    
+                # Skip duplicates
+                if Person.objects.filter(membership_number=membership_number).exists():
+                    duplicate_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'warning', 'message': f'Skipped duplicate'})
+                    continue
+                    
+                town_name = cleaned_row.get('town', '')
+                zone_name = cleaned_row.get('zone', '')
+                uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
+                ward_name = cleaned_row.get('ward', '')
+
+                town_obj = None
+                if town_name:
+                    town_key = town_name.lower()
+                    if town_key in towns_cache:
+                        town_obj = towns_cache[town_key]
+                    else:
+                        town_obj = Town.objects.create(name=town_name)
+                        towns_cache[town_key] = town_obj
+
+                zone_obj = None
+                if zone_name and town_obj:
+                    zone_key = (zone_name.lower(), town_obj.id)
+                    if zone_key in zones_cache:
+                        zone_obj = zones_cache[zone_key]
+                    else:
+                        zone_obj = Zone.objects.create(name=zone_name, town=town_obj)
+                        zones_cache[zone_key] = zone_obj
+
+                uc_obj = None
+                if uc_name and zone_obj:
+                    uc_key = (uc_name.lower(), zone_obj.id)
+                    if uc_key in ucs_cache:
+                        uc_obj = ucs_cache[uc_key]
+                    else:
+                        uc_obj = UnionCouncil.objects.create(name=uc_name, zone=zone_obj)
+                        ucs_cache[uc_key] = uc_obj
+                    
+                ward_obj = None
+                if ward_name and uc_obj:
+                    ward_key = (ward_name.lower(), uc_obj.id)
+                    if ward_key in wards_cache:
+                        ward_obj = wards_cache[ward_key]
+                    else:
+                        ward_obj = Ward.objects.create(name=ward_name, union_council=uc_obj)
+                        wards_cache[ward_key] = ward_obj
+
+                registered_by_name = cleaned_row.get('registered by', '')
+                registrar_membership_id = cleaned_row.get('registrar membership id', '')
+                member_obj = None
+                if registered_by_name or registrar_membership_id:
+                    member_id = registrar_membership_id or registered_by_name
+                    if member_id in members_cache:
+                        member_obj = members_cache[member_id]
+                    else:
+                        member_obj = Member.objects.create(
+                            member_id=member_id,
+                            member_name=registered_by_name,
+                            no_of_registrations=0
+                        )
+                        members_cache[member_id] = member_obj
+
+                cnic_val = cleaned_row.get('cnic', '') or None
                 
-            town_name = cleaned_row.get('town', '')
-            zone_name = cleaned_row.get('zone', '')
-            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
-            ward_name = cleaned_row.get('ward', '')
-
-            town_obj = None
-            if town_name:
-                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
-
-            zone_obj = None
-            if zone_name and town_obj:
-                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
-            elif zone_name:
-                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
-
-            uc_obj = None
-            if uc_name and zone_obj:
-                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
-            elif uc_name:
-                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
-                
-            ward_obj = None
-            if ward_name and uc_obj:
-                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
-
-            registered_by_name = cleaned_row.get('registered by', '')
-            registrar_membership_id = cleaned_row.get('registrar membership id', '')
-            member_obj = None
-            if registered_by_name or registrar_membership_id:
-                # Try to find by member_id (PK) first, then fall back to name
-                if registrar_membership_id:
-                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
-                if not member_obj and registered_by_name:
-                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
-                if not member_obj:
-                    member_obj = Member.objects.create(
-                        member_id=registrar_membership_id or registered_by_name,
-                        member_name=registered_by_name,
-                        no_of_registrations=0
+                # Since we skip duplicates above, we can just create
+                try:
+                    person = Person.objects.create(
+                        membership_number=membership_number,
+                        name=cleaned_row.get('name', ''),
+                        father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
+                        cnic=cnic_val,
+                        phone=cleaned_row.get('phone', ''),
+                        address=cleaned_row.get('address', ''),
+                        town=town_obj,
+                        zone=zone_obj,
+                        union_council=uc_obj,
+                        ward=ward_obj,
+                        made_by=member_obj,
                     )
+                    
+                    if member_obj:
+                        member_obj.no_of_registrations = F('no_of_registrations') + 1
+                        member_obj.save()
 
-            cnic_val = cleaned_row.get('cnic', '') or None
+                    # Prepare parallel S3 upload task
+                    url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+                    file_name = f"qrcodes/qr_{person.membership_number}.png"
+                    qr_tasks.append((person.membership_number, url, file_name))
+
+                    date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+                    if date_str:
+                        try:
+                            from django.utils.dateparse import parse_datetime
+                            import datetime
+                            parsed_date = parse_datetime(date_str)
+                            if not parsed_date:
+                                parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                            if parsed_date:
+                                Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                        except Exception:
+                            pass
+
+                    success_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
+                except Exception as e:
+                    # E.g. unique constraint failed on CNIC
+                    error_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Error importing: {str(e)}'})
+                    
+        # Upload QR codes to S3 in parallel (up to 30 concurrent uploads)
+        if qr_tasks:
+            import concurrent.futures
             
-            # Since we skip duplicates above, we can just create
-            try:
-                person = Person.objects.create(
-                    membership_number=membership_number,
-                    name=cleaned_row.get('name', ''),
-                    father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
-                    cnic=cnic_val,
-                    phone=cleaned_row.get('phone', ''),
-                    address=cleaned_row.get('address', ''),
-                    town=town_obj,
-                    zone=zone_obj,
-                    union_council=uc_obj,
-                    ward=ward_obj,
-                    made_by=member_obj,
-                )
+            with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+                results = list(executor.map(upload_qr_to_s3, qr_tasks))
                 
-                if member_obj:
-                    member_obj.no_of_registrations = F('no_of_registrations') + 1
-                    member_obj.save()
-                    member_obj.refresh_from_db()
+            # Perform single transaction update in database to prevent write locks
+            with transaction.atomic():
+                for membership_number, saved_name in results:
+                    if saved_name:
+                        Person.objects.filter(membership_number=membership_number).update(qr_code=saved_name)
 
-                # Generate QR code
-                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
-                img = qrcode.make(url)
-                
-                buffer = io.BytesIO()
-                img.save(buffer, format='PNG')
-                file_name = f"qr_{person.membership_number}.png"
-                
-                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
-                person.save()
-
-                date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
-                if date_str:
-                    try:
-                        from django.utils.dateparse import parse_datetime
-                        import datetime
-                        parsed_date = parse_datetime(date_str)
-                        if not parsed_date:
-                            parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                        if parsed_date:
-                            Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                    except Exception:
-                        pass
-
-                success_count += 1
-                logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
-            except Exception as e:
-                # E.g. unique constraint failed on CNIC
-                error_count += 1
-                logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Error importing: {str(e)}'})
-                
         return JsonResponse({
             'status': 'success',
             'imported': success_count,
@@ -2229,6 +2338,28 @@ from .models import (
 from django.db.models import F
 
 
+def upload_qr_to_s3(task):
+    """
+    Helper function to upload generated QR code directly to S3.
+    """
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+    import io
+    import qrcode
+
+    membership_number, url, file_name = task
+    try:
+        img = qrcode.make(url)
+        buffer = io.BytesIO()
+        img.save(buffer, format='PNG')
+        
+        saved_name = default_storage.save(file_name, ContentFile(buffer.getvalue()))
+        return membership_number, saved_name
+    except Exception as e:
+        print(f"Error uploading QR code for {membership_number}: {e}")
+        return membership_number, None
+
+
 def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -2498,6 +2629,30 @@ def admin_person_detail(request, pk):
         except Exception:
             qr_base64 = None
 
+    if not person.qr_code or not qr_base64:
+        # Lazy self-healing generation
+        try:
+            import io
+            import qrcode
+            from django.core.files.base import ContentFile
+            
+            url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+            img = qrcode.make(url)
+            
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            file_name = f"qr_{person.membership_number}.png"
+            
+            person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=True)
+            
+            # Read back newly created QR code
+            person.qr_code.open('rb')
+            qr_bytes = person.qr_code.read()
+            person.qr_code.close()
+            qr_base64 = 'data:image/png;base64,' + base64.b64encode(qr_bytes).decode('utf-8')
+        except Exception as e:
+            print(f"Error in lazy QR code generation: {e}")
+
     return render(request, 'details.html', {
         'person': person,
         'is_admin': is_admin,
@@ -2528,7 +2683,7 @@ def all_members(request):
             pass
         return redirect('all_members')
 
-    members_list = Person.objects.all().order_by('-created_at')
+    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by').order_by('-created_at')
 
     # Filtering logic
     q = request.GET.get('q', '')
@@ -2692,128 +2847,159 @@ def import_members_csv(request):
         
         success_count = 0
         error_count = 0
+        qr_tasks = []
 
-        for row in reader:
-            # Clean keys to make it more resilient to trailing spaces or case differences
-            cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
-            
-            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
-            if not membership_number:
-                error_count += 1
-                continue
-            
-            town_name = cleaned_row.get('town', '')
-            zone_name = cleaned_row.get('zone', '')
-            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
-            ward_name = cleaned_row.get('ward', '')
+        # Local cache to prevent N+1 queries during insertion
+        towns_cache = {t.name.lower(): t for t in Town.objects.all()}
+        zones_cache = {(z.name.lower(), z.town_id): z for z in Zone.objects.all()}
+        ucs_cache = {(u.name.lower(), u.zone_id): u for u in UnionCouncil.objects.all()}
+        wards_cache = {(w.name.lower(), w.union_council_id): w for w in Ward.objects.all()}
+        members_cache = {m.member_id: m for m in Member.objects.all()}
 
-            town_obj = None
-            if town_name:
-                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
-
-            zone_obj = None
-            if zone_name and town_obj:
-                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
-            elif zone_name:
-                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
-
-            uc_obj = None
-            if uc_name and zone_obj:
-                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
-            elif uc_name:
-                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
+        from django.db import transaction
+        
+        with transaction.atomic():
+            for row in reader:
+                # Clean keys to make it more resilient to trailing spaces or case differences
+                cleaned_row = {k.strip().lower(): v.strip() for k, v in row.items() if k}
                 
-            ward_obj = None
-            if ward_name and uc_obj:
-                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
-
-            registered_by_name = cleaned_row.get('registered by', '')
-            registrar_membership_id = cleaned_row.get('registrar membership id', '')
-            member_obj = None
-            if registered_by_name or registrar_membership_id:
-                # Try to find by member_id (PK) first, then fall back to name
-                if registrar_membership_id:
-                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
-                if not member_obj and registered_by_name:
-                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
-                if not member_obj:
-                    member_obj = Member.objects.create(
-                        member_id=registrar_membership_id or registered_by_name,
-                        member_name=registered_by_name,
-                        no_of_registrations=0
-                    )
-
-            # Handle CNIC carefully to avoid unique constraint issues if empty
-            cnic_val = cleaned_row.get('cnic', '') or None
-
-            # Create or update the person
-            person, created = Person.objects.get_or_create(
-                membership_number=membership_number,
-                defaults={
-                    'name': cleaned_row.get('name', ''),
-                    'father_name': cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
-                    'cnic': cnic_val,
-                    'phone': cleaned_row.get('phone', ''),
-                    'address': cleaned_row.get('address', ''),
-                    'town': town_obj,
-                    'zone': zone_obj,
-                    'union_council': uc_obj,
-                    'ward': ward_obj,
-                    'made_by': member_obj,
-                }
-            )
-
-            if not created:
-                person.name = cleaned_row.get('name', '')
-                person.father_name = cleaned_row.get('father name', '') or cleaned_row.get('father_name', '')
-                person.cnic = cnic_val
-                person.phone = cleaned_row.get('phone', '')
-                person.address = cleaned_row.get('address', '')
-                person.town = town_obj
-                person.zone = zone_obj
-                person.union_council = uc_obj
-                person.ward = ward_obj
+                membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+                if not membership_number:
+                    error_count += 1
+                    continue
                 
-                if person.made_by != member_obj:
-                    if person.made_by:
-                        old_member = person.made_by
-                        old_member.no_of_registrations = F('no_of_registrations') - 1
-                        old_member.save()
+                town_name = cleaned_row.get('town', '')
+                zone_name = cleaned_row.get('zone', '')
+                uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
+                ward_name = cleaned_row.get('ward', '')
+
+                town_obj = None
+                if town_name:
+                    town_key = town_name.lower()
+                    if town_key in towns_cache:
+                        town_obj = towns_cache[town_key]
+                    else:
+                        town_obj = Town.objects.create(name=town_name)
+                        towns_cache[town_key] = town_obj
+
+                zone_obj = None
+                if zone_name and town_obj:
+                    zone_key = (zone_name.lower(), town_obj.id)
+                    if zone_key in zones_cache:
+                        zone_obj = zones_cache[zone_key]
+                    else:
+                        zone_obj = Zone.objects.create(name=zone_name, town=town_obj)
+                        zones_cache[zone_key] = zone_obj
+
+                uc_obj = None
+                if uc_name and zone_obj:
+                    uc_key = (uc_name.lower(), zone_obj.id)
+                    if uc_key in ucs_cache:
+                        uc_obj = ucs_cache[uc_key]
+                    else:
+                        uc_obj = UnionCouncil.objects.create(name=uc_name, zone=zone_obj)
+                        ucs_cache[uc_key] = uc_obj
+                    
+                ward_obj = None
+                if ward_name and uc_obj:
+                    ward_key = (ward_name.lower(), uc_obj.id)
+                    if ward_key in wards_cache:
+                        ward_obj = wards_cache[ward_key]
+                    else:
+                        ward_obj = Ward.objects.create(name=ward_name, union_council=uc_obj)
+                        wards_cache[ward_key] = ward_obj
+
+                registered_by_name = cleaned_row.get('registered by', '')
+                registrar_membership_id = cleaned_row.get('registrar membership id', '')
+                member_obj = None
+                if registered_by_name or registrar_membership_id:
+                    member_id = registrar_membership_id or registered_by_name
+                    if member_id in members_cache:
+                        member_obj = members_cache[member_id]
+                    else:
+                        member_obj = Member.objects.create(
+                            member_id=member_id,
+                            member_name=registered_by_name,
+                            no_of_registrations=0
+                        )
+                        members_cache[member_id] = member_obj
+
+                # Handle CNIC carefully to avoid unique constraint issues if empty
+                cnic_val = cleaned_row.get('cnic', '') or None
+
+                # Create or update the person
+                person, created = Person.objects.get_or_create(
+                    membership_number=membership_number,
+                    defaults={
+                        'name': cleaned_row.get('name', ''),
+                        'father_name': cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
+                        'cnic': cnic_val,
+                        'phone': cleaned_row.get('phone', ''),
+                        'address': cleaned_row.get('address', ''),
+                        'town': town_obj,
+                        'zone': zone_obj,
+                        'union_council': uc_obj,
+                        'ward': ward_obj,
+                        'made_by': member_obj,
+                    }
+                )
+
+                if not created:
+                    person.name = cleaned_row.get('name', '')
+                    person.father_name = cleaned_row.get('father name', '') or cleaned_row.get('father_name', '')
+                    person.cnic = cnic_val
+                    person.phone = cleaned_row.get('phone', '')
+                    person.address = cleaned_row.get('address', '')
+                    person.town = town_obj
+                    person.zone = zone_obj
+                    person.union_council = uc_obj
+                    person.ward = ward_obj
+                    
+                    if person.made_by != member_obj:
+                        if person.made_by:
+                            old_member = person.made_by
+                            old_member.no_of_registrations = F('no_of_registrations') - 1
+                            old_member.save()
+                        if member_obj:
+                            member_obj.no_of_registrations = F('no_of_registrations') + 1
+                            member_obj.save()
+                    
+                    person.made_by = member_obj
+                    person.save()
+                else:
                     if member_obj:
                         member_obj.no_of_registrations = F('no_of_registrations') + 1
                         member_obj.save()
-                        member_obj.refresh_from_db()
-                
-                person.made_by = member_obj
-                person.save()
-            else:
-                if member_obj:
-                    member_obj.no_of_registrations = F('no_of_registrations') + 1
-                    member_obj.save()
-                    member_obj.refresh_from_db()
 
-            date_str = cleaned_row.get('date', '')
-            if date_str:
-                try:
-                    parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                    Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                except ValueError:
-                    pass
+                date_str = cleaned_row.get('date', '')
+                if date_str:
+                    try:
+                        parsed_date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                        Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                    except ValueError:
+                        pass
 
-            # Generate QR code if newly created or if missing
-            if created or not person.qr_code:
-                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
-                img = qrcode.make(url)
-                
-                buffer = io.BytesIO()
-                img.save(buffer, format='PNG')
-                file_name = f"qr_{person.membership_number}.png"
-                
-                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
-                person.save()
+                # ONLY prepare parallel S3 upload if QR code is missing (prevents redundant uploads)
+                if created or not person.qr_code:
+                    url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+                    file_name = f"qrcodes/qr_{person.membership_number}.png"
+                    qr_tasks.append((person.membership_number, url, file_name))
 
-            success_count += 1
+                success_count += 1
             
+        # Upload QR codes to S3 in parallel (up to 30 concurrent uploads)
+        if qr_tasks:
+            import concurrent.futures
+            
+            with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+                results = list(executor.map(upload_qr_to_s3, qr_tasks))
+                
+            # Perform single transaction update in the database to prevent write locks
+            with transaction.atomic():
+                for membership_number, saved_name in results:
+                    if saved_name:
+                        Person.objects.filter(membership_number=membership_number).update(qr_code=saved_name)
+
         if success_count > 0:
             messages.success(request, f"Successfully imported/updated {success_count} members.")
         if error_count > 0:
@@ -2837,120 +3023,152 @@ def import_members_ajax(request):
         duplicate_count = 0
         error_count = 0
         logs = []
+        qr_tasks = []
 
-        for row in rows:
-            # Clean keys
-            cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
-            
-            membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
-            log_id = membership_number if membership_number else "Unknown"
+        # Local caches for quick lookups
+        towns_cache = {t.name.lower(): t for t in Town.objects.all()}
+        zones_cache = {(z.name.lower(), z.town_id): z for z in Zone.objects.all()}
+        ucs_cache = {(u.name.lower(), u.zone_id): u for u in UnionCouncil.objects.all()}
+        wards_cache = {(w.name.lower(), w.union_council_id): w for w in Ward.objects.all()}
+        members_cache = {m.member_id: m for m in Member.objects.all()}
 
-            if not membership_number:
-                error_count += 1
-                logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Member ID'})
-                continue
+        from django.db import transaction
+
+        with transaction.atomic():
+            for row in rows:
+                # Clean keys
+                cleaned_row = {k.strip().lower(): str(v).strip() for k, v in row.items() if k}
                 
-            # Skip duplicates
-            if Person.objects.filter(membership_number=membership_number).exists():
-                duplicate_count += 1
-                logs.append({'serial_number': log_id, 'type': 'warning', 'message': f'Skipped duplicate'})
-                continue
+                membership_number = cleaned_row.get('member id') or cleaned_row.get('membership_number')
+                log_id = membership_number if membership_number else "Unknown"
+
+                if not membership_number:
+                    error_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'error', 'message': 'Missing Member ID'})
+                    continue
+                    
+                # Skip duplicates
+                if Person.objects.filter(membership_number=membership_number).exists():
+                    duplicate_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'warning', 'message': f'Skipped duplicate'})
+                    continue
+                    
+                town_name = cleaned_row.get('town', '')
+                zone_name = cleaned_row.get('zone', '')
+                uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
+                ward_name = cleaned_row.get('ward', '')
+
+                town_obj = None
+                if town_name:
+                    town_key = town_name.lower()
+                    if town_key in towns_cache:
+                        town_obj = towns_cache[town_key]
+                    else:
+                        town_obj = Town.objects.create(name=town_name)
+                        towns_cache[town_key] = town_obj
+
+                zone_obj = None
+                if zone_name and town_obj:
+                    zone_key = (zone_name.lower(), town_obj.id)
+                    if zone_key in zones_cache:
+                        zone_obj = zones_cache[zone_key]
+                    else:
+                        zone_obj = Zone.objects.create(name=zone_name, town=town_obj)
+                        zones_cache[zone_key] = zone_obj
+
+                uc_obj = None
+                if uc_name and zone_obj:
+                    uc_key = (uc_name.lower(), zone_obj.id)
+                    if uc_key in ucs_cache:
+                        uc_obj = ucs_cache[uc_key]
+                    else:
+                        uc_obj = UnionCouncil.objects.create(name=uc_name, zone=zone_obj)
+                        ucs_cache[uc_key] = uc_obj
+                    
+                ward_obj = None
+                if ward_name and uc_obj:
+                    ward_key = (ward_name.lower(), uc_obj.id)
+                    if ward_key in wards_cache:
+                        ward_obj = wards_cache[ward_key]
+                    else:
+                        ward_obj = Ward.objects.create(name=ward_name, union_council=uc_obj)
+                        wards_cache[ward_key] = ward_obj
+
+                registered_by_name = cleaned_row.get('registered by', '')
+                registrar_membership_id = cleaned_row.get('registrar membership id', '')
+                member_obj = None
+                if registered_by_name or registrar_membership_id:
+                    member_id = registrar_membership_id or registered_by_name
+                    if member_id in members_cache:
+                        member_obj = members_cache[member_id]
+                    else:
+                        member_obj = Member.objects.create(
+                            member_id=member_id,
+                            member_name=registered_by_name,
+                            no_of_registrations=0
+                        )
+                        members_cache[member_id] = member_obj
+
+                cnic_val = cleaned_row.get('cnic', '') or None
                 
-            town_name = cleaned_row.get('town', '')
-            zone_name = cleaned_row.get('zone', '')
-            uc_name = cleaned_row.get('union council', '') or cleaned_row.get('union_council', '')
-            ward_name = cleaned_row.get('ward', '')
-
-            town_obj = None
-            if town_name:
-                town_obj, _ = Town.objects.get_or_create(name__iexact=town_name, defaults={'name': town_name})
-
-            zone_obj = None
-            if zone_name and town_obj:
-                zone_obj, _ = Zone.objects.get_or_create(name__iexact=zone_name, town=town_obj, defaults={'name': zone_name})
-            elif zone_name:
-                zone_obj = Zone.objects.filter(name__iexact=zone_name).first()
-
-            uc_obj = None
-            if uc_name and zone_obj:
-                uc_obj, _ = UnionCouncil.objects.get_or_create(name__iexact=uc_name, zone=zone_obj, defaults={'name': uc_name})
-            elif uc_name:
-                uc_obj = UnionCouncil.objects.filter(name__iexact=uc_name).first()
-                
-            ward_obj = None
-            if ward_name and uc_obj:
-                ward_obj, _ = Ward.objects.get_or_create(name__iexact=ward_name, union_council=uc_obj, defaults={'name': ward_name})
-
-            registered_by_name = cleaned_row.get('registered by', '')
-            registrar_membership_id = cleaned_row.get('registrar membership id', '')
-            member_obj = None
-            if registered_by_name or registrar_membership_id:
-                # Try to find by member_id (PK) first, then fall back to name
-                if registrar_membership_id:
-                    member_obj = Member.objects.filter(member_id=registrar_membership_id).first()
-                if not member_obj and registered_by_name:
-                    member_obj = Member.objects.filter(member_name__iexact=registered_by_name).first()
-                if not member_obj:
-                    member_obj = Member.objects.create(
-                        member_id=registrar_membership_id or registered_by_name,
-                        member_name=registered_by_name,
-                        no_of_registrations=0
+                # Since we skip duplicates above, we can just create
+                try:
+                    person = Person.objects.create(
+                        membership_number=membership_number,
+                        name=cleaned_row.get('name', ''),
+                        father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
+                        cnic=cnic_val,
+                        phone=cleaned_row.get('phone', ''),
+                        address=cleaned_row.get('address', ''),
+                        town=town_obj,
+                        zone=zone_obj,
+                        union_council=uc_obj,
+                        ward=ward_obj,
+                        made_by=member_obj,
                     )
+                    
+                    if member_obj:
+                        member_obj.no_of_registrations = F('no_of_registrations') + 1
+                        member_obj.save()
 
-            cnic_val = cleaned_row.get('cnic', '') or None
+                    # Prepare parallel S3 upload task
+                    url = request.build_absolute_uri(f"/person/{person.membership_number}/")
+                    file_name = f"qrcodes/qr_{person.membership_number}.png"
+                    qr_tasks.append((person.membership_number, url, file_name))
+
+                    date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
+                    if date_str:
+                        try:
+                            from django.utils.dateparse import parse_datetime
+                            import datetime
+                            parsed_date = parse_datetime(date_str)
+                            if not parsed_date:
+                                parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                            if parsed_date:
+                                Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
+                        except Exception:
+                            pass
+
+                    success_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
+                except Exception as e:
+                    # E.g. unique constraint failed on CNIC
+                    error_count += 1
+                    logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Error importing: {str(e)}'})
+                    
+        # Upload QR codes to S3 in parallel (up to 30 concurrent uploads)
+        if qr_tasks:
+            import concurrent.futures
             
-            # Since we skip duplicates above, we can just create
-            try:
-                person = Person.objects.create(
-                    membership_number=membership_number,
-                    name=cleaned_row.get('name', ''),
-                    father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
-                    cnic=cnic_val,
-                    phone=cleaned_row.get('phone', ''),
-                    address=cleaned_row.get('address', ''),
-                    town=town_obj,
-                    zone=zone_obj,
-                    union_council=uc_obj,
-                    ward=ward_obj,
-                    made_by=member_obj,
-                )
+            with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+                results = list(executor.map(upload_qr_to_s3, qr_tasks))
                 
-                if member_obj:
-                    member_obj.no_of_registrations = F('no_of_registrations') + 1
-                    member_obj.save()
-                    member_obj.refresh_from_db()
+            # Perform single transaction update in database to prevent write locks
+            with transaction.atomic():
+                for membership_number, saved_name in results:
+                    if saved_name:
+                        Person.objects.filter(membership_number=membership_number).update(qr_code=saved_name)
 
-                # Generate QR code
-                url = request.build_absolute_uri(f"/person/{person.membership_number}/")
-                img = qrcode.make(url)
-                
-                buffer = io.BytesIO()
-                img.save(buffer, format='PNG')
-                file_name = f"qr_{person.membership_number}.png"
-                
-                person.qr_code.save(file_name, ContentFile(buffer.getvalue()), save=False)
-                person.save()
-
-                date_str = cleaned_row.get('date') or cleaned_row.get('created_at') or cleaned_row.get('created at') or ''
-                if date_str:
-                    try:
-                        from django.utils.dateparse import parse_datetime
-                        import datetime
-                        parsed_date = parse_datetime(date_str)
-                        if not parsed_date:
-                            parsed_date = datetime.datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                        if parsed_date:
-                            Person.objects.filter(membership_number=person.membership_number).update(created_at=parsed_date)
-                    except Exception:
-                        pass
-
-                success_count += 1
-                logs.append({'serial_number': log_id, 'type': 'success', 'message': f'Imported successfully'})
-            except Exception as e:
-                # E.g. unique constraint failed on CNIC
-                error_count += 1
-                logs.append({'serial_number': log_id, 'type': 'error', 'message': f'Error importing: {str(e)}'})
-                
         return JsonResponse({
             'status': 'success',
             'imported': success_count,
