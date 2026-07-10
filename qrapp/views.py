@@ -3357,7 +3357,7 @@ def reports_view(request):
     town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
     
     # 2. Registrar Performance (Top 10)
-    registrar_qs = Member.objects.all()
+    registrar_qs = Member.objects.all()   
     registrar_stats = registrar_qs.annotate(
         member_count=Count('persons_created')
     ).order_by('-member_count')[:10]
@@ -4398,3 +4398,61 @@ def import_office_bearers_ajax(request, category):
         })
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_all_real_members(request):
+    try:
+        Member.objects.all().delete()
+        messages.success(request, "All real members have been deleted successfully.")
+    except Exception as e:
+        messages.error(request, f"Error deleting real members: {str(e)}")
+    return redirect('all_real_members')
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_all_members(request):
+    try:
+        Person.objects.all().delete()
+        messages.success(request, "All members have been deleted successfully.")
+    except Exception as e:
+        messages.error(request, f"Error deleting members: {str(e)}")
+    return redirect('all_members')
+
+
+@require_POST
+@login_required
+@admin_only
+def delete_all_office_bearers(request, category):
+    mapping = {
+        'central_cabinet': CentralCabinet,
+        'town_org': TownOrganization,
+        'zonal_org': ZonalOrganization,
+        'uc_org': UnionCouncilOrganization,
+        'ward_org': WardOrganization,
+        'peoples_youth_org': PeoplesYouthOrganization,
+        'women_wing': WomenWing,
+        'minority_wing': MinorityWing,
+        'labour_wing': LabourWing,
+        'cultural_wing': CulturalWing,
+        'human_rights_wing': HumanRightsWing,
+        'traders_wing': TradersWing,
+        'sports_wing': SportsWing,
+        'study_circle': PeoplesStudyCircle,
+        'doctors_forum': DoctorsForum,
+        'ulema_wing': UlemaWing,
+    }
+    ModelClass = mapping.get(category)
+    if ModelClass:
+        try:
+            ModelClass.objects.all().delete()
+            messages.success(request, "All office bearers in this category have been deleted successfully.")
+        except Exception as e:
+            messages.error(request, f"Error deleting office bearers: {str(e)}")
+    else:
+        messages.error(request, "Invalid category.")
+    return redirect('office_bearers_list', category=category)

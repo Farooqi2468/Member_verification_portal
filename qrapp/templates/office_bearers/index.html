@@ -27,7 +27,6 @@
             <div class="row">
                 {% for category in categories %}
                 <div class="col-md-4 mb-4">
-                    {% if 'Town' in category.name or 'Zonal' in category.name or 'Zone' in category.name or 'Central Cabinet' in category.name %}
                     <a href="{% url 'office_bearers_list' category.id %}" class="card h-100 shadow-sm border-0 office-bearer-card">
                         <div class="card-body d-flex flex-column text-center">
                             <i class="bi {{ category.icon }} mb-3" style="font-size: 2rem; color: #E21033;"></i>
@@ -35,15 +34,6 @@
                             <p class="card-text text-muted">Manage the office bearers for this category.</p>
                         </div>
                     </a>
-                    {% else %}
-                    <a href="#" class="card h-100 shadow-sm border-0 office-bearer-card" style="pointer-events: none; opacity: 0.6;">
-                        <div class="card-body d-flex flex-column text-center">
-                            <i class="bi {{ category.icon }} mb-3" style="font-size: 2rem; color: #6c757d;"></i>
-                            <h5 class="card-title" style="color: #333;">{{ category.name }}<br><small class="text-danger mt-1 d-block" style="font-size: 0.8rem;">(Coming Soon)</small></h5>
-                            <p class="card-text text-muted">Manage the office bearers for this category.</p>
-                        </div>
-                    </a>
-                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

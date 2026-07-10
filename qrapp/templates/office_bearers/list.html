@@ -315,6 +315,12 @@
             <div class="table-title-area">
                 <h2 class="table-title">{{ category_name }} Office Bearers</h2>
                 <div class="d-flex flex-wrap gap-2">
+                    <form method="POST" action="{% url 'delete_all_office_bearers' category_id %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete ALL office bearers in this category? This action cannot be undone.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" style="font-size: 13px; font-weight: 600; border-radius: 8px;">
+                            <i class="bi bi-trash-fill"></i> Delete All
+                        </button>
+                    </form>
                     <button class="btn d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileFilterCollapse" aria-expanded="false" aria-controls="mobileFilterCollapse" style="background: #e9ecef; color: #333; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-funnel-fill"></i> Filters
                     </button>
