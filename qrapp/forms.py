@@ -8,7 +8,7 @@ from django.contrib.auth import password_validation
 class PersonForm(forms.ModelForm):
     member_id = forms.CharField(max_length=50, required=True, label="Member Serial No/ ممبرشپ کرنے والے کا ممبرشپ نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial Number', 'pattern': '[0-9]+', 'title': 'Only numbers are allowed', 'oninput': "this.value = this.value.replace(/[^0-9]/g, '');", 'inputmode': 'numeric'}))
     member_name = forms.CharField(max_length=100, required=True, label="Member Name / ممبرشپ کرنے والے کا نام", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
-    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone / ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
+    member_phone = forms.CharField(max_length=15, required=False, label="Member Phone / ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone', 'oninput': "this.value = this.value.replace(/[^0-9]/g, '');"}))
     member_cnic = forms.CharField(max_length=15, required=False, label="Member CNIC / ممبرشپ کرنے والے کا شناختی کارڈ", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'XXXXX-XXXXXXX-X', 'pattern': '^[0-9]{5}-[0-9]{7}-[0-9]{1}$', 'title': 'CNIC must be in the format XXXXX-XXXXXXX-X', 'oninput': "this.value = this.value.replace(/[^0-9-]/g, '');", 'maxlength': '15'}))
 
     class Meta:
@@ -34,7 +34,8 @@ class PersonForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': '03XXXXXXXXX',
                 'pattern': '03[0-9]{9}',
-                'title': 'Phone number must be in the format 03XXXXXXXXX'
+                'title': 'Phone number must be in the format 03XXXXXXXXX',
+                'oninput': "this.value = this.value.replace(/[^0-9]/g, '');"
             }),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter current address'}),
             'town': forms.Select(attrs={'class': 'form-control', 'id': 'id_town'}),
@@ -293,7 +294,7 @@ class MemberForm(forms.ModelForm):
         widgets = {
             'member_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial No'}),
             'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
-            'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
+            'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number', 'oninput': "this.value = this.value.replace(/[^0-9]/g, '');"}),
             'member_cnic': forms.TextInput(attrs={
                 'class': 'form-control', 
                 'placeholder': 'XXXXX-XXXXXXX-X',

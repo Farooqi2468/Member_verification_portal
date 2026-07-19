@@ -805,7 +805,7 @@ def import_members_ajax(request):
                 
                 # Since we skip duplicates above, we can just create
                 try:
-                    person = Person.objects.create(
+                    person = Person(
                         membership_number=membership_number,
                         name=cleaned_row.get('name', ''),
                         father_name=cleaned_row.get('father name', '') or cleaned_row.get('father_name', ''),
@@ -818,6 +818,17 @@ def import_members_ajax(request):
                         ward=ward_obj,
                         made_by=member_obj,
                     )
+                    
+                    from django.core.exceptions import ValidationError
+                    try:
+                        person.full_clean()
+                    except ValidationError as ve:
+                        error_msgs = []
+                        for field, errors in ve.message_dict.items():
+                            error_msgs.append(f"{field.capitalize()}: {', '.join(errors)}")
+                        raise Exception("Format Error - " + " | ".join(error_msgs))
+                        
+                    person.save()
                     
                     if member_obj:
                         member_obj.no_of_registrations = F('no_of_registrations') + 1

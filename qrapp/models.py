@@ -1,4 +1,15 @@
 from django.db import models
+from django.core.validators import RegexValidator
+
+numeric_validator = RegexValidator(
+    regex=r'^\d+$',
+    message='Only numbers are allowed.'
+)
+
+cnic_validator = RegexValidator(
+    regex=r'^\d{5}-\d{7}-\d{1}$',
+    message='CNIC must be in the format XXXXX-XXXXXXX-X'
+)
 
 from django.contrib.auth.models import User
 
@@ -45,10 +56,10 @@ class Ward(models.Model):
         unique_together = ('name', 'union_council')
 
 class Member(models.Model):
-    member_id = models.CharField(max_length=50, primary_key=True)
+    member_id = models.CharField(max_length=50, primary_key=True, validators=[numeric_validator])
     member_name = models.CharField(max_length=100)
-    member_phone = models.CharField(max_length=15, null=True, blank=True)
-    member_cnic = models.CharField(max_length=15, null=True, blank=True)
+    member_phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
+    member_cnic = models.CharField(max_length=15, null=True, blank=True, validators=[cnic_validator])
     no_of_registrations = models.PositiveIntegerField(default=0)
 
     def __str__(self):
@@ -56,13 +67,13 @@ class Member(models.Model):
 
 class Person(models.Model):
     # membership_number acts as the primary key entered from the form
-    membership_number = models.CharField(max_length=50, primary_key=True, default=100011)
+    membership_number = models.CharField(max_length=50, primary_key=True, default=100011, validators=[numeric_validator])
 
     name = models.CharField(max_length=100, null=True, blank=True)
     father_name = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(null=True, blank=True)
-    cnic = models.CharField(max_length=15, unique=True, null=True, blank=True)
-    phone = models.CharField(max_length=15, null=True, blank=True)
+    cnic = models.CharField(max_length=15, unique=True, null=True, blank=True, validators=[cnic_validator])
+    phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
     address = models.TextField(null=True, blank=True)
 
     # Location ForeignKeys (nullable for backward compatibility)
@@ -74,8 +85,8 @@ class Person(models.Model):
     # New fields
     member_name = models.CharField(max_length=100, null=True, blank=True)
     member_membership_id = models.CharField(max_length=50, null=True, blank=True)
-    member_phone = models.CharField(max_length=15, null=True, blank=True)
-    member_cnic = models.CharField(max_length=15, null=True, blank=True)
+    member_phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
+    member_cnic = models.CharField(max_length=15, null=True, blank=True, validators=[cnic_validator])
 
     # Foreign key to the Member table
     made_by = models.ForeignKey(Member, on_delete=models.CASCADE, null=True, related_name='persons_created')
@@ -136,8 +147,8 @@ def create_person_for_member(sender, instance, created, **kwargs):
 class CentralCabinet(models.Model):
     central_cabinet_name = models.CharField(max_length=100)
     central_cabinet_designation = models.CharField(max_length=100, null=True, blank=True)
-    central_cabinet_phone = models.CharField(max_length=20, null=True, blank=True)
-    central_cabinet_cnic = models.CharField(max_length=20, null=True, blank=True)
+    central_cabinet_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    central_cabinet_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     central_cabinet_address = models.TextField(null=True, blank=True)
     central_cabinet_photo = models.ImageField(upload_to='office_bearers/central_cabinet/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -149,8 +160,8 @@ class TownOrganization(models.Model):
     town = models.ForeignKey(Town, on_delete=models.CASCADE, related_name='town_office_bearers')
     town_org_name = models.CharField(max_length=100)
     town_org_designation = models.CharField(max_length=100, null=True, blank=True)
-    town_org_phone = models.CharField(max_length=20, null=True, blank=True)
-    town_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    town_org_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    town_org_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     town_org_address = models.TextField(null=True, blank=True)
     town_org_photo = models.ImageField(upload_to='office_bearers/town_org/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -162,8 +173,8 @@ class ZonalOrganization(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='zonal_office_bearers')
     zonal_org_name = models.CharField(max_length=100)
     zonal_org_designation = models.CharField(max_length=100, null=True, blank=True)
-    zonal_org_phone = models.CharField(max_length=20, null=True, blank=True)
-    zonal_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    zonal_org_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    zonal_org_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     zonal_org_address = models.TextField(null=True, blank=True)
     zonal_org_photo = models.ImageField(upload_to='office_bearers/zonal_org/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -175,8 +186,8 @@ class UnionCouncilOrganization(models.Model):
     union_council = models.ForeignKey(UnionCouncil, on_delete=models.CASCADE, related_name='uc_office_bearers')
     uc_org_name = models.CharField(max_length=100)
     uc_org_designation = models.CharField(max_length=100, null=True, blank=True)
-    uc_org_phone = models.CharField(max_length=20, null=True, blank=True)
-    uc_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    uc_org_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    uc_org_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     uc_org_address = models.TextField(null=True, blank=True)
     uc_org_photo = models.ImageField(upload_to='office_bearers/uc_org/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -188,8 +199,8 @@ class WardOrganization(models.Model):
     ward = models.ForeignKey(Ward, on_delete=models.CASCADE, related_name='ward_office_bearers')
     ward_org_name = models.CharField(max_length=100)
     ward_org_designation = models.CharField(max_length=100, null=True, blank=True)
-    ward_org_phone = models.CharField(max_length=20, null=True, blank=True)
-    ward_org_cnic = models.CharField(max_length=20, null=True, blank=True)
+    ward_org_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    ward_org_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     ward_org_address = models.TextField(null=True, blank=True)
     ward_org_photo = models.ImageField(upload_to='office_bearers/ward_org/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -200,8 +211,8 @@ class WardOrganization(models.Model):
 class PeoplesYouthOrganization(models.Model):
     pyo_name = models.CharField(max_length=100)
     pyo_designation = models.CharField(max_length=100, null=True, blank=True)
-    pyo_phone = models.CharField(max_length=20, null=True, blank=True)
-    pyo_cnic = models.CharField(max_length=20, null=True, blank=True)
+    pyo_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    pyo_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     pyo_address = models.TextField(null=True, blank=True)
     pyo_photo = models.ImageField(upload_to='office_bearers/pyo/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -209,8 +220,8 @@ class PeoplesYouthOrganization(models.Model):
 class WomenWing(models.Model):
     women_wing_name = models.CharField(max_length=100)
     women_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    women_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    women_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    women_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    women_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     women_wing_address = models.TextField(null=True, blank=True)
     women_wing_photo = models.ImageField(upload_to='office_bearers/women_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -218,8 +229,8 @@ class WomenWing(models.Model):
 class MinorityWing(models.Model):
     minority_wing_name = models.CharField(max_length=100)
     minority_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    minority_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    minority_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    minority_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    minority_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     minority_wing_address = models.TextField(null=True, blank=True)
     minority_wing_photo = models.ImageField(upload_to='office_bearers/minority_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -227,8 +238,8 @@ class MinorityWing(models.Model):
 class LabourWing(models.Model):
     labour_wing_name = models.CharField(max_length=100)
     labour_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    labour_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    labour_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    labour_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    labour_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     labour_wing_address = models.TextField(null=True, blank=True)
     labour_wing_photo = models.ImageField(upload_to='office_bearers/labour_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -236,8 +247,8 @@ class LabourWing(models.Model):
 class CulturalWing(models.Model):
     cultural_wing_name = models.CharField(max_length=100)
     cultural_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    cultural_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    cultural_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    cultural_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    cultural_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     cultural_wing_address = models.TextField(null=True, blank=True)
     cultural_wing_photo = models.ImageField(upload_to='office_bearers/cultural_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -245,8 +256,8 @@ class CulturalWing(models.Model):
 class HumanRightsWing(models.Model):
     human_rights_wing_name = models.CharField(max_length=100)
     human_rights_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    human_rights_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    human_rights_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    human_rights_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    human_rights_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     human_rights_wing_address = models.TextField(null=True, blank=True)
     human_rights_wing_photo = models.ImageField(upload_to='office_bearers/human_rights_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -254,8 +265,8 @@ class HumanRightsWing(models.Model):
 class TradersWing(models.Model):
     traders_wing_name = models.CharField(max_length=100)
     traders_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    traders_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    traders_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    traders_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    traders_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     traders_wing_address = models.TextField(null=True, blank=True)
     traders_wing_photo = models.ImageField(upload_to='office_bearers/traders_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -263,8 +274,8 @@ class TradersWing(models.Model):
 class SportsWing(models.Model):
     sports_wing_name = models.CharField(max_length=100)
     sports_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    sports_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    sports_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    sports_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    sports_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     sports_wing_address = models.TextField(null=True, blank=True)
     sports_wing_photo = models.ImageField(upload_to='office_bearers/sports_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -272,8 +283,8 @@ class SportsWing(models.Model):
 class PeoplesStudyCircle(models.Model):
     study_circle_name = models.CharField(max_length=100)
     study_circle_designation = models.CharField(max_length=100, null=True, blank=True)
-    study_circle_phone = models.CharField(max_length=20, null=True, blank=True)
-    study_circle_cnic = models.CharField(max_length=20, null=True, blank=True)
+    study_circle_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    study_circle_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     study_circle_address = models.TextField(null=True, blank=True)
     study_circle_photo = models.ImageField(upload_to='office_bearers/study_circle/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -281,8 +292,8 @@ class PeoplesStudyCircle(models.Model):
 class DoctorsForum(models.Model):
     doctors_forum_name = models.CharField(max_length=100)
     doctors_forum_designation = models.CharField(max_length=100, null=True, blank=True)
-    doctors_forum_phone = models.CharField(max_length=20, null=True, blank=True)
-    doctors_forum_cnic = models.CharField(max_length=20, null=True, blank=True)
+    doctors_forum_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    doctors_forum_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     doctors_forum_address = models.TextField(null=True, blank=True)
     doctors_forum_photo = models.ImageField(upload_to='office_bearers/doctors_forum/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -290,8 +301,8 @@ class DoctorsForum(models.Model):
 class UlemaWing(models.Model):
     ulema_wing_name = models.CharField(max_length=100)
     ulema_wing_designation = models.CharField(max_length=100, null=True, blank=True)
-    ulema_wing_phone = models.CharField(max_length=20, null=True, blank=True)
-    ulema_wing_cnic = models.CharField(max_length=20, null=True, blank=True)
+    ulema_wing_phone = models.CharField(max_length=20, null=True, blank=True, validators=[numeric_validator])
+    ulema_wing_cnic = models.CharField(max_length=20, null=True, blank=True, validators=[cnic_validator])
     ulema_wing_address = models.TextField(null=True, blank=True)
     ulema_wing_photo = models.ImageField(upload_to='office_bearers/ulema_wing/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
