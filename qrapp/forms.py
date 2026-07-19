@@ -9,7 +9,7 @@ class PersonForm(forms.ModelForm):
     member_id = forms.CharField(max_length=50, required=True, label="Member Serial No/ ممبرشپ کرنے والے کا ممبرشپ نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial Number', 'pattern': '[0-9]+', 'title': 'Only numbers are allowed', 'oninput': "this.value = this.value.replace(/[^0-9]/g, '');", 'inputmode': 'numeric'}))
     member_name = forms.CharField(max_length=100, required=True, label="Member Name / ممبرشپ کرنے والے کا نام", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}))
     member_phone = forms.CharField(max_length=15, required=False, label="Member Phone / ممبرشپ کرنے والے کا فون نمبر", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Phone'}))
-    member_cnic = forms.CharField(max_length=15, required=False, label="Member CNIC / ممبرشپ کرنے والے کا شناختی کارڈ", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member CNIC'}))
+    member_cnic = forms.CharField(max_length=15, required=False, label="Member CNIC / ممبرشپ کرنے والے کا شناختی کارڈ", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'XXXXX-XXXXXXX-X', 'pattern': '^[0-9]{5}-[0-9]{7}-[0-9]{1}$', 'title': 'CNIC must be in the format XXXXX-XXXXXXX-X', 'oninput': "this.value = this.value.replace(/[^0-9-]/g, '');", 'maxlength': '15'}))
 
     class Meta:
         model = Person
@@ -25,8 +25,10 @@ class PersonForm(forms.ModelForm):
             'cnic': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'XXXXX-XXXXXXX-X',
-                'pattern': '[0-9]{5}-[0-9]{7}-[0-9]{1}',
-                'title': 'CNIC must be in the format XXXXX-XXXXXXX-X'
+                'pattern': '^[0-9]{5}-[0-9]{7}-[0-9]{1}$',
+                'title': 'CNIC must be in the format XXXXX-XXXXXXX-X',
+                'oninput': "this.value = this.value.replace(/[^0-9-]/g, '');",
+                'maxlength': '15'
             }),
             'phone': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -292,7 +294,14 @@ class MemberForm(forms.ModelForm):
             'member_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Serial No'}),
             'member_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Member Name'}),
             'member_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
-            'member_cnic': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'CNIC'}),
+            'member_cnic': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'XXXXX-XXXXXXX-X',
+                'pattern': '^[0-9]{5}-[0-9]{7}-[0-9]{1}$',
+                'title': 'CNIC must be in the format XXXXX-XXXXXXX-X',
+                'oninput': "this.value = this.value.replace(/[^0-9-]/g, '');",
+                'maxlength': '15'
+            }),
             'no_of_registrations': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Total Registrations'}),
         }
 

@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
 
+from django.contrib.auth.models import User
 
 class Town(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -10,7 +10,6 @@ class Town(models.Model):
 
     class Meta:
         ordering = ['name']
-
 
 class Zone(models.Model):
     name = models.CharField(max_length=100)
@@ -23,7 +22,6 @@ class Zone(models.Model):
         ordering = ['name']
         unique_together = ('name', 'town')
 
-
 class UnionCouncil(models.Model):
     name = models.CharField(max_length=100)
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='union_councils')
@@ -34,7 +32,6 @@ class UnionCouncil(models.Model):
     class Meta:
         ordering = ['name']
         unique_together = ('name', 'zone')
-
 
 class Ward(models.Model):
     name = models.CharField(max_length=100)
@@ -47,7 +44,6 @@ class Ward(models.Model):
         ordering = ['name']
         unique_together = ('name', 'union_council')
 
-
 class Member(models.Model):
     member_id = models.CharField(max_length=50, primary_key=True)
     member_name = models.CharField(max_length=100)
@@ -57,7 +53,6 @@ class Member(models.Model):
 
     def __str__(self):
         return f"{self.member_name} ({self.member_id})"
-
 
 class Person(models.Model):
     # membership_number acts as the primary key entered from the form
@@ -91,7 +86,6 @@ class Person(models.Model):
     def __str__(self):
         return f"{self.name} ({self.membership_number})"
 
-
 class Book(models.Model):
     name = models.CharField(max_length=200)
     receiving_date = models.DateField()
@@ -111,7 +105,6 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.name} (Sr No: {self.sr_no})"
-
 
 class MembershipSummary(models.Model):
     name = models.CharField(max_length=200, unique=True)
