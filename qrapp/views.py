@@ -469,7 +469,7 @@ def all_members(request):
 
     # Pagination
     if request.GET.get('print') == 'all':
-        members_list = members_list.select_related('made_by').only(
+        members_list = members_list.select_related(None).select_related('made_by').only(
             'membership_number', 'name', 'cnic', 'phone', 'created_at', 'made_by__member_name'
         )
         page_obj = members_list.iterator(chunk_size=2000)
@@ -2805,7 +2805,7 @@ def all_members(request):
 
     # Pagination
     if request.GET.get('print') == 'all':
-        members_list = members_list.select_related('made_by').only(
+        members_list = members_list.select_related(None).select_related('made_by').only(
             'membership_number', 'name', 'cnic', 'phone', 'created_at', 'made_by__member_name'
         )
         page_obj = members_list.iterator(chunk_size=2000)
