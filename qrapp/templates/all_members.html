@@ -332,7 +332,7 @@
                         style="background: #1A1A1A; color: white; font-size: 13px; font-weight: 600; border-radius: 8px;">
                         <i class="bi bi-download"></i> Export CSV
                     </button>
-                    <button onclick="window.print()" class="btn btn-outline-dark no-print"
+                    <button onclick="handlePrint()" class="btn btn-outline-dark no-print"
                         style="font-size: 13px; font-weight: 600; border-radius: 8px; border: 1px solid #ddd; background: white; color: #333;">
                         <i class="bi bi-printer-fill"></i> Print
                     </button>
@@ -860,5 +860,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+</script>
+<script>
+    function handlePrint() {
+        let params = new URLSearchParams(window.location.search);
+        if (params.get('print') !== 'all') {
+            params.set('print', 'all');
+            window.location.search = params.toString();
+        } else {
+            window.print();
+        }
+    }
+    window.addEventListener('DOMContentLoaded', function() {
+        let params = new URLSearchParams(window.location.search);
+        if (params.get('print') === 'all') {
+            window.print();
+        }
+    });
 </script>
 {% endblock %}

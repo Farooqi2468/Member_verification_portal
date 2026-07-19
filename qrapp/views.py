@@ -123,7 +123,10 @@ def all_system_users(request):
     if role_id:
         users_list = users_list.filter(groups__id=role_id)
 
-    paginator = Paginator(users_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(users_list, max(users_list.count(), 1))
+    else:
+        paginator = Paginator(users_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -465,7 +468,10 @@ def all_members(request):
         return response
 
     # Pagination
-    paginator = Paginator(members_list, 10)  # Show 10 members per page
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(members_list, max(members_list.count(), 1))
+    else:
+        paginator = Paginator(members_list, 10)  # Show 10 members per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -1419,7 +1425,10 @@ def book_list(request):
             except ValueError:
                 pass
 
-    paginator = Paginator(books_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(books_list, max(books_list.count(), 1))
+    else:
+        paginator = Paginator(books_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -1515,7 +1524,10 @@ def all_real_members(request):
             writer.writerow(row)
         return response
 
-    paginator = Paginator(members_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(members_list, max(members_list.count(), 1))
+    else:
+        paginator = Paginator(members_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -2430,7 +2442,10 @@ def all_system_users(request):
     if role_id:
         users_list = users_list.filter(groups__id=role_id)
 
-    paginator = Paginator(users_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(users_list, max(users_list.count(), 1))
+    else:
+        paginator = Paginator(users_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -2786,7 +2801,10 @@ def all_members(request):
         return response
 
     # Pagination
-    paginator = Paginator(members_list, 10)  # Show 10 members per page
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(members_list, max(members_list.count(), 1))
+    else:
+        paginator = Paginator(members_list, 10)  # Show 10 members per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -3742,7 +3760,10 @@ def book_list(request):
             except ValueError:
                 pass
 
-    paginator = Paginator(books_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(books_list, max(books_list.count(), 1))
+    else:
+        paginator = Paginator(books_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -3838,7 +3859,10 @@ def all_real_members(request):
             writer.writerow(row)
         return response
 
-    paginator = Paginator(members_list, 15)
+    if request.GET.get('print') == 'all':
+        paginator = Paginator(members_list, max(members_list.count(), 1))
+    else:
+        paginator = Paginator(members_list, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
