@@ -124,11 +124,11 @@ def all_system_users(request):
         users_list = users_list.filter(groups__id=role_id)
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(users_list, max(users_list.count(), 1))
+        page_obj = users_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(users_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     # ROLE-BASED VISIBILITY: Non-superusers cannot filter for Superuser group
     roles = Group.objects.all()
@@ -469,11 +469,14 @@ def all_members(request):
 
     # Pagination
     if request.GET.get('print') == 'all':
-        paginator = Paginator(members_list, max(members_list.count(), 1))
+        members_list = members_list.select_related('made_by').only(
+            'membership_number', 'name', 'cnic', 'phone', 'created_at', 'made_by__member_name'
+        )
+        page_obj = members_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(members_list, 10)  # Show 10 members per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     # Initial context for dropdowns
     towns = Town.objects.all()
@@ -1426,11 +1429,11 @@ def book_list(request):
                 pass
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(books_list, max(books_list.count(), 1))
+        page_obj = books_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(books_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -1525,11 +1528,11 @@ def all_real_members(request):
         return response
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(members_list, max(members_list.count(), 1))
+        page_obj = members_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(members_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -2443,11 +2446,11 @@ def all_system_users(request):
         users_list = users_list.filter(groups__id=role_id)
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(users_list, max(users_list.count(), 1))
+        page_obj = users_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(users_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     # ROLE-BASED VISIBILITY: Non-superusers cannot filter for Superuser group
     roles = Group.objects.all()
@@ -2802,11 +2805,14 @@ def all_members(request):
 
     # Pagination
     if request.GET.get('print') == 'all':
-        paginator = Paginator(members_list, max(members_list.count(), 1))
+        members_list = members_list.select_related('made_by').only(
+            'membership_number', 'name', 'cnic', 'phone', 'created_at', 'made_by__member_name'
+        )
+        page_obj = members_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(members_list, 10)  # Show 10 members per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     # Initial context for dropdowns
     towns = Town.objects.all()
@@ -3761,11 +3767,11 @@ def book_list(request):
                 pass
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(books_list, max(books_list.count(), 1))
+        page_obj = books_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(books_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -3860,11 +3866,11 @@ def all_real_members(request):
         return response
 
     if request.GET.get('print') == 'all':
-        paginator = Paginator(members_list, max(members_list.count(), 1))
+        page_obj = members_list.iterator(chunk_size=2000)
     else:
         paginator = Paginator(members_list, 15)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
     query_dict = request.GET.copy()
     if 'page' in query_dict:
