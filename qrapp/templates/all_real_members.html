@@ -292,6 +292,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>Sr. #</th>
+                            <th>ID</th>
                             <th>Name</th>
                             <th>Father Name</th>
                             <th>Phone</th>
@@ -378,13 +379,14 @@ function showMemberRegistrations(memberId) {
         
         if (data && data.status === 'success') {
             if (data.data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No members found for this serial number.</td></tr>`;
             } else {
                 let htmlContent = '';
                 data.data.forEach((person, index) => {
                     htmlContent += `
                         <tr>
                             <td>${index + 1}</td>
+                            <td class="text-primary fw-bold">${person.membership_number || '--'}</td>
                             <td class="fw-bold">${person.name || '--'}</td>
                             <td>${person.father_name || '--'}</td>
                             <td>${person.phone || '--'}</td>
@@ -398,7 +400,7 @@ function showMemberRegistrations(memberId) {
             document.getElementById('modalSearchInput').value = '';
             filterModalTable();
         } else {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
             document.getElementById('modalContent').style.display = 'block';
         }
     };
@@ -430,7 +432,7 @@ function showMemberRegistrations(memberId) {
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('modalLoading').style.display = 'none';
-                document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
+                document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
                 document.getElementById('modalContent').style.display = 'block';
             });
     }
