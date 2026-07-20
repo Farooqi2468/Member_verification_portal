@@ -216,6 +216,122 @@
                     </div>
                 </div>
             </div>
+        <!-- ── Additional Geographic Breakdown ────────────────────────────── -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-map-fill" style="color: #10B981;"></i> Zone Distribution
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-sm-5">
+                            <div style="height: 180px;">
+                                <canvas id="zoneChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-custom m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Zone Name</th>
+                                            <th class="text-end">Members</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for zone in zone_stats|slice:":5" %}
+                                        <tr>
+                                            <td>{{ zone.name }}</td>
+                                            <td class="text-end fw-bold">{{ zone.member_count }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">No data available</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-pin-map-fill" style="color: #3B82F6;"></i> Union Council Distribution
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-sm-5">
+                            <div style="height: 180px;">
+                                <canvas id="ucChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-custom m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>UC Name</th>
+                                            <th class="text-end">Members</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for uc in uc_stats|slice:":5" %}
+                                        <tr>
+                                            <td>{{ uc.name }}</td>
+                                            <td class="text-end fw-bold">{{ uc.member_count }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">No data available</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="report-card">
+                    <div class="report-title">
+                        <i class="bi bi-signpost-split-fill" style="color: #8B5CF6;"></i> Ward Distribution
+                    </div>
+                    <div class="row align-items-center">
+                        <div class="col-sm-5">
+                            <div style="height: 180px;">
+                                <canvas id="wardChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-custom m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Ward Name</th>
+                                            <th class="text-end">Members</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for ward in ward_stats|slice:":5" %}
+                                        <tr>
+                                            <td>{{ ward.name }}</td>
+                                            <td class="text-end fw-bold">{{ ward.member_count }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">No data available</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ── Registrar Performance ────────────────────────────── -->
@@ -239,6 +355,7 @@
                                         <tr>
                                             <th>Rank</th>
                                             <th>Member Name</th>
+                                            <th>Serial Number</th>
                                             <th class="text-end">Registrations</th>
                                         </tr>
                                     </thead>
@@ -249,13 +366,16 @@
                                             <td>
                                                 <div class="fw-bold">{{ user.member_name }}</div>
                                             </td>
+                                            <td>
+                                                <a href="{% url 'all_members' %}?registrar={{ user.member_id }}" class="text-decoration-none text-primary fw-bold">{{ user.member_id }}</a>
+                                            </td>
                                             <td class="text-end">
                                                 <span class="badge bg-dark rounded-pill">{{ user.member_count }}</span>
                                             </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted">No data available</td>
+                                            <td colspan="4" class="text-center text-muted">No data available</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -324,6 +444,63 @@
         cutout: '70%'
     }
         });
+
+    // Zone Chart (Donut)
+    new Chart(document.getElementById('zoneChart'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for zone in zone_stats|slice:":5" %}'{{ zone.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for zone in zone_stats|slice:":5" %}{{ zone.member_count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+                backgroundColor: colors,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '70%'
+        }
+    });
+
+    // UC Chart (Donut)
+    new Chart(document.getElementById('ucChart'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for uc in uc_stats|slice:":5" %}'{{ uc.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for uc in uc_stats|slice:":5" %}{{ uc.member_count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+                backgroundColor: colors,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '70%'
+        }
+    });
+
+    // Ward Chart (Donut)
+    new Chart(document.getElementById('wardChart'), {
+        type: 'doughnut',
+        data: {
+            labels: [{% for ward in ward_stats|slice:":5" %}'{{ ward.name|escapejs|default:"" }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for ward in ward_stats|slice:":5" %}{{ ward.member_count|default:0 }}{% if not forloop.last %}, {% endif %} {% endfor %}],
+                backgroundColor: colors,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '70%'
+        }
+    });
 
     // 3. Performance Chart (Bar)
     new Chart(document.getElementById('performanceChart'), {

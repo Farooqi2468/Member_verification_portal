@@ -1292,6 +1292,9 @@ def ajax_dashboard_charts(request):
 def reports_view(request):
     # 1. Geographic Data
     town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    zone_stats = Zone.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    uc_stats = UnionCouncil.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    ward_stats = Ward.objects.annotate(member_count=Count('persons')).order_by('-member_count')
     
     # 2. Registrar Performance (Top 10)
     registrar_qs = Member.objects.all()
@@ -1332,6 +1335,9 @@ def reports_view(request):
     context = {
         'active_page': 'reports',
         'town_stats': town_stats,
+        'zone_stats': zone_stats,
+        'uc_stats': uc_stats,
+        'ward_stats': ward_stats,
         'registrar_stats': registrar_stats,
         'integrity_data': integrity_data,
         'growth_stats': growth_stats,
@@ -3630,6 +3636,9 @@ def ajax_dashboard_charts(request):
 def reports_view(request):
     # 1. Geographic Data
     town_stats = Town.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    zone_stats = Zone.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    uc_stats = UnionCouncil.objects.annotate(member_count=Count('persons')).order_by('-member_count')
+    ward_stats = Ward.objects.annotate(member_count=Count('persons')).order_by('-member_count')
     
     # 2. Registrar Performance (Top 10)
     registrar_qs = Member.objects.all()   
@@ -3670,6 +3679,9 @@ def reports_view(request):
     context = {
         'active_page': 'reports',
         'town_stats': town_stats,
+        'zone_stats': zone_stats,
+        'uc_stats': uc_stats,
+        'ward_stats': ward_stats,
         'registrar_stats': registrar_stats,
         'integrity_data': integrity_data,
         'growth_stats': growth_stats,
