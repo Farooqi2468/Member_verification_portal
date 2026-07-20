@@ -166,40 +166,52 @@
                     </div>
                     <div class="row g-2">
                         <div class="col-4">
-                            <div class="integrity-box">
-                                <div class="text-muted small mb-1">Missing Name</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_name > 0 %}text-danger{% endif %}">{{ integrity_data.missing_name }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('name', 'Missing Name')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box">
+                                    <div class="text-muted small mb-1">Missing Name</div>
+                                    <h4 class="fw-bold {% if integrity_data.missing_name > 0 %}text-danger{% endif %}">{{ integrity_data.missing_name }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-4">
-                            <div class="integrity-box">
-                                <div class="text-muted small mb-1">Missing Phone</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_phone > 0 %}text-danger{% endif %}">{{ integrity_data.missing_phone }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('phone', 'Missing Phone')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box">
+                                    <div class="text-muted small mb-1">Missing Phone</div>
+                                    <h4 class="fw-bold {% if integrity_data.missing_phone > 0 %}text-danger{% endif %}">{{ integrity_data.missing_phone }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-4">
-                            <div class="integrity-box">
-                                <div class="text-muted small mb-1">Missing CNIC</div>
-                                <h4 class="fw-bold {% if integrity_data.missing_cnic > 0 %}text-danger{% endif %}">{{ integrity_data.missing_cnic }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('cnic', 'Missing CNIC')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box">
+                                    <div class="text-muted small mb-1">Missing CNIC</div>
+                                    <h4 class="fw-bold {% if integrity_data.missing_cnic > 0 %}text-danger{% endif %}">{{ integrity_data.missing_cnic }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-4">
-                            <div class="integrity-box">
-                                <div class="text-muted small mb-1">Missing Address</div>
-                                <h4 class="fw-bold">{{ integrity_data.missing_address }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('address', 'Missing Address')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box">
+                                    <div class="text-muted small mb-1">Missing Address</div>
+                                    <h4 class="fw-bold {% if integrity_data.missing_address > 0 %}text-danger{% endif %}">{{ integrity_data.missing_address }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-4">
-                            <div class="integrity-box">
-                                <div class="text-muted small mb-1">Missing Town</div>
-                                <h4 class="fw-bold">{{ integrity_data.missing_town }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('town', 'Missing Town')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box">
+                                    <div class="text-muted small mb-1">Missing Town</div>
+                                    <h4 class="fw-bold {% if integrity_data.missing_town > 0 %}text-danger{% endif %}">{{ integrity_data.missing_town }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-4">
-                            <div class="integrity-box" style="background: #f0fdf4; border-color: #bbf7d0;">
-                                <div class="text-muted small mb-1">Total Members</div>
-                                <h4 class="fw-bold text-success">{{ integrity_data.total }}</h4>
-                            </div>
+                            <a href="javascript:void(0);" onclick="showMissingData('total', 'Total Members')" class="text-decoration-none text-dark d-block">
+                                <div class="integrity-box" style="background: #f0fdf4; border-color: #bbf7d0;">
+                                    <div class="text-muted small mb-1">Total Members</div>
+                                    <h4 class="fw-bold text-success">{{ integrity_data.total }}</h4>
+                                </div>
+                            </a>
                         </div>
                         <div class="col-12 mt-4 text-center">
                             <p class="text-muted small mb-0">
@@ -528,4 +540,161 @@
         });
     });
 </script>
+
+<!-- Modal for Missing Data Persons -->
+<div class="modal fade" id="missingDataModal" tabindex="-1" aria-labelledby="missingDataModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 bg-light">
+        <h5 class="modal-title fw-bold" id="missingDataModalLabel" style="font-family: 'Georgia', serif; color: #1A1A1A;">
+            <i class="bi bi-people-fill me-2"></i> <span id="modalDataType"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="modalLoading" class="text-center py-5">
+            <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Fetching data...</p>
+        </div>
+        
+        <div id="modalContent" style="display: none;">
+            <div class="px-3 py-2 bg-white border-bottom no-print-modal">
+                <input type="text" id="modalSearchInput" class="form-control form-control-sm" placeholder="Search members by name, phone, or CNIC..." onkeyup="filterModalTable()">
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped mb-0 table-modal" style="font-size: 13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sr. #</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Father Name</th>
+                            <th>Phone</th>
+                            <th>CNIC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary no-print-modal" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn text-white no-print-modal" style="background: #1A1A1A;" onclick="window.print()">
+            <i class="bi bi-printer-fill me-1"></i> Print Table
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const missingDataCache = {};
+
+function showMissingData(type, title) {
+    var modalEl = document.getElementById('missingDataModal');
+    var modal = new bootstrap.Modal(modalEl);
+    
+    document.getElementById('modalDataType').innerText = title;
+    
+    const renderData = (data) => {
+        document.getElementById('modalLoading').style.display = 'none';
+        var tbody = document.getElementById('modalTableBody');
+        tbody.innerHTML = '';
+        
+        if (data && data.status === 'success') {
+            if (data.data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No members found.</td></tr>`;
+            } else {
+                let htmlContent = '';
+                data.data.forEach((person, index) => {
+                    htmlContent += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td class="text-primary fw-bold">${person.membership_number || '--'}</td>
+                            <td class="fw-bold">${person.name || '--'}</td>
+                            <td>${person.father_name || '--'}</td>
+                            <td>${person.phone || '--'}</td>
+                            <td>${person.cnic || '--'}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = htmlContent;
+            }
+            document.getElementById('modalContent').style.display = 'block';
+            document.getElementById('modalSearchInput').value = '';
+        } else {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error fetching data.</td></tr>`;
+            document.getElementById('modalContent').style.display = 'block';
+        }
+    };
+
+    if (missingDataCache[type]) {
+        if (missingDataCache[type] instanceof Promise) {
+            document.getElementById('modalLoading').style.display = 'block';
+            document.getElementById('modalContent').style.display = 'none';
+            modal.show();
+            missingDataCache[type].then(data => {
+                missingDataCache[type] = data;
+                renderData(data);
+            });
+        } else {
+            renderData(missingDataCache[type]);
+            modal.show();
+        }
+    } else {
+        document.getElementById('modalLoading').style.display = 'block';
+        document.getElementById('modalContent').style.display = 'none';
+        modal.show();
+        
+        missingDataCache[type] = fetch(`/ajax/missing-data-persons/?type=${encodeURIComponent(type)}`)
+            .then(response => response.json())
+            .then(data => {
+                missingDataCache[type] = data;
+                renderData(data);
+                return data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('modalLoading').style.display = 'none';
+                document.getElementById('modalTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Network error occurred.</td></tr>`;
+                document.getElementById('modalContent').style.display = 'block';
+            });
+    }
+}
+
+function filterModalTable() {
+    var input, filter, tbody, tr, i, txtValue;
+    input = document.getElementById("modalSearchInput");
+    filter = input.value.toUpperCase();
+    tbody = document.getElementById("modalTableBody");
+    tr = tbody.getElementsByTagName("tr");
+
+    for (i = 0; i < tr.length; i++) {
+        if (tr[i].getElementsByTagName("td").length === 1) continue;
+        
+        var match = false;
+        var tds = tr[i].getElementsByTagName("td");
+        for (var j = 1; j < tds.length; j++) { 
+            if (tds[j]) {
+                txtValue = tds[j].textContent || tds[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+        }
+        
+        if (match) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
+</script>
+
 {% endblock %}

@@ -394,6 +394,8 @@ def all_members(request):
     missing_phone = request.GET.get('missing_phone')
     missing_town = request.GET.get('missing_town')
     missing_zone = request.GET.get('missing_zone')
+    missing_address = request.GET.get('missing_address')
+    missing_name = request.GET.get('missing_name')
 
     if q:
         members_list = members_list.filter(
@@ -436,6 +438,10 @@ def all_members(request):
         members_list = members_list.filter(town__isnull=True)
     if missing_zone == '1':
         members_list = members_list.filter(zone__isnull=True)
+    if missing_address == '1':
+        members_list = members_list.filter(Q(address__isnull=True) | Q(address__exact=''))
+    if missing_name == '1':
+        members_list = members_list.filter(Q(name__isnull=True) | Q(name__exact=''))
 
     # CSV Export
     if request.GET.get('export') == 'csv':
@@ -507,6 +513,8 @@ def all_members(request):
             'missing_phone': missing_phone,
             'missing_town': missing_town,
             'missing_zone': missing_zone,
+            'missing_address': missing_address,
+            'missing_name': missing_name,
         },
         'query_params': query_params
     }
@@ -4759,3 +4767,31 @@ def delete_all_office_bearers(request, category):
     else:
         messages.error(request, "Invalid category.")
     return redirect('office_bearers_list', category=category)
+
+@login_required
+def ajax_get_missing_data_persons(request):
+    missing_type = request.GET.get('type')
+    if not missing_type:
+        return JsonResponse({'status': 'error', 'message': 'Missing type parameter'}, status=400)
+    
+    persons = Person.objects.all()
+    if missing_type == 'name':
+        persons = persons.filter(Q(name__isnull=True) | Q(name=''))
+    elif missing_type == 'phone':
+        persons = persons.filter(Q(phone__isnull=True) | Q(phone=''))
+    elif missing_type == 'cnic':
+        persons = persons.filter(Q(cnic__isnull=True) | Q(cnic=''))
+    elif missing_type == 'address':
+        persons = persons.filter(Q(address__isnull=True) | Q(address=''))
+    elif missing_type == 'town':
+        persons = persons.filter(town__isnull=True)
+    elif missing_type == 'total':
+        pass
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid type parameter'}, status=400)
+
+    data = list(
+        persons.order_by('-created_at')
+        .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
+    )
+    return JsonResponse({'status': 'success', 'data': data})
