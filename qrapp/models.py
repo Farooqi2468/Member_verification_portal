@@ -6,9 +6,19 @@ numeric_validator = RegexValidator(
     message='Only numbers are allowed.'
 )
 
+phone_validator = RegexValidator(
+    regex=r'^\+?[0-9]+$',
+    message='Phone number can optionally start with + followed by only numbers.'
+)
+
 cnic_validator = RegexValidator(
     regex=r'^\d{5}-\d{7}-\d{1}$',
     message='CNIC must be in the format XXXXX-XXXXXXX-X'
+)
+
+alpha_only_validator = RegexValidator(
+    regex=r'^[a-zA-Z\s]*$',
+    message='Only alphabets and spaces are allowed.'
 )
 
 from django.contrib.auth.models import User
@@ -57,8 +67,8 @@ class Ward(models.Model):
 
 class Member(models.Model):
     member_id = models.CharField(max_length=50, primary_key=True, validators=[numeric_validator])
-    member_name = models.CharField(max_length=100)
-    member_phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
+    member_name = models.CharField(max_length=100, validators=[alpha_only_validator])
+    member_phone = models.CharField(max_length=13, null=True, blank=True, validators=[phone_validator])
     member_cnic = models.CharField(max_length=15, null=True, blank=True, validators=[cnic_validator])
     no_of_registrations = models.PositiveIntegerField(default=0)
 
@@ -69,11 +79,11 @@ class Person(models.Model):
     # membership_number acts as the primary key entered from the form
     membership_number = models.CharField(max_length=50, primary_key=True, default=100011, validators=[numeric_validator])
 
-    name = models.CharField(max_length=100, null=True, blank=True)
-    father_name = models.CharField(max_length=100, blank=True, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True, validators=[alpha_only_validator])
+    father_name = models.CharField(max_length=100, blank=True, null=True, validators=[alpha_only_validator])
     email = models.EmailField(null=True, blank=True)
     cnic = models.CharField(max_length=15, unique=True, null=True, blank=True, validators=[cnic_validator])
-    phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
+    phone = models.CharField(max_length=13, null=True, blank=True, validators=[phone_validator])
     address = models.TextField(null=True, blank=True)
 
     # Location ForeignKeys (nullable for backward compatibility)
@@ -83,9 +93,9 @@ class Person(models.Model):
     ward = models.ForeignKey(Ward, on_delete=models.CASCADE, null=True, blank=True, related_name='persons')
 
     # New fields
-    member_name = models.CharField(max_length=100, null=True, blank=True)
+    member_name = models.CharField(max_length=100, null=True, blank=True, validators=[alpha_only_validator])
     member_membership_id = models.CharField(max_length=50, null=True, blank=True)
-    member_phone = models.CharField(max_length=15, null=True, blank=True, validators=[numeric_validator])
+    member_phone = models.CharField(max_length=13, null=True, blank=True, validators=[phone_validator])
     member_cnic = models.CharField(max_length=15, null=True, blank=True, validators=[cnic_validator])
 
     # Foreign key to the Member table
