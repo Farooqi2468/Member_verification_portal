@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import Count, Q
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, Length
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
@@ -379,7 +379,7 @@ def all_members(request):
             pass
         return redirect('all_members')
 
-    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by').order_by('-created_at')
+    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by')
 
     # Filtering logic
     q = request.GET.get('q', '')
@@ -487,7 +487,7 @@ def all_members(request):
     # Initial context for dropdowns
     towns = Town.objects.all()
     
-    registrars = Member.objects.all().order_by('member_name')
+    registrars = Member.objects.all().order_by(Length('member_id'), 'member_id')
     # Query string for pagination
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -1520,7 +1520,7 @@ def book_delete(request, pk):
 @login_required
 @admin_only
 def all_real_members(request):
-    members_list = Member.objects.annotate(actual_registrations=Count('persons_created')).order_by('-member_name')
+    members_list = Member.objects.annotate(actual_registrations=Count('persons_created')).order_by(Length('member_id'), 'member_id')
     q = request.GET.get('q', '')
 
     if q:
@@ -1742,7 +1742,6 @@ def ajax_get_registered_persons(request):
     # Query database and retrieve values directly (very fast)
     data = list(
         Person.objects.filter(made_by_id=member_id)
-        .order_by('-created_at')
         .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
     )
     return JsonResponse({'status': 'success', 'data': data})
@@ -1755,7 +1754,7 @@ def ajax_get_location_members(request):
     if not loc_type or not loc_id:
         return JsonResponse({'status': 'error', 'message': 'Missing parameters'}, status=400)
     
-    persons = Person.objects.all().order_by('-created_at')
+    persons = Person.objects.all()
     if loc_type == 'town':
         persons = persons.filter(town_id=loc_id)
     elif loc_type == 'zone':
@@ -2726,7 +2725,7 @@ def all_members(request):
             pass
         return redirect('all_members')
 
-    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by').order_by('-created_at')
+    members_list = Person.objects.all().select_related('town', 'zone', 'union_council', 'ward', 'made_by')
 
     # Filtering logic
     q = request.GET.get('q', '')
@@ -2842,7 +2841,7 @@ def all_members(request):
     # Initial context for dropdowns
     towns = Town.objects.all()
     
-    registrars = Member.objects.all().order_by('member_name')
+    registrars = Member.objects.all().order_by(Length('member_id'), 'member_id')
     # Query string for pagination
     query_dict = request.GET.copy()
     if 'page' in query_dict:
@@ -3864,7 +3863,7 @@ def book_delete(request, pk):
 @login_required
 @admin_only
 def all_real_members(request):
-    members_list = Member.objects.annotate(actual_registrations=Count('persons_created')).order_by('-member_name')
+    members_list = Member.objects.annotate(actual_registrations=Count('persons_created')).order_by(Length('member_id'), 'member_id')
     q = request.GET.get('q', '')
 
     if q:
@@ -4086,7 +4085,6 @@ def ajax_get_registered_persons(request):
     # Query database and retrieve values directly (very fast)
     data = list(
         Person.objects.filter(made_by_id=member_id)
-        .order_by('-created_at')
         .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
     )
     return JsonResponse({'status': 'success', 'data': data})
@@ -4099,7 +4097,7 @@ def ajax_get_location_members(request):
     if not loc_type or not loc_id:
         return JsonResponse({'status': 'error', 'message': 'Missing parameters'}, status=400)
     
-    persons = Person.objects.all().order_by('-created_at')
+    persons = Person.objects.all()
     if loc_type == 'town':
         persons = persons.filter(town_id=loc_id)
     elif loc_type == 'zone':
@@ -4791,7 +4789,6 @@ def ajax_get_missing_data_persons(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid type parameter'}, status=400)
 
     data = list(
-        persons.order_by('-created_at')
-        .values('membership_number', 'name', 'father_name', 'phone', 'cnic')
+        persons.values('membership_number', 'name', 'father_name', 'phone', 'cnic')
     )
     return JsonResponse({'status': 'success', 'data': data})

@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.db.models.functions import Length
 
 numeric_validator = RegexValidator(
     regex=r'^\d+$',
@@ -75,6 +76,9 @@ class Member(models.Model):
     def __str__(self):
         return f"{self.member_name} ({self.member_id})"
 
+    class Meta:
+        ordering = [Length('member_id'), 'member_id']
+
 class Person(models.Model):
     # membership_number acts as the primary key entered from the form
     membership_number = models.CharField(max_length=50, primary_key=True, default=100011, validators=[numeric_validator])
@@ -106,6 +110,9 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.membership_number})"
+
+    class Meta:
+        ordering = [Length('membership_number'), 'membership_number']
 
 class Book(models.Model):
     name = models.CharField(max_length=200)
