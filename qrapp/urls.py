@@ -1,7 +1,17 @@
 from django.urls import path
 from . import views
+from .api_views import MemberRegistrationAPIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
+    # ── Public API Endpoints ─────────────────────────────────────────────────
+    path('api/member/register/', MemberRegistrationAPIView.as_view(), name='api_member_register'),
+
+    # ── Swagger / OpenAPI Docs ───────────────────────────────────────────────
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
     # Public URLs
     path('', views.home, name='home'),
     path('person/<str:pk>/', views.person_detail, name='person_detail'),

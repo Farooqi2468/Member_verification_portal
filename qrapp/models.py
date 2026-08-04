@@ -155,7 +155,9 @@ def create_person_for_member(sender, instance, created, **kwargs):
             defaults={
                 'name': instance.member_name,
                 'phone': instance.member_phone,
-                'cnic': instance.member_cnic,
+                # NOTE: cnic intentionally excluded — it has unique=True on Person.
+                # Setting it here causes IntegrityError if any Person already holds
+                # that CNIC. The API's save() method sets it safely after creation.
             }
         )
 

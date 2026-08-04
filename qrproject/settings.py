@@ -39,10 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
+    'corsheaders',
+    'rest_framework',
     'qrapp',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Must be first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -127,6 +131,30 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# ── Django REST Framework ────────────────────────────────────────────────────
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+# ── drf-spectacular (Swagger) Settings ──────────────────────────────────────
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'QR Project — Member Registration API',
+    'DESCRIPTION': 'REST API for registering members via the website form.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,   # Hides /api/schema/ from docs (fixes 406 error)
+}
+
+# ── CORS (allow frontend website to call our API) ────────────────────────────
+# Set to True to allow ALL origins during development.
+# In production, replace with: CORS_ALLOWED_ORIGINS = ['https://yourfrontend.com']
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Only API endpoints need CORS — restrict it to /api/ paths
+CORS_URLS_REGEX = r'^/api/.*$'
 
 
 # settings.py
